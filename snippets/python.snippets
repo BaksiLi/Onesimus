@@ -1,0 +1,30 @@
+priority -50
+
+snippet #! "#!/usr/bin/env python" b
+#!/usr/bin/env python
+$0
+endsnippet
+
+snippet "^# ?[uU][tT][fF]-?8" "# encoding: UTF-8" r
+# -*- coding: utf-8 -*-
+$0
+endsnippet
+
+snippet ifmain "ifmain" b
+if __name__ == '__main__':
+  ${1:main()}$0
+endsnippet
+
+snippet fdoc "docstring" b
+"""${1:Description}
+${2:
+Args:
+	$3
+
+Returns:
+	$4${5:
+
+Raises:
+	$6}}
+"""$0
+endsnippet

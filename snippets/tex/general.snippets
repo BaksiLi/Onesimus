@@ -1,0 +1,36 @@
+# TODO: \\ sensible?t
+
+snippet beg "begin{} / end{}" bA
+\\begin{$1}
+  $0
+\\end{$1}
+endsnippet
+
+# TODO: https://github.com/honza/vim-snippets/blob/master/UltiSnips/tex.snippets
+# 	add a row function.
+snippet table "Table" b
+\begin{∩table}[${1:htpb}]
+	\centering
+	\caption{${2:caption}}
+	\label{tab:${3:label}}
+	\begin{tabular}{${5:c}}
+	$0${5/((?<=.)c|l|r)|./(?1: & )/g}
+	\end{tabular}
+\end{table}
+endsnippet
+
+snippet fig "Figure" b
+\begin{figure}[${1:htpb}]
+	\centering
+	${2:\includegraphics[width=0.8\textwidth]{$3}}
+	\caption{${4:$3}}
+	\label{fig:${5:${3/\W+/-/g}}}
+\end{figure}
+endsnippet
+
+snippet box "Box" b
+`!p snip.rv = '┌' + '─' * (len(t[1]) + 2) + '┐'`
+│ $1 │
+`!p snip.rv = '└' + '─' * (len(t[1]) + 2) + '┘'`
+$0
+endsnippet

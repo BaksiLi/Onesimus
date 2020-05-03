@@ -1,0 +1,10 @@
+let g:Lf_WindowPosition = 'popup'  " vim 8.1.1615+
+let g:Lf_PreviewInPopup = 1
+let g:Lf_HideHelp = 1
+let g:Lf_IgnoreCurrentBufferName = 1
+let g:Lf_ShortcutF = '<leader>ff'
+noremap <leader>fl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+noremap <leader>fm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><C>
+noremap <leader>fb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+noremap <leader>ft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
+noremap <leader>fc :<C-U><C-R>=printf("Leaderf Colour Scheme", "")<CR><CR>

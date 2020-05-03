@@ -1,0 +1,35 @@
+snippet sympy "sympy block" w
+sympy $1 sympy$0
+endsnippet
+
+priority 10000
+snippet 'sympy(.*)sympy' "evaluate sympy" wr
+`!p
+from sympy import symbols, eval, init_printing
+x, y, z, t = symbols('x y z t')
+k, m, n = symbols('k m n', integer=True)
+f, g, h = symbols('f g h', cls=Function)
+init_printing()
+snip.rv = eval('latex(' + match.group(1).replace('\\', '') \
+		.replace('^', '**') \
+		.replace('{', '(') \
+		.replace('}', ')') + ')')
+`
+endsnippet
+
+
+priority 1000
+snippet mma "mathematica block" w
+mma $1 mma$0
+endsnippet
+
+priority 10000
+snippet 'mma(.*)mma' "evaluate mathematica" wr
+`!p
+from subprocess import check_output
+code = 'ToString[' + match.group(1) + ', TeXForm]'
+snip.rv = check_output(['wolframscript', '-code', code]) \
+		.decode() \
+		.strip('\n')
+`
+endsnippet
