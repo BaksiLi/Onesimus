@@ -1,11 +1,44 @@
 #!/bin/bash
 
+cat << "EOF"
+         .-://:-.      `:`                       
+      .+syyyyyyyys+.  :ooo/`                     
+     /yyyyyyyyyyyyyy+``/oooo/`                   
+    +yys+++++oooooooy+  /ooooo/````````````..    
+   `yyy/...``````...sy. .ooooo/...```````..`     
+   `yyyyss+``````sssyy. .oooooo++:`````..`       
+    +yyyyy+``````syyy+  :ooooo+:.````..`         
+    `+yyyy+``````syy+` -oooo+:.````.:+/.         
+      .+sy+``````o+. `:ooo+:.````.:+ooo+/.       
+   `::.``.:``````-`./+oo+:.````.:+ooooooo+/.     
+  -+ooo+/::``````++ooo+:.````.:+ooooooooooo+/.   
+  `-+ooooo/``````+oo+:.````.:+oooooooooooooo+/`  
+    `-+ooo/``````++:.````.:+oooooooooooooo+:.    
+      `-+o/``````-.````.:+oooooooooooooo+:`      
+        `-:``````````.:+oooooooooooooo+-`        
+          -````````.:+oooooooooooooo/-`          
+          -``````.:+oooooooooooooo/.             
+          -````.:+ooooooooooooo+:`               
+          -``..``-+oooooooooo+:`                 
+          -..`    `-+oooooo+-`                   
+          -`         -+oo/.                      
+                       -.                        
+EOF
+
 echo "------------------------"
-echo "Welcome. You're going to install the amazing Vim distribution Onesimos!"
+echo "Welcome. You're going to install the amazing Onesimos Vim configuration!"
 echo "------------------------"
 
+echo "Checking the required environment..."
+if [[ -x "$(command -v vim)" && -x "$(command -v git)" ]]; then
+        echo "Done."
+else
+        echo "Please check if you have vim and git installed."
+        exit
+fi
+
 # Ask for alternative root directory
-echo "Install in the home directory?"
+echo -e "\nInstall in the home directory?"
 
 while true; do
         read -n 1 -p "(<Enter> to confirm)" key
@@ -18,18 +51,19 @@ while true; do
         else
                 echo ""
                 read -p "Enter an alternative path: " VIMRCDIR
+                VIMRCDIR=${VIMRCDIR/#\~/$HOME}  # replace tilde with $HOME
         fi
 
-        if [ -d "$VIMRCDIR" ]; then
+        if [ -d "${VIMRCDIR}" ]; then
                 echo -e "\nThe vimrc path is going to be $VIMRCDIR"
                 break
         else
-                echo "The given directory doesn't exist."
+                echo -e "The given directory doesn't exist.\nCreate?"
 
                 select yn in Yes No; do
                         case $yn in
-                                Yes ) mkdir "$VIMRCDIR"\;break;break;;
-                                No ) echo "Restarting ...";break;;
+                                Yes ) mkdir "$VIMRCDIR";break;break;;
+                                No ) echo "Restarting...";break;;
                         esac
                 done
         fi
@@ -37,14 +71,15 @@ done
 
 # Cloning Repo from GitHub
 cd $VIMRCDIR
-echo -e "\nCloning the repository on GitHub ..."
-git clone https://github.com/BaksiLi/Onesimos ./vimrc
-
 MYVIMRC="$VIMRCDIR/vimrc"
-# TODO: check message
+echo -e "\nCloning the repository on GitHub..."
+git clone https://github.com/BaksiLi/Onesimos ./vimrc && echo "Done." || (cd $MYVIMRC && git pull)
+
+# Install Onesimos Functions
+# Once they are ready...
 
 # Checking old .vimrc file
-echo -e "\nChecking old .vimrc file ..."
+echo -e "\nChecking old .vimrc file..."
 if test -f ".vimrc"; then
         echo "Found!"
         _oldrc="$VIMRCDIR/.vimrc"
@@ -69,7 +104,11 @@ else
     echomsg 'Vim configuration folder not found!'
 endif
 EOL
+[ -f "$VIMRCDIR/.vimrc" ] && echo "Done." || exit
 
 # TODO: verification
-read -n 1 -s -r -p "Installation Complete!"
 echo ""
+read -n 1 -s -r -p "Installation Complete!"
+
+echo -e "\nLaunching Vim..."
+vim -c "PlugInstall"

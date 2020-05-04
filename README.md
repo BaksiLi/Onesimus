@@ -1,5 +1,7 @@
-# Onesimos Vim
-**Onesimos** (Ὀνήσιμος, Latinized *Onesimus*) is a Vim configuration.
+Onesimos Vim
+<img src="./doc/onesimos-logo.png" width:auto height=128pt align="right"/>
+---
+**Onesimos** ('helpful', Latinized *Onesimus*) is a Vim configuration.
 
 General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymap, are following the principle of 'Convention over configuration'.
 
@@ -14,6 +16,8 @@ wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bas
 Use git pull to update.
 
 ### Goals
+- [ ] Build CI for Linux.
+- [ ] Write a doc.
 - [ ] Make Compile/Run function runs asynchronously.
 - [ ] User configuration interface.
 - [ ] Compile Vim automatically.
@@ -81,11 +85,6 @@ where there are (currently) three folders of differenciated functions and a few 
    The default folder for storing snippet rules for [UltiSnips](https://github.com/SirVer/ultisnips). The folder under `~/.vim` should be of limited use.
 
 Notice that these folders and files are autoloaded even for the first time your `.vimrc` is sourced. Adding of any new functionalities will not need manual loading as placing them in their corresponding folder should suffice.
-
-## Notice on the conventions
-- The naming convention mostly followed the style of neovim (although I dislike it).
-- Comment Rule Lines in vimscripts is chosen as `" ------ ------`.
-- [Google Style Guide of VimScript](https://google.github.io/styleguide/vimscriptguide.xml), which can be linted using [vint](https://github.com/Vimjas/vint).
 
 ## Acknowledgements
 Unless otherwise specified, the repository is Copyright BaksiLi, and are licenced under the [MIT Licence](./LICENSE).
