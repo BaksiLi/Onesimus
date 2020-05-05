@@ -37,6 +37,15 @@ endif
 " download skim if none for tex
 " download vint
 
+" Recursive source function
+function! s:source_all(dir)
+  for f in glob(a:dir.'/*.vim', 0, 1)
+    if f !~? 'test_'  " if not a test file
+      exec 'so' f
+    endif
+  endfor
+endfunction
+command! -nargs=1 -bar SourceAll  call s:source_all(<args>)
 
 " TODO: backup to designated folder (by python or something)
 "   check if anything changed, git backup

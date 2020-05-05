@@ -1,6 +1,6 @@
 " Project: Onesimos Vim
 " Maintainer: BaksiLi
-" Version: 0.1
+" Version: 0.1.1
 "--------------------------------------------------------------
 " Menu
 "--------------------------------------------------------------
@@ -15,11 +15,6 @@
 "       plugconf/*.vim
 " 4 Custom Functions and Keys
 "       functions/*.vim
-
-" TODO:
-" - general config first?
-" - move plugin installs to a seperate file
-" - let choose font
 
 "--------------------------------------------------------------
 " Automated Installations
@@ -226,15 +221,14 @@ Plug 'SirVer/ultisnips'
 ":CocInstall coc-snippets
 " Plug 'honza/vim-snippets'
 
+" ------ Miscellanous ------
+" Plug 'jamessan/vim-gnupg'
+
 " ------ Initialze Plugin System ------
 call plug#end()
 
 " Load config files
-for f in glob($VIMRCDIR.'/plugconf/*.vim', 0, 1)
-  if f !~? 'test_'
-    exec 'so' f
-  endif
-endfor
+SourceAll $VIMRCDIR.'/plugconf'
 
 " GUI settings
 set termguicolors  " need +termguicolors
@@ -267,9 +261,8 @@ endif
 "--------------------------------------------------------------
 " Custom Functions
 "--------------------------------------------------------------
-for f in glob($VIMRCDIR.'/functions/*.vim', 0, 1)
-  exec 'so' f
-endfor
+" Load all functions
+SourceAll $VIMRCDIR.'/functions'
 
 " File Header
 au BufNewFile *.cpp,*.[ch],*.sh,*.rb,*.java,*.py,*.ts exec ":call SetHeader()"
