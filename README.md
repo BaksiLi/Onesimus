@@ -18,7 +18,9 @@ Use git pull to update.
 ### Goals
 - [ ] Build CI for Linux.
 - [ ] Write a doc.
-- [ ] Make Compile/Run function runs asynchronously.
+- [ ] Utilize Async technology
+  - [ ] CompileRun
+  - [ ] OpenREPL (range)
 - [ ] User configuration interface.
 - [ ] Compile Vim automatically.
 
