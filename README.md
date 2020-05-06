@@ -1,11 +1,16 @@
 Onesimos Vim
 <img src="./doc/onesimos-logo.png" width:auto height=128pt align="right"/>
 ---
+![GitHub](https://img.shields.io/github/license/BaksiLi/Onesimos?style=flat-square)
+![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/BaksiLi/Onesimos?include_prereleases&style=flat-square)
+[![Contribute](https://img.shields.io/badge/contribute-gray.svg?style=flat-square)](./CONTRIBUTING.md)
+
+<!-- ## About Onesimos -->
 **Onesimos** ('helpful', Latinized *Onesimus*) is a Vim configuration.
 
-General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymap, are following the principle of 'Convention over configuration'.
+General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymap, are following the principle of [*Convention over configuration*](https://en.wikipedia.org/wiki/Convention_over_configuration).
 
-Any concerns related to this repository can be issued. [Contributions](./CONTRIBUTING.md) are welcomed.
+Any concerns related to this repository can be issued.
 
 ## Installation
 ### Install & Update Script
@@ -16,10 +21,10 @@ wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bas
 Use git pull to update.
 
 ### Goals
-- [ ] Build CI for Linux.
+- [ ] Build CI for Linux, use *vader.vim* for testing.
 - [ ] Write a doc.
 - [ ] Utilize Async technology
-  - [ ] CompileRun
+  - [x] CompileRun
   - [ ] OpenREPL (range)
 - [ ] User configuration interface.
 - [ ] Compile Vim automatically.
@@ -59,12 +64,12 @@ I have divided the traditional `.vimrc` into several files and folders in order 
 <!-- by `tree . -L 1` -->
 ```
 .
-├── README.md
-├── automated.vim
+├── **snippets**
 ├── **functions**
-├── init.vim
 ├── **plugconf**
-└── **snippets**
+├── init.vim
+├── README.md
+└── automated.vim
 ```
 
 where there are (currently) three folders of differenciated functions and a few config file named `init.vim` (main) and `automated.vim`.
