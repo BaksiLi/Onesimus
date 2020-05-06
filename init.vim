@@ -146,6 +146,7 @@ Plug 'liuchengxu/vim-which-key'
 
 " Assync Run (Vim 8?)
 Plug 'skywind3000/asyncrun.vim'
+" Plug 'skywind3000/asynctasks.vim'  " this is good but a bit heavy
 
 " vim-minimap
 
@@ -229,6 +230,10 @@ call plug#end()
 
 " Load config files
 SourceAll $VIMRCDIR.'/plugconf'
+
+if &runtimepath =~ 'asyncrun'
+  command! -bang -nargs=* -complete=file Make AsyncRun -program=make @ <args>
+endif
 
 " GUI settings
 set termguicolors  " need +termguicolors

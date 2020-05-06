@@ -5,6 +5,10 @@ let g:airline#extensions#tabline#enabled = 1  " Automatically displays all buffe
 
 let g:airline_powerline_fonts = 1  " requires powerline-fonts
 
+if &runtimepath =~ 'asyncrun'
+  let g:airline_section_error = airline#section#create_right(['%{g:asyncrun_status}'])
+endif
+
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
 endif
