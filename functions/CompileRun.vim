@@ -7,12 +7,16 @@ func! s:CompileRun()
   " AsyncRun -save={0,1,2} -post
   " -mode={}
 
-  " Save?
-  " exec 'w'
+  " Retrieve file data
+  " let header = getline(1) | let pos = stridx(header, '#!')
+  let fname = expand('%')
+  let frname = expand('%:r')
+  let fpath = expand('%:p')
   
   " Open terminal
   let g:compilerun_term = -1
   " if = 1, position
+
 
   " Auto open :copen
   let g:asyncrun_open = 8
@@ -28,9 +32,9 @@ func! s:CompileRun()
 
   " ------ Run part ------
   if &filetype ==? 'sh'
-    call asyncrun#run('', {}, expr_timer.'bash '.expand('%'))
+    call asyncrun#run('', {}, expr_timer.'bash '.fpath)
   elseif &filetype ==? 'python'
-    call asyncrun#run('raw', {}, expr_timer.'python '.expand('%'))
+    call asyncrun#run('raw', {}, expr_timer.'python '.fpath)
   elseif &filetype ==? 'markdown'
     " exec '!~/.vim/markdown.pl % > %.html &'
     " exec '!open -a \"Google Chrome\" %.html &'  " only for macOS
@@ -42,11 +46,12 @@ func! s:CompileRun()
   elseif &filetype ==? 'html'
     exec '!open -a "Google Chrome" % &'
   elseif &filetype ==? 'haskell'
-    call asyncrun#run('', {}, expr_timer.'ghc '.expand('%'))
+    call asyncrun#run('', {}, expr_timer.'ghc '.fpath)
   elseif &filetype ==? 'vim'
     exec 'so %'
   elseif &filetype ==? 'dot'
-    let command = 'dot -Tpng '.expand(%).' -o '.expand(%:r).'.png && open '.expand(%:r)'.png'
+    let imgname = frname.'.png'
+    let command = 'dot -Tpng '.fpath.' -o '.imgname.' && open '.imgname
     call asyncrun#run('', {}, expr_timer.command)
     
   endif
