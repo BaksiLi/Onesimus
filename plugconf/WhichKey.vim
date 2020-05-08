@@ -1,8 +1,13 @@
 let g:which_key_map = {
-  \ 'r' : 'Toggle Relative Numbering',
   \ 'h' : 'Open Onesimos Documentation',
   \ 's' : { 'name' : 'Source', 'd' : 'Source Dotfile' },
-  \ 't' : 'Create Tags',
+  \ }
+
+let g:which_key_map['t'] = {
+  \ 'name' : '+toggle',
+  \ 'r' : 'Toggle Relative Numbering',
+  \ 'i' : ['IndentLinesToggle', 'Toggle Indent Indicator'],
+  \ 'p' : ['RainbowToggle', 'Toggle Parenthesis Indicator']
   \ }
 
 let g:which_key_map['f'] = {
@@ -18,6 +23,7 @@ let g:which_key_map['e'] = {
   \ 'name' : '+File', 
   \ 'd' : 'Edit Dotfile',
   \ 'r' : ['Rename', 'Rename File'],
+  \ 't' : 'Create Tags',
   \ }
 
 " TODO: more

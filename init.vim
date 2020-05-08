@@ -1,6 +1,6 @@
 " Project: Onesimos Vim
 " Maintainer: BaksiLi
-" Version: 0.1.1
+" Version: 0.1.2
 "--------------------------------------------------------------
 " Menu
 "--------------------------------------------------------------
@@ -60,7 +60,7 @@ set scrolloff=4
 set ruler
 set number        " line numbering
 " key for toggle relative numbering
-nmap <leader>r :set rnu!<cr>
+nmap <leader>tr :set rnu!<cr>
 set cursorline
 
 " ------ Search ------
@@ -114,6 +114,10 @@ augroup set_indents
     \ shiftwidth=2
 augroup END
 
+augroup lisp_behaviour
+  autocmd FileType lisp,emacs,scheme RainbowToggle
+augroup end
+
 " ------ Keymaps ------
 " NB Some keymaps are loaded later
 " Fast split navigations
@@ -125,13 +129,17 @@ nnoremap <C-H> <C-W><C-H>
 " Enforcing HJKL-style
 " NB this will cause problem to some plugins 
 " map <Up> <Nop>
-map <Up> :echo 'Use HJKL (k)!'<cr>k
-map <Down> :echo 'Use HJKL (j)!'<cr>j
-map <Left> :echo 'Use HJKL (h)!'<cr>h
-map <Right> :echo 'Use HJKL (l)!'<cr>l
+map <Up> :echoe 'Use HJKL (k)!'<cr>k
+map <Down> :echoe 'Use HJKL (j)!'<cr>j
+map <Left> :echoe 'Use HJKL (h)!'<cr>h
+map <Right> :echoe 'Use HJKL (l)!'<cr>l
 
 " Alternative to <esc>
 inoremap lkj <esc>
+
+" Buffer move
+nnoremap ]b :bnext<cr>
+nnoremap [b :bprev<cr>
 
 "--------------------------------------------------------------
 " Plugins
@@ -140,8 +148,8 @@ call plug#begin('~/.vim/bundle')
 
 " ------ IDE and UI features ------
 Plug 'mhinz/vim-startify'
-Plug 'scrooloose/nerdtree'
-Plug 'majutsushi/tagbar'
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'majutsushi/tagbar', {'on': 'TagbarToggle'}
 Plug 'liuchengxu/vim-which-key'
 
 " Assync Run (Vim 8?)
@@ -158,18 +166,21 @@ Plug 'Yggdroot/LeaderF', { 'do': '.\install.bat' }
 "   if font not compatible, use other seperator
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+
 Plug 'morhetz/gruvbox'
-Plug 'endel/vim-github-colorscheme'
+Plug 'junegunn/seoul256.vim' 
+Plug 'arcticicestudio/nord-vim'
+Plug 'sickill/vim-monokai'
 
 " ------ Git Support ------
 Plug 'tpope/vim-fugitive'
 Plug 'mhinz/vim-signify'  "faster than vim-gitgutter
-Plug 'airblade/vim-gitgutter'
 " Plug 'Xuyuanp/nerdtree-git-plugin'
+" Plug 'junegunn/vim-emoji'
+"   command! -range EmojiReplace <line1>,<line2>s/:\([^:]\+\):/\=emoji#for(submatch(1), submatch(0))/g
 
 " ------ Language Server Client ------
 Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
-" CocInstall coc-tabnine coclist?
 
 " Linter and Fixer
 Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
@@ -177,20 +188,21 @@ Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
 
 " ------ Lang-specific Plugs ------
 " Markdown
-Plug 'gabrielelana/vim-markdown'
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
-Plug 'BaksiLi/vim-markdown-toc' " originally 'mzlogin/vim-markdown-toc'
+Plug 'gabrielelana/vim-markdown' , { 'for': 'markdown'}
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' , 'for': 'markdown' }
+Plug 'BaksiLi/vim-markdown-toc', { 'for': 'markdown' }  " originally 'mzlogin/vim-markdown-toc'
 " Markdown mappings?  like :onoremap ih :<c-u>exec 'normal! ?^==\\+$\r:nohlsearch\rkvg_'<cr>
 
 " TeX
-" requires latexmk, `sudo tlmgr install latexmk`
-" coc-vimtex
-Plug 'lervag/vimtex' " config avail
-Plug 'KeitaNakamura/tex-conceal.vim', {'for': 'tex'}
+" requires latexmk, `sudo tlmgr install latexmk`; coc-vimtex
+Plug 'lervag/vimtex', { 'for': 'tex' }
+Plug 'KeitaNakamura/tex-conceal.vim', { 'for': 'tex' }
 
 " Swift 
-Plug 'bumaociyuan/vim-swift'  " syntax (fork from official)
+Plug 'bumaociyuan/vim-swift', { 'for': 'swift' }  " syntax (fork from official)
 
+" TODO: coc-settings.json
+" coc-tabnine coclist?
 " coc-json, coc-html
 " coc-python
 
@@ -214,8 +226,10 @@ Plug 'godlygeek/tabular'
 
 " vim-multiple-cursors  " Multi-cursor is poisonous
 
-" Auxiliary indentation indicator
+" Auxiliary indicator
 Plug 'Yggdroot/indentLine'
+Plug 'luochen1990/rainbow', { 'on': 'RainbowToggle' }
+  let g:rainbow_active = 0
 
 " Snippets
 Plug 'SirVer/ultisnips'
@@ -231,6 +245,7 @@ call plug#end()
 " Load config files
 SourceAll $VIMRCDIR.'/plugconf'
 
+" AsyncRun for fugitive
 if &runtimepath =~ 'asyncrun'
   command! -bang -nargs=* -complete=file Make AsyncRun -program=make @ <args>
 endif
@@ -238,12 +253,11 @@ endif
 " GUI settings
 set termguicolors  " need +termguicolors
 if has('gui_running')
-  colorscheme github
+  colorscheme nord
 else
   colorscheme gruvbox
   let g:airline_theme = 'gruvbox'
   " let g:gruvbox_contrast_dark = 'hard'
-  " TODO: overwrite airline, remove charging status
 endif
 
 " Change cursor under different modes (for iTerm2 only)
@@ -256,6 +270,7 @@ else
   let &t_SR = "\<Esc>]50;CursorShape=2\x7"
   let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
+" TODO: if two tmux detected, set notermguicolors to avoid colour lost
 
 " start a clientserver under terminal?
 " if empty(v:servername) && exists('*remote_startserver')
@@ -280,13 +295,13 @@ nmap <F5> :CompileRun<cr>
 nmap <F6> :ALEFix<cr>
 
 " TODO: more ctags into a fn
-nnoremap <leader>t command! MakeTags !ctags -R .<cr>
+nnoremap <leader>et command! MakeTags !ctags -R .<cr>
 
 " TODO: enable wordprocessingmode for certain filetypes
 " :autocmd FileType javascript nnoremap <buffer> <localleader>c I//<esc>
 
 " Colour Column
-" TODO: exclude latex
+" exclude latex
 " The line length should be limited to 72 characters, 79 at max.
 " see https://www.python.org/dev/peps/pep-0008/#maximum-line-length.
 " highlight OverLength ctermbg=red ctermfg=white guibg=#592929

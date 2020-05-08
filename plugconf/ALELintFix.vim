@@ -6,6 +6,8 @@ let b:ale_linters = {
 \ 'LaTeX': ['chktex'],
 \ 'vim': ['vint'],
 \}
+nmap ]a <Plug>(ale_next_wrap)
+nmap [a <Plug>(ale_previous_wrap)
 
 " Autoformat
 let g:ale_fixers = {

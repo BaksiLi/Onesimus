@@ -3,6 +3,8 @@ Onesimos Vim
 ---
 ![GitHub](https://img.shields.io/github/license/BaksiLi/Onesimos?style=flat-square)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/BaksiLi/Onesimos?include_prereleases&style=flat-square)
+![GitHub repo size](https://img.shields.io/github/repo-size/BaksiLi/Onesimos?color=yellow&label=size&style=flat-square)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue?style=flat-square)
 [![Contribute](https://img.shields.io/badge/contribute-gray.svg?style=flat-square)](./CONTRIBUTING.md)
 
 <!-- ## About Onesimos -->
@@ -40,8 +42,14 @@ The default leader key is `\`.
 #### Editing
 - `lkj` (insert mode) to change to normal mode.
 - `<space>` to fold manually.
-- `<leader>r` to toggle enable relative numbering.
 - `<C-e>` to expand snippets.
+
+- `<leader>tr` to toggle enable relative numbering.
+- `<leader>tp` to toggle rainbow parenthesis.
+- `<leader>ti` to toggle indent lines.
+
+- `]a`/`[a` to go to the next/previous lint position.
+- `]b`/`[b` to go to the next/previous buffer position.
 
 #### IDE Features
 - `<leader>ff` to open fuzzy finder for the current working directory(LeaderF).
