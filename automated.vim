@@ -47,21 +47,8 @@ function! s:source_all(dir)
 endfunction
 command! -nargs=1 -bar SourceAll  call s:source_all(<args>)
 
-" TODO: backup to designated folder (by python or something)
-"   check if anything changed, git backup
-
-" Learn from:
-" " Load dein.
-" let s:dein_dir = finddir('dein.vim', '.;')
-" if s:dein_dir != '' || &runtimepath !~ '/dein.vim'
-"   if s:dein_dir == '' && &runtimepath !~ '/dein.vim'
-"     let s:dein_dir = expand('$CONFIG/nvim')
-"           \. '/repos/github.com/Shougo/dein.vim'
-"     if !isdirectory(s:dein_dir)
-"       echomsg 'Download dein plugin management wait a moment'
-"       execute '!git clone https://github.com/Shougo/dein.vim' s:dein_dir
-"     endif
-"   endif
-"   execute 'set runtimepath^=' . substitute(
-"         \ fnamemodify(s:dein_dir, ':p') , '/$', '', '')
-" endif
+" Vim-plug Cond helper function
+function! Cond(cond, ...)
+  let opts = get(a:000, 0, {})
+  return a:cond ? opts : extend(opts, { 'on': [], 'for': [] })
+endfunction

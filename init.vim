@@ -69,7 +69,6 @@ set incsearch     " real time search
 set showmatch
 set ignorecase
 
-" coc setup: Some servers have issues with backup files
 set nobackup
 set nowritebackup
 set autoread      " if file is edited outside, reload automatically
@@ -156,7 +155,8 @@ Plug 'liuchengxu/vim-which-key'
 Plug 'skywind3000/asyncrun.vim'
 " Plug 'skywind3000/asynctasks.vim'  " this is good but a bit heavy
 
-" vim-minimap
+" Stats
+" Plug  'wakatime/vim-wakatime'
 
 " Fuzzy finder
 Plug 'Yggdroot/LeaderF', { 'do': '.\install.bat' }
@@ -207,9 +207,9 @@ Plug 'bumaociyuan/vim-swift', { 'for': 'swift' }  " syntax (fork from official)
 " coc-python
 
 " Haskell
-" https://github.com/neovimhaskell/haskell-vim
-" https://github.com/chrisdone/hindent
 " https://github.com/jaspervdj/stylish-haskell
+Plug 'neovimhaskell/haskell-vim', { 'for': 'haskell'}
+Plug 'chrisdone/hindent', { 'for': 'haskell'}
 
 " Agda
 " ...
@@ -255,9 +255,11 @@ set termguicolors  " need +termguicolors
 if has('gui_running')
   colorscheme nord
 else
+  "let g:gruvbox_contrast_dark = 'medium'
+  let g:gruvbox_improved_warnings = 1
+  set background=dark
   colorscheme gruvbox
   let g:airline_theme = 'gruvbox'
-  " let g:gruvbox_contrast_dark = 'hard'
 endif
 
 " Change cursor under different modes (for iTerm2 only)
