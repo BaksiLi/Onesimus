@@ -185,6 +185,8 @@ Plug 'sickill/vim-monokai'
 " ------ Git Support ------
 Plug 'tpope/vim-fugitive'
 Plug 'mhinz/vim-signify'  "faster than vim-gitgutter
+Plug 'mattn/vim-gist', { 'on': 'Gist'}
+  let g:gist_open_browser_after_post = 1
 " Plug 'Xuyuanp/nerdtree-git-plugin'
 " Plug 'junegunn/vim-emoji'
 "   command! -range EmojiReplace <line1>,<line2>s/:\([^:]\+\):/\=emoji#for(submatch(1), submatch(0))/g
@@ -198,7 +200,7 @@ Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
 
 " ------ Lang-specific Plugs ------
 " Markdown
-Plug 'gabrielelana/vim-markdown' , { 'for': 'markdown'}
+Plug 'gabrielelana/vim-markdown', { 'for': 'markdown'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' , 'for': 'markdown' }
 Plug 'BaksiLi/vim-markdown-toc', { 'for': 'markdown' }  " originally 'mzlogin/vim-markdown-toc'
 " Markdown mappings?  like :onoremap ih :<c-u>exec 'normal! ?^==\\+$\r:nohlsearch\rkvg_'<cr>
@@ -213,6 +215,9 @@ Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion'}
 
 " Swift 
 Plug 'bumaociyuan/vim-swift', { 'for': 'swift' }  " syntax (fork from official)
+
+" Web
+Plug 'mattn/emmet-vim', { 'for': 'html'}
 
 " TODO: coc-settings.json
 " coc-tabnine coclist?
@@ -252,7 +257,7 @@ Plug 'luochen1990/rainbow', { 'on': 'RainbowToggle' }
 
 " Focus mode
 Plug 'junegunn/goyo.vim'
-"Plug 'junegunn/limelight.vim'
+Plug 'junegunn/limelight.vim'
 
 " Snippets
 Plug 'SirVer/ultisnips'
@@ -269,7 +274,7 @@ call plug#end()
 SourceAll $VIMRCDIR.'/plugconf'
 
 " AsyncRun for fugitive
-if &runtimepath =~ 'asyncrun'
+if &runtimepath =~? 'asyncrun'
   command! -bang -nargs=* -complete=file Make AsyncRun -program=make @ <args>
 endif
 
