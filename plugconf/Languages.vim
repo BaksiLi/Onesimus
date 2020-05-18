@@ -9,6 +9,6 @@ let g:vimtex_quickfix_mode=0
 let g:tex_conceal='abdmg'
 
 " ------ IndentLine ------
-let g:indentLine_char_list = ['|', '¦', '┆', '┊']  " only work with file encoding UTF-8
+let g:indentLine_char_list = ['¦', '┆', '┊']  " only work with file encoding UTF-8
 let g:indentLine_setColors = 0  " use colourscheme default
 let g:indentLine_conceallevel = 2
