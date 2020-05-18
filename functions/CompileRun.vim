@@ -1,7 +1,7 @@
-" TODO: configurable
-" TODO: a more elegant way to do this
-"   - expand macros as a function (%, filetype)
-" TODO: HTML, and check if has ghc? initialise?
+" TODO: 
+"  - expand macros as a function (%, filetype)
+"  - HTML, and check if has ghc? initialise?
+"  - detect io and switch to normal run mode.
 
 func! s:CompileRun()
   " AsyncRun -save={0,1,2} -post
@@ -12,11 +12,15 @@ func! s:CompileRun()
   let fname = expand('%')
   let frname = expand('%:r')
   let fpath = expand('%:p')
-  
+
+  " macOS absolute path has whitespaces
+  if g:asc_uname ==? 'darwin'
+    let fpath = substitute(fpath, '\ ', '\\ ', '')
+  endif
+
   " Open terminal
   let g:compilerun_term = -1
   " if = 1, position
-
 
   " Auto open :copen
   let g:asyncrun_open = 8
@@ -25,7 +29,7 @@ func! s:CompileRun()
   " Timer
   let g:compilerun_timer = 1
   if g:compilerun_timer
-    let expr_timer = 'time '
+    let expr_timer = ''
   else
     let expr_time = ''
   endif
@@ -53,7 +57,7 @@ func! s:CompileRun()
     let imgname = frname.'.png'
     let command = 'dot -Tpng '.fpath.' -o '.imgname.' && open '.imgname
     call asyncrun#run('', {}, expr_timer.command)
-    
+
   endif
 
   " ------ Compile part ------
