@@ -8,6 +8,7 @@ let g:which_key_map = {
 let g:which_key_map['t'] = {
   \ 'name' : '+toggle',
   \ 'r' : 'Toggle Relative Numbering',
+  \ 'w' : ['WPModeToggle', 'Toggle Word Processing Mode'],
   \ 'i' : ['IndentLinesToggle', 'Toggle Indent Indicator'],
   \ 'p' : ['RainbowToggle', 'Toggle Parenthesis Indicator']
   \ }

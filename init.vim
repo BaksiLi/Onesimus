@@ -1,6 +1,6 @@
 " Project: Onesimos Vim
 " Maintainer: BaksiLi
-" Version: 0.1.2
+" Version: 0.1.3
 "--------------------------------------------------------------
 " Menu
 "--------------------------------------------------------------
@@ -111,6 +111,13 @@ augroup set_indents
     \ noexpandtab
     \ tabstop=4
     \ shiftwidth=2
+  au FileType json
+    \ setlocal conceallevel=0
+augroup END
+
+augroup set_comment
+  au FileType markdown
+    \ setlocal commentstring=<!--\ %s\ -->
 augroup END
 
 augroup lisp_behaviour
@@ -126,6 +133,7 @@ nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
 " Enforcing HJKL-style
+" Make it a Layer? elite_mode?
 " NB this will cause problem to some plugins 
 " map <Up> <Nop>
 map <Up> :echoe 'Use HJKL (k)!'<cr>k
@@ -150,6 +158,7 @@ Plug 'mhinz/vim-startify'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'majutsushi/tagbar', {'on': 'TagbarToggle'}
 Plug 'liuchengxu/vim-which-key'
+" Plug 't9md/vim-choosewin'
 
 " Assync Run (Vim 8?)
 Plug 'skywind3000/asyncrun.vim'
@@ -157,6 +166,7 @@ Plug 'skywind3000/asyncrun.vim'
 
 " Stats
 Plug  'wakatime/vim-wakatime'
+" Plug 'dstein64/vim-startuptime'
 
 " Fuzzy finder
 Plug 'Yggdroot/LeaderF', { 'do': '.\install.bat' }
@@ -198,6 +208,9 @@ Plug 'BaksiLi/vim-markdown-toc', { 'for': 'markdown' }  " originally 'mzlogin/vi
 Plug 'lervag/vimtex', { 'for': 'tex' }
 Plug 'KeitaNakamura/tex-conceal.vim', { 'for': 'tex' }
 
+" VimScript Reference
+Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion'}
+
 " Swift 
 Plug 'bumaociyuan/vim-swift', { 'for': 'swift' }  " syntax (fork from official)
 
@@ -226,10 +239,20 @@ Plug 'godlygeek/tabular'
 
 " vim-multiple-cursors  " Multi-cursor is poisonous
 
+" Improved increment <C-a>/<C-x>
+Plug 'tpope/vim-speeddating'
+
+" Undo Tree
+" Plug 'mbbill/undotree'
+
 " Auxiliary indicator
 Plug 'Yggdroot/indentLine'
 Plug 'luochen1990/rainbow', { 'on': 'RainbowToggle' }
-  let g:rainbow_active = 0
+  let g:rainbow_active = 0  " default off
+
+" Focus mode
+Plug 'junegunn/goyo.vim'
+"Plug 'junegunn/limelight.vim'
 
 " Snippets
 Plug 'SirVer/ultisnips'

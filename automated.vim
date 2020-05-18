@@ -27,16 +27,6 @@ if empty(glob('~/.vim/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-" TODO: let user to choose the package
-" https://github.com/skywind3000/vim/blob/master/bundle.vim
-
-" TODO: detect if the dependency are installed
-" Install nodejs and yarn if not installed
-"   maybe use bash?
-"   https://gist.github.com/JamieMason/4761049
-" download skim if none for tex
-" download vint
-
 " Recursive source function
 function! s:source_all(dir)
   for f in glob(a:dir.'/*.vim', 0, 1)
@@ -52,3 +42,20 @@ function! Cond(cond, ...)
   let opts = get(a:000, 0, {})
   return a:cond ? opts : extend(opts, { 'on': [], 'for': [] })
 endfunction
+
+function! PlugLoaded(name)
+  return (
+    \ has_key(g:plugs, a:name) &&
+    \ isdirectory(g:plugs[a:name].dir) &&
+    \ stridx(&rtp, g:plugs[a:name].dir) >= 0)
+endfunction
+
+" TODO: let user to choose the package
+" https://github.com/skywind3000/vim/blob/master/bundle.vim
+
+" TODO: detect if the dependency are installed
+" Install nodejs and yarn if not installed
+"   maybe use bash?
+"   https://gist.github.com/JamieMason/4761049
+" download skim if none for tex
+" download vint
