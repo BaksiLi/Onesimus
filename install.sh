@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Print Onesimos logo.
 cat << "EOF"
          .-://:-.      `:`                       
       .+syyyyyyyys+.  :ooo/`                     
@@ -29,7 +30,8 @@ echo "------------------------"
 echo "Welcome. You're going to install the amazing Onesimos Vim configuration!"
 echo "------------------------"
 
-echo "Checking the required environment..."
+# Checking for git and vim
+echo -e "\nChecking the required environment..."
 if [[ -x "$(command -v vim)" && -x "$(command -v git)" ]]; then
         echo "Done."
 else
@@ -82,7 +84,7 @@ git clone https://github.com/BaksiLi/Onesimos ./vimrc && echo "Done." || (cd $MY
 echo -e "\nChecking old .vimrc file..."
 if test -f ".vimrc"; then
         echo "Found!"
-        _oldrc="$VIMRCDIR/.vimrc"
+        _oldrc="$HOME/.vimrc"
         _newrc="$MYVIMRC/vimrc.backup"
         echo "Moving it to $MYVIMRC/vimrc.backup"
         mv $_oldrc $_newrc
@@ -91,8 +93,8 @@ echo "Done."
 
 # Create new .vimrc file
 echo -e "\nCreating new .vimrc"
-touch "$VIMRCDIR/.vimrc"
-cat >> "$VIMRCDIR/.vimrc" << EOL
+touch "$HOME/.vimrc"
+cat >> "$HOME/.vimrc" << EOL
 "return" 2>&- || "exit"
 
 let \$VIMRCDIR = '$MYVIMRC'
@@ -104,11 +106,13 @@ else
     echomsg 'Vim configuration folder not found!'
 endif
 EOL
-[ -f "$VIMRCDIR/.vimrc" ] && echo "Done." || exit
+[ -f "$HOME/.vimrc" ] && echo "Done." || exit
 
 # TODO: verification
 echo ""
 read -n 1 -s -r -p "Installation Complete!"
+
+# export EDITOR=vim
 
 echo -e "\nLaunching Vim..."
 vim -c "PlugInstall"

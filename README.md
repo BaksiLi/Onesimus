@@ -10,6 +10,12 @@ Onesimos Vim
 <!-- ## About Onesimos -->
 **Onesimos** ('helpful', Latinized *Onesimus*) is a Vim configuration.
 
+It aims to provide a vim-style experience for both the **daily uses** and **academic production**. 
+
+<!-- It is not only usable but aesthetically amusing. -->
+<!-- Markdown, TeX, Python. Haskell -->
+<!-- Future: Agda -->
+
 General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymap, are following the principle of [*Convention over configuration*](https://en.wikipedia.org/wiki/Convention_over_configuration).
 
 Any concerns related to this repository can be issued.
@@ -20,16 +26,21 @@ Any concerns related to this repository can be issued.
 wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bash ./install.sh
 ```
 
-Use git pull to update.
+Use `git pull origin master` to update.
 
 ### Goals
-- [ ] Build CI for Linux, use *vader.vim* for testing.
-- [ ] Write a doc.
-- [ ] Utilize Async technology
-  - [x] CompileRun
-  - [ ] OpenREPL (range)
-- [ ] User configuration interface.
-- [ ] Compile Vim automatically.
+- Project
+  - [x] User configuration interface.
+  - [ ] Register Onesismos as a Plugin; Write a doc.
+  - [ ] Build CI for Linux, use *vader.vim* for testing.
+  - [ ] Compile Vim automatically on different platforms
+
+- Functionality
+  - [x] Utilize Asynchronous technology in CompileRun
+  - [x] [Word Processing Mode](./functions/WordProcMode.vim)
+  - Support Literate Programming
+    - [ ] Interactive Kernel
+    - [ ] Haskell, Python, Agda, WolfLang
 
 ## Keymaps
 The default leader key is `\`.
@@ -52,7 +63,7 @@ The default leader key is `\`.
 - `]b`/`[b` to go to the next/previous buffer position.
 
 #### IDE Features
-- `<leader>ff` to open fuzzy finder for the current working directory(LeaderF).
+- `<leader>ff` to open fuzzy finder for the current working directory (LeaderF).
 - `<leader>fl` to open fuzzy finder for the current file.
 - `<leader>fb` to open fuzzy finder for buffers.
 - `<leader>ft` to open fuzzy finder for tags.
