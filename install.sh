@@ -73,7 +73,7 @@ done
 
 # Cloning Repo from GitHub
 cd $VIMRCDIR
-MYVIMRC="$VIMRCDIR/vimrc"
+MYVIMRC="${VIMRCDIR%/}/vimrc"
 echo -e "\nCloning the repository on GitHub..."
 git clone https://github.com/BaksiLi/Onesimos ./vimrc && echo "Done." || (cd $MYVIMRC && git pull)
 
