@@ -166,7 +166,7 @@ Plug 'skywind3000/asyncrun.vim'
 " Plug 'skywind3000/asynctasks.vim'  " this is good but a bit heavy
 
 " Stats
-Plug  'wakatime/vim-wakatime'
+" Plug  'wakatime/vim-wakatime'
 " Plug 'dstein64/vim-startuptime'
 
 " Fuzzy finder
