@@ -27,20 +27,21 @@ wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bas
 ```
 
 Use `git pull origin master` to update.
-
+conflict
 ### Goals
 - Project
   - [x] User configuration interface.
   - [ ] Register Onesismos as a Plugin; Write a doc.
   - [ ] Build CI for Linux, use *vader.vim* for testing.
-  - [ ] Compile Vim automatically on different platforms
+  - [ ] Compile Vim automatically on different platforms.
+  - [ ] Create docker image.
 
 - Functionality
-  - [x] Utilize Asynchronous technology in CompileRun
+  - [x] Utilize Asynchronous technology in CompileRun.
   - [x] [Word Processing Mode](./functions/WordProcMode.vim)
-  - Support Literate Programming
-    - [ ] Interactive Kernel
-    - [ ] Haskell, Python, Agda, WolfLang
+  - Support Literate Programming (+ REPL)
+    - [ ] Interactive Kernel.
+    - [ ] Haskell, Python, Wolfram Language.
 
 ## Keymaps
 The default leader key is `\`.

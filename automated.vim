@@ -20,12 +20,16 @@ else
   let g:asc_uname = 'posix'
 endif
 
-" Download vim-plug
+" Download vim-plug automatically 
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+  autocmd VimEnter * PlugInstall --sync | so $MYVIMRC
 endif
+" TODO: detect if the dependency are installed
+" Install nodejs and yarn if not installed; use shell script?
+"   https://gist.github.com/JamieMason/4761049
+" download skim if none for tex; download vint
 
 " Recursive source function
 function! s:source_all(dir)
@@ -50,12 +54,5 @@ function! PlugLoaded(name)
     \ stridx(&rtp, g:plugs[a:name].dir) >= 0)
 endfunction
 
-" TODO: let user to choose the package
-" https://github.com/skywind3000/vim/blob/master/bundle.vim
-
-" TODO: detect if the dependency are installed
-" Install nodejs and yarn if not installed
-"   maybe use bash?
-"   https://gist.github.com/JamieMason/4761049
-" download skim if none for tex
-" download vint
+" Configuration
+" cf. https://github.com/skywind3000/vim/blob/master/bundle.vim

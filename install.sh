@@ -2,28 +2,28 @@
 
 # Print Onesimos logo.
 cat << "EOF"
-         .-://:-.      `:`                       
-      .+syyyyyyyys+.  :ooo/`                     
-     /yyyyyyyyyyyyyy+``/oooo/`                   
-    +yys+++++oooooooy+  /ooooo/````````````..    
-   `yyy/...``````...sy. .ooooo/...```````..`     
-   `yyyyss+``````sssyy. .oooooo++:`````..`       
-    +yyyyy+``````syyy+  :ooooo+:.````..`         
-    `+yyyy+``````syy+` -oooo+:.````.:+/.         
-      .+sy+``````o+. `:ooo+:.````.:+ooo+/.       
-   `::.``.:``````-`./+oo+:.````.:+ooooooo+/.     
-  -+ooo+/::``````++ooo+:.````.:+ooooooooooo+/.   
-  `-+ooooo/``````+oo+:.````.:+oooooooooooooo+/`  
-    `-+ooo/``````++:.````.:+oooooooooooooo+:.    
-      `-+o/``````-.````.:+oooooooooooooo+:`      
-        `-:``````````.:+oooooooooooooo+-`        
-          -````````.:+oooooooooooooo/-`          
-          -``````.:+oooooooooooooo/.             
-          -````.:+ooooooooooooo+:`               
-          -``..``-+oooooooooo+:`                 
-          -..`    `-+oooooo+-`                   
-          -`         -+oo/.                      
-                       -.                        
+         .-://:-.      `:`
+      .+syyyyyyyys+.  :ooo/`
+     /yyyyyyyyyyyyyy+``/oooo/`
+    +yys+++++oooooooy+  /ooooo/````````````..
+   `yyy/...``````...sy. .ooooo/...```````..`
+   `yyyyss+``````sssyy. .oooooo++:`````..`
+    +yyyyy+``````syyy+  :ooooo+:.````..`
+    `+yyyy+``````syy+` -oooo+:.````.:+/.
+      .+sy+``````o+. `:ooo+:.````.:+ooo+/.
+   `::.``.:``````-`./+oo+:.````.:+ooooooo+/.
+  -+ooo+/::``````++ooo+:.````.:+ooooooooooo+/.
+  `-+ooooo/``````+oo+:.````.:+oooooooooooooo+/`
+    `-+ooo/``````++:.````.:+oooooooooooooo+:.
+      `-+o/``````-.````.:+oooooooooooooo+:`
+        `-:``````````.:+oooooooooooooo+-`
+          -````````.:+oooooooooooooo/-`
+          -``````.:+oooooooooooooo/.
+          -````.:+ooooooooooooo+:`
+          -``..``-+oooooooooo+:`
+          -..`    `-+oooooo+-`
+          -`         -+oo/.
+                       -.
 EOF
 
 echo "------------------------"
@@ -72,7 +72,7 @@ while true; do
 done
 
 # Cloning Repo from GitHub
-cd $VIMRCDIR
+cd $VIMRCDIR || exit
 MYVIMRC="${VIMRCDIR%/}/vimrc"
 echo -e "\nCloning the repository on GitHub..."
 git clone https://github.com/BaksiLi/Onesimos ./vimrc && echo "Done." || (cd $MYVIMRC && git pull)
@@ -87,7 +87,7 @@ if test -f ".vimrc"; then
         _oldrc="$HOME/.vimrc"
         _newrc="$MYVIMRC/vimrc.backup"
         echo "Moving it to $MYVIMRC/vimrc.backup"
-        mv $_oldrc $_newrc
+        mv "$_oldrc" "$_newrc"
 fi
 echo "Done."
 
@@ -112,6 +112,7 @@ EOL
 echo ""
 read -n 1 -s -r -p "Installation Complete!"
 
+# if echo $EDITOR not vim, ask
 # export EDITOR=vim
 
 echo -e "\nLaunching Vim..."
