@@ -1,6 +1,7 @@
 " ------ NERDTree ------
 let g:NERDTreeWinPos = 'left'
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let g:NERDTreeQuitOnOpen=1
 
 let g:NERDTreeFileExtensionHighlightFullName = 1
 let g:NERDTreeExactMatchHighlightFullName = 1
@@ -10,10 +11,11 @@ let g:NERDTreeHighlightFoldersFullName = 1
 let g:NERDTreeDirArrowExpandable='▷'
 let g:NERDTreeDirArrowCollapsible='▼'
 
-" let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
+" let g:NERDTreeShowHidden=1
+" let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree, maybe read
+" .gitignore?
 
-" open a NERDTree automatically when vim starts up if no files were specified
-" contradits startify
+" Open a NERDTree automatically when vim starts up if no files were specified
 " autocmd StdinReadPre * let s:std_in=1
 " autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 

@@ -1,3 +1,4 @@
+" TODO: local keys for specific filetype
 " ------ Misc ------
 let g:which_key_map = {
   \ 'h' : 'Open Onesimos Documentation',
@@ -10,7 +11,7 @@ let g:which_key_map['t'] = {
   \ 'r' : 'Toggle Relative Numbering',
   \ 'w' : ['WPModeToggle', 'Toggle Word Processing Mode'],
   \ 'i' : ['IndentLinesToggle', 'Toggle Indent Indicator'],
-  \ 'p' : ['RainbowToggle', 'Toggle Parenthesis Indicator']
+  \ 'p' : ['ParenthesisToggle', 'Toggle Parenthesis Indicator'],
   \ }
 
 " ------ Fuzzy finder ------
@@ -24,11 +25,12 @@ let g:which_key_map['f'] = {
   \ }
 
 " ------ Current File ------
-let g:which_key_map['e'] = { 
-  \ 'name' : '+File', 
+let g:which_key_map['e'] = {
+  \ 'name' : '+File',
   \ 'd' : 'Edit Dotfile',
   \ 'r' : ['Rename', 'Rename File'],
   \ 't' : 'Create Tags',
+  \ 'p' : [':read !pbpaste', 'Paste Clipboard'],
   \ }
 
 " ------ Window ------
@@ -72,7 +74,7 @@ let g:which_key_map['\'] = {
 " ------ WhichKey Settings ------
 let g:which_key_use_floating_win = 1
 
-call which_key#register('\', 'g:which_key_map')  
+call which_key#register('\', 'g:which_key_map')
 
 nnoremap <silent> <leader> :<c-u>WhichKey '\'<CR>
 vnoremap <silent> <leader> :<c-u>WhichKey '\'<CR>

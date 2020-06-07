@@ -36,6 +36,7 @@ endif
 "--------------------------------------------------------------
 " Set alternative leader key (default: '\')
 let mapleader = '\'
+let maplocalleader = ','
 
 " ------ Meta ------
 " Edit dotfile
@@ -89,13 +90,13 @@ set smartindent          " optional
 set sidescroll=10
 set backspace=2          " indent,eol,start
 
+" Replace it with EditorConfig?
 augroup set_indents
   set expandtab          " tab to spaces
     \ tabstop=4
     \ shiftwidth=4
     \ softtabstop=4
-  au Filetype python set
-    \ textwidth=79
+  " au Filetype python set
   " use condition to set *.js, *.html, *.css
   "    \ set tabstop=2
   "    \ set softtabstop=2
@@ -121,7 +122,7 @@ augroup set_comment
 augroup END
 
 augroup lisp_behaviour
-  autocmd FileType lisp,emacs,scheme RainbowToggle
+  autocmd FileType lisp,emacs,scheme ParenthesisToggle
 augroup end
 
 " ------ Keymaps ------
@@ -170,6 +171,7 @@ Plug  'wakatime/vim-wakatime'
 
 " Fuzzy finder
 Plug 'Yggdroot/LeaderF', { 'do': '.\install.bat' }
+" fzf can integrate ag, awk etc
 
 " ------ Colour Schemes ------
 " TODO: Airline remove battery, add pyenv, cf :h statusline
@@ -203,6 +205,9 @@ Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
 Plug 'gabrielelana/vim-markdown', { 'for': 'markdown'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' , 'for': 'markdown' }
 Plug 'BaksiLi/vim-markdown-toc', { 'for': 'markdown' }  " originally 'mzlogin/vim-markdown-toc'
+Plug 'masukomi/vim-markdown-folding', { 'for': 'markdown' } 
+" This doesn't work for html tags!
+" Should rewrite this
 " Markdown mappings?  like :onoremap ih :<c-u>exec 'normal! ?^==\\+$\r:nohlsearch\rkvg_'<cr>
 
 " TeX
@@ -213,8 +218,12 @@ Plug 'KeitaNakamura/tex-conceal.vim', { 'for': 'tex' }
 " VimScript Reference
 Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion'}
 
-" Swift 
-Plug 'bumaociyuan/vim-swift', { 'for': 'swift' }  " syntax (fork from official)
+" Highlight
+Plug 'bumaociyuan/vim-swift'
+Plug 'BaksiLi/vim-applescript'
+" Plug 'leafgarland/typescript-vim'
+" Plug 'rust-lang/rust.vim'
+" Plug 'jparise/vim-graphql'
 
 " Web
 Plug 'mattn/emmet-vim', { 'for': 'html'}
@@ -280,6 +289,7 @@ endif
 
 " GUI settings
 set termguicolors  " need +termguicolors
+" termguicolors sometimes cause problem
 if has('gui_running')
   colorscheme nord
 else
@@ -326,6 +336,16 @@ nmap <F6> :ALEFix<cr>
 
 " TODO: more ctags into a fn
 nnoremap <leader>et command! MakeTags !ctags -R .<cr>
+
+function! s:Paren_toggle()
+  RainbowToggle
+  DoMatchParen
+  " hi MatchParen ctermbg=blue guibg=lightblue
+endfunction
+command! ParenthesisToggle call <sid>Paren_toggle()
+
+" command W w !sudo tee % > /dev/null
+
 
 " TODO: enable wordprocessingmode for certain filetypes
 " :autocmd FileType javascript nnoremap <buffer> <localleader>c I//<esc>

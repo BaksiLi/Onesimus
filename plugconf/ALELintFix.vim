@@ -5,6 +5,7 @@ let b:ale_linters = {
 \ 'Markdown': ['mdl'],
 \ 'LaTeX': ['chktex'],
 \ 'vim': ['vint'],
+\ 'bash': ['shellcheck'],
 \}
 nmap ]a <Plug>(ale_next_wrap)
 nmap [a <Plug>(ale_previous_wrap)
