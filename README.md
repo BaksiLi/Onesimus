@@ -16,7 +16,7 @@ It aims to provide a vim-style experience for both the **daily uses** and **acad
 <!-- Markdown, TeX, Python. Haskell -->
 <!-- Future: Agda -->
 
-General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymap, are following the principle of [*Convention over configuration*](https://en.wikipedia.org/wiki/Convention_over_configuration).
+General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymaps, are following the principle of [*Convention over configuration*](https://en.wikipedia.org/wiki/Convention_over_configuration).
 
 Any concerns related to this repository can be issued.
 
@@ -73,6 +73,7 @@ The default leader key is `\`.
 - `<F3>` to Toggle File Tree (NERDTree).
 - `<F4>` to Open a terminal window REPL for the specific language of the file (Visual Mode will be supported soon).
 - `<F5>` to Run or Compile the current file.
+  - Preview Markdown, Compile LaTeX, Run Python Script, Load Vim Settings and so on.
 - `<F6>` to Format the current file.
 
 ## Explained
@@ -84,6 +85,7 @@ I have divided the traditional `.vimrc` into several files and folders in order 
 <!-- by `tree . -L 1` -->
 ```
 .
+├── **customs**
 ├── **snippets**
 ├── **functions**
 ├── **plugconf**
@@ -102,6 +104,9 @@ where there are (currently) three folders of differenciated functions and a few 
 ### automated.vim
    This is where the system test and install prerequisites to support normal functions of plugins.
 
+### ./custom
+  This is where to store custom configurations. `plugins.vim` is the Plugin configuration file.
+
 ### ./plugconf
    The configurations of plugins could be found here with their name as the title followed by '.vim'.
 
@@ -111,7 +116,7 @@ where there are (currently) three folders of differenciated functions and a few 
 ### ./snippets
    The default folder for storing snippet rules for [UltiSnips](https://github.com/SirVer/ultisnips). The folder under `~/.vim` should be of limited use.
 
-Notice that these folders and files are autoloaded even for the first time your `.vimrc` is sourced. Adding of any new functionalities will not need manual loading as placing them in their corresponding folder should suffice.
+Notice that these folders and files are auto-loaded even for the first time your `.vimrc` is sourced. Adding of any new functionalities will not need manual loading as placing them in their corresponding folder should suffice.
 
 ## Acknowledgements
 Unless otherwise specified, the repository is Copyright BaksiLi, and are licenced under the [MIT Licence](./LICENSE).

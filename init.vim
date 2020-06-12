@@ -101,10 +101,12 @@ augroup set_indents
   "    \ set tabstop=2
   "    \ set softtabstop=2
   "    \ set shiftwidth=2
+  au Filetype tex :IndentLinesDisable
   au Filetype tex set
-    \ tabstop=4
+    \ tabstop=2
+    \ shiftwidth=2
     \ concealcursor-=n   " overwritten by indentLine
-    \ let g:indentLine_concealcursor = 'ic'
+    \ conceallevel=1
   au Filetype vim,snippets set
     \ tabstop=2
     \ shiftwidth=2
@@ -166,7 +168,6 @@ Plug 'skywind3000/asyncrun.vim'
 " Plug 'skywind3000/asynctasks.vim'  " this is good but a bit heavy
 
 " Stats
-" Plug  'wakatime/vim-wakatime'
 " Plug 'dstein64/vim-startuptime'
 
 " Fuzzy finder
@@ -216,7 +217,8 @@ Plug 'lervag/vimtex', { 'for': 'tex' }
 Plug 'KeitaNakamura/tex-conceal.vim', { 'for': 'tex' }
 
 " VimScript Reference
-Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion'}
+Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion' }
+Plug 'junegunn/vader.vim', { 'on': 'Vader' }
 
 " Highlight
 Plug 'bumaociyuan/vim-swift'
@@ -275,6 +277,11 @@ Plug 'SirVer/ultisnips'
 
 " ------ Miscellanous ------
 " Plug 'jamessan/vim-gnupg'
+
+" ------ Load Custom Plugins ------
+if filereadable(expand($VIMRCDIR.'/custom/plugins.vim'))
+    so $VIMRCDIR/custom/plugins.vim
+endif
 
 " ------ Initialze Plugin System ------
 call plug#end()
@@ -336,6 +343,7 @@ nmap <F6> :ALEFix<cr>
 
 " TODO: more ctags into a fn
 nnoremap <leader>et command! MakeTags !ctags -R .<cr>
+nnoremap X $x
 
 function! s:Paren_toggle()
   RainbowToggle
