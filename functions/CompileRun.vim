@@ -34,6 +34,8 @@ func! s:CompileRun()
     let expr_time = ''
   endif
 
+  exec 'w'
+
   " ------ Run part ------
   if &filetype ==? 'sh'
     call asyncrun#run('', {}, expr_timer.'bash '.fpath)
@@ -46,7 +48,7 @@ func! s:CompileRun()
     echo 'Markdown Preview Toggled'
   elseif &filetype ==? 'tex'
     " vimtex compile key
-    exec 'normal \ll'
+    exec 'VimtexCompile'
   elseif &filetype ==? 'html'
     exec '!open -a "Google Chrome" % &'
   elseif &filetype ==? 'haskell'
