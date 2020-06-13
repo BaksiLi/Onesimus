@@ -69,6 +69,7 @@ set hlsearch      " highlight search results
 set incsearch     " real time search
 set showmatch
 set ignorecase
+" set smartcase
 
 set nobackup
 set nowritebackup
@@ -76,6 +77,7 @@ set autoread      " if file is edited outside, reload automatically
 set confirm       " confirm when read-only
 
 set cmdheight=2   " Better message
+set sidescroll=10
 " Shorter updatetime for CursorHold & CursorHoldI
 set updatetime=300
 set timeoutlen=750
@@ -87,35 +89,30 @@ set foldmethod=manual
 " ------ Indentation ------
 set autoindent           " indent based on the previous line
 set smartindent          " optional
-set sidescroll=10
-set backspace=2          " indent,eol,start
+set backspace=indent,eol,start
 
 " Replace it with EditorConfig?
 augroup set_indents
-  set expandtab          " tab to spaces
-    \ tabstop=4
-    \ shiftwidth=4
-    \ softtabstop=4
-  " au Filetype python set
-  " use condition to set *.js, *.html, *.css
-  "    \ set tabstop=2
-  "    \ set softtabstop=2
-  "    \ set shiftwidth=2
-  au Filetype tex :IndentLinesDisable
-  au Filetype tex set
+  set expandtab  " tab to spaces
     \ tabstop=2
     \ shiftwidth=2
+    \ softtabstop=2
+
+  au Filetype tex :IndentLinesDisable
+  au Filetype tex setlocal
     \ concealcursor-=n   " overwritten by indentLine
     \ conceallevel=1
-  au Filetype vim,snippets set
-    \ tabstop=2
-    \ shiftwidth=2
-  au Filetype yaml set
+  au Filetype yaml setlocal
     \ noexpandtab
     \ tabstop=4
     \ shiftwidth=2
-  au FileType json
-    \ setlocal conceallevel=0
+  au FileType json setlocal
+    \ conceallevel=0
+  au FileType go setlocal
+    \ noexpandtab
+    \ shiftwidth=4
+    \ softtabstop=4
+    \ tabstop=4
 augroup END
 
 augroup set_comment
@@ -150,6 +147,11 @@ inoremap lkj <esc>
 " Buffer move
 nnoremap ]b :bnext<cr>
 nnoremap [b :bprev<cr>
+" QuickFix move
+nnoremap [c :cprevious<CR>
+nnoremap ]c :cnext<CR>
+
+nnoremap X $x
 
 "--------------------------------------------------------------
 " Plugins
@@ -196,6 +198,7 @@ Plug 'mattn/vim-gist', { 'on': 'Gist'}
 
 " ------ Language Server Client ------
 Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
+" let g:coc_global_extensions = []
 
 " Linter and Fixer
 Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
@@ -343,7 +346,6 @@ nmap <F6> :ALEFix<cr>
 
 " TODO: more ctags into a fn
 nnoremap <leader>et command! MakeTags !ctags -R .<cr>
-nnoremap X $x
 
 function! s:Paren_toggle()
   RainbowToggle

@@ -30,6 +30,7 @@ let g:which_key_map['e'] = {
   \ 'd' : 'Edit Dotfile',
   \ 'r' : ['Rename', 'Rename File'],
   \ 't' : 'Create Tags',
+  \ 'w' : ['update', 'Write Changes'],
   \ 'p' : [':read !pbpaste', 'Paste Clipboard'],
   \ }
 
@@ -70,6 +71,20 @@ let g:which_key_map['\'] = {
     \ 'b' : ['ToggleBackground', 'Toggle Background Colour']
     \ }
   \ }
+
+" ------ Bookmark ------
+" let g:which_bookmark_key_map = {}
+" call which_key#register('M', 'g:which_bookmark_key_map')
+" let g:which_bookmark_key_map = {
+" \ 'name': '+bookmark',
+" \ 'm':    'Toggle bookmark',
+" \ 'i':    'Annotate bookmark',
+" \ 'n':    'Next bookmark',
+" \ 'p':    'Previous bookmark',
+" \ 'a':    'Show all bookmark',
+" \ 'c':    'Clear buffer bookmark',
+" \ 'x':    'Clear all bookmark',
+" \ }
 
 " ------ WhichKey Settings ------
 let g:which_key_use_floating_win = 1
