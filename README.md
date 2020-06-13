@@ -30,18 +30,17 @@ Use `git pull origin master` to update.
 conflict
 ### Goals
 - Project
-  - [x] User configuration interface.
-  - [ ] Register Onesismos as a Plugin; Write a doc.
-  - [ ] Build CI for Linux, use *vader.vim* for testing.
-  - [ ] Compile Vim automatically on different platforms.
-  - [ ] Create docker image.
+  - [ ] Something like emacs' **list-packages**. First time install, pops up a checklist of what language to support, and puts those in the custom plugin file
+  - [ ] Compatibility for different platforms (See [Compatibility Milestone](https://github.com/BaksiLi/Onesimos/milestone/1)
+  - [ ] Register Onesismos as a Plugin; Write a doc
 
 - Functionality
-  - [x] Utilize Asynchronous technology in CompileRun.
+  - [x] Utilize Asynchronous technology in [CompileRun](./functions/CompileRun.vim)
   - [x] [Word Processing Mode](./functions/WordProcMode.vim)
   - Support Literate Programming (+ REPL)
-    - [ ] Interactive Kernel.
-    - [ ] Haskell, Python, Wolfram Language.
+    - [x] [OpenREPL](./functions/OpenREPL.vim)
+    - [ ] Interactive Kernel
+    - [ ] Haskell, Python, Wolfram Language
 
 ## Keymaps
 The default leader key is `\`.
