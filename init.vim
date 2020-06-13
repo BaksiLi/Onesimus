@@ -92,12 +92,12 @@ set smartindent          " optional
 set backspace=indent,eol,start
 
 " Replace it with EditorConfig?
-augroup set_indents
-  set expandtab  " tab to spaces
-    \ tabstop=2
-    \ shiftwidth=2
-    \ softtabstop=2
+set expandtab  " tab to spaces
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
 
+augroup set_indents
   au Filetype tex :IndentLinesDisable
   au Filetype tex setlocal
     \ concealcursor-=n   " overwritten by indentLine
