@@ -32,7 +32,7 @@ endif
 " g:asc_uname
 
 "--------------------------------------------------------------
-" General Configurations and Keymaps
+" General Configurations and Keymaps and Basic Setup
 "--------------------------------------------------------------
 " Set alternative leader key (default: '\')
 let mapleader = '\'
@@ -50,26 +50,16 @@ nnoremap <leader>h :view +let\ &l:modifiable=0 $VIMRCDIR/README.md<cr>
 syntax on   " highlight syntax
 filetype plugin indent on  " for vimtex, why indent?
 
-set fileencodings=utf-8,12,shift-jis,gbk,big
+" ------ Encoding ------
+set encoding=utf-8
+set fileencodings=utf-8,shift-jis,gbk,big
 set magic
 set nomodeline  " for safety
-
-set autochdir  " always always change to the current file's directory
-set scrolloff=4
+set ttyfast
 
 " ------ Editing ------
-set ruler
-set number        " line numbering
-" key for toggle relative numbering
-nmap <leader>tr :set rnu!<cr>
-set cursorline
-
-" ------ Search ------
-set hlsearch      " highlight search results
-set incsearch     " real time search
-set showmatch
-set ignorecase
-" set smartcase
+set autochdir  " always always change to the current file's directory
+set scrolloff=4
 
 set nobackup
 set nowritebackup
@@ -82,9 +72,26 @@ set sidescroll=10
 set updatetime=300
 set timeoutlen=750
 
-" Manual folding
+" ------ Visual Setting ------
+set ruler
+set number        " line numbering
+" key for toggle relative numbering
+"nmap <leader>tr :set rnu!<cr>
+set cursorline
+
+" ------ Search ------
+set hlsearch      " highlight search results
+set incsearch     " real time search
+set showmatch
+set ignorecase
+set smartcase
+
+" ------ Enable hidden buffers ------
+set hidden
+
+" ------ Manual folding ------
 set foldmethod=manual
-"nnoremap <space> @=((foldclosed(line('.')<0)?'zc':'zo'))<CR>
+nnoremap <space> @=((foldclosed(line('.')<0)?'zc':'zo'))<CR>
 
 " ------ Indentation ------
 set autoindent           " indent based on the previous line
@@ -113,16 +120,62 @@ augroup set_indents
     \ shiftwidth=4
     \ softtabstop=4
     \ tabstop=4
+  au FileType c setlocal
+    \ noexpandtab
+    \ shiftwidth=4
+    \ softtabstop=4
+    \ tabstop=4
+  au FileType html setlocal
+    \ noexpandtab
+    \ shiftwidth=4
+    \ softtabstop=4
+    \ tabstop=4
+  au FileType perl setlocal
+    \ noexpandtab
+    \ shiftwidth=4
+    \ softtabstop=4
+    \ tabstop=4
+  au FileType php setlocal
+    \ noexpandtab
+    \ shiftwidth=4
+    \ softtabstop=4
+    \ tabstop=4
+  au FileType perl setlocal
+    \ noexpandtab
+    \ shiftwidth=4
+    \ softtabstop=4
+    \ tabstop=4
 augroup END
 
 augroup set_comment
   au FileType markdown
+    \ setlocal commentstring=<!--\ %s\ -->
+  au FileType html
     \ setlocal commentstring=<!--\ %s\ -->
 augroup END
 
 augroup lisp_behaviour
   autocmd FileType lisp,emacs,scheme ParenthesisToggle
 augroup end
+
+set fileformats=unix,dos,mac
+
+" ------ Terminal Setting ------
+let no_buffers_menu=1
+silent! colorscheme molokai
+
+set mousemodel=popup
+set t_Co=256
+set guioptions=egmrti
+set gfn=Monospace\ 10
+
+if $COLORTERM == 'gnome-terminal'
+  set term=gnome-256color
+else
+  if $TERM == 'xterm'
+    set term=xterm-256color
+  endif
+endif
 
 " ------ Keymaps ------
 " NB Some keymaps are loaded later
@@ -152,6 +205,7 @@ nnoremap [c :cprevious<CR>
 nnoremap ]c :cnext<CR>
 
 nnoremap X $x
+
 
 "--------------------------------------------------------------
 " Plugins
