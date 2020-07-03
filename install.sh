@@ -1,33 +1,26 @@
 #!/bin/bash
 
-# Print Onesimos logo.
+# Print Vim logo.
 cat << "EOF"
-         .-://:-.      `:`
-      .+syyyyyyyys+.  :ooo/`
-     /yyyyyyyyyyyyyy+``/oooo/`
-    +yys+++++oooooooy+  /ooooo/````````````..
-   `yyy/...``````...sy. .ooooo/...```````..`
-   `yyyyss+``````sssyy. .oooooo++:`````..`
-    +yyyyy+``````syyy+  :ooooo+:.````..`
-    `+yyyy+``````syy+` -oooo+:.````.:+/.
-      .+sy+``````o+. `:ooo+:.````.:+ooo+/.
-   `::.``.:``````-`./+oo+:.````.:+ooooooo+/.
-  -+ooo+/::``````++ooo+:.````.:+ooooooooooo+/.
-  `-+ooooo/``````+oo+:.````.:+oooooooooooooo+/`
-    `-+ooo/``````++:.````.:+oooooooooooooo+:.
-      `-+o/``````-.````.:+oooooooooooooo+:`
-        `-:``````````.:+oooooooooooooo+-`
-          -````````.:+oooooooooooooo/-`
-          -``````.:+oooooooooooooo/.
-          -````.:+ooooooooooooo+:`
-          -``..``-+oooooooooo+:`
-          -..`    `-+oooooo+-`
-          -`         -+oo/.
-                       -.
+        ________ ++     ________
+       /````````\++++  /````````\
+       \````````/++++++\````````/
+        |``````|++++++++/`````/'
+        |``````|++++++/`````/'
+       +|``````|++++/`````/'+
+     +++|``````|++/`````/'+++++
+   +++++|``````|/```___++++++++++
+     +++|``````````/oo/ +_+_+_+_
+       +|````````/___ +/o_o,o_o,\
+        |``````/ /oo/+/o/+/o/'/o/
+        |`````/'+/o/+/o/+/o/ /o/
+        |```/'++/o/+/o/ /o/ /o/
+        '`/'  /oo//oo//oo//ooo/
+                 ++
 EOF
 
 echo "------------------------"
-echo "Welcome. You're going to install the amazing Onesimos Vim configuration!"
+echo "Welcome. You're going to install the Mikimoto's Vim configuration!"
 echo "------------------------"
 
 # Checking for git and vim
@@ -75,7 +68,7 @@ done
 cd $VIMRCDIR || exit
 MYVIMRC="${VIMRCDIR%/}/vimrc"
 echo -e "\nCloning the repository on GitHub..."
-git clone https://github.com/BaksiLi/Onesimos ./vimrc && echo "Done." || (cd $MYVIMRC && git pull)
+git clone https://github.com/Mikimoto/vimrc ./vimrc && echo "Done." || (cd $MYVIMRC && git switch develop && git pull)
 
 # Install Onesimos Functions
 # Once they are ready...
@@ -94,7 +87,7 @@ echo "Done."
 # Create new .vimrc file
 echo -e "\nCreating new .vimrc"
 touch "$HOME/.vimrc"
-cat >> "$HOME/.vimrc" << EOL
+cat > "$HOME/.vimrc" << EOL
 "return" 2>&- || "exit"
 
 let \$VIMRCDIR = '$MYVIMRC'

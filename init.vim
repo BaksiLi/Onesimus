@@ -136,10 +136,10 @@ nnoremap <C-H> <C-W><C-H>
 " Make it a Layer? elite_mode?
 " NB this will cause problem to some plugins 
 " map <Up> <Nop>
-map <Up> :echoe 'Use HJKL (k)!'<cr>k
-map <Down> :echoe 'Use HJKL (j)!'<cr>j
-map <Left> :echoe 'Use HJKL (h)!'<cr>h
-map <Right> :echoe 'Use HJKL (l)!'<cr>l
+"map <Up> :echoe 'Use HJKL (k)!'<cr>k
+"map <Down> :echoe 'Use HJKL (j)!'<cr>j
+"map <Left> :echoe 'Use HJKL (h)!'<cr>h
+"map <Right> :echoe 'Use HJKL (l)!'<cr>l
 
 " Alternative to <esc>
 inoremap lkj <esc>
