@@ -68,8 +68,9 @@ done
 cd $VIMRCDIR || exit
 MYVIMRC="${VIMRCDIR%/}/vimrc"
 echo -e "\nCloning the repository on GitHub..."
-git clone https://github.com/Mikimoto/vimrc ./vimrc && echo "Done." || (cd $MYVIMRC && git switch develop && git pull)
-
+git clone https://github.com/Mikimoto/vimrc ./vimrc && echo "Done." || (cd $MYVIMRC && git pull)
+cd $MYVIMRC && git switch develop
+cd $MYVIMRC && git pull
 # Install Onesimos Functions
 # Once they are ready...
 
