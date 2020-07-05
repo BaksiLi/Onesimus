@@ -23,7 +23,7 @@ Any concerns related to this repository can be issued.
 ## Installation
 ### Install & Update Script
 ```bash
-wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bash ./install.sh
+wget https://raw.githubusercontent.com/Mikimoto/vimrc/develop/install.sh && bash ./install.sh
 ```
 
 Use `git pull origin master` to update.
