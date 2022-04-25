@@ -1,9 +1,15 @@
 # TODO: \\ sensible?t
 
-snippet beg "begin{} / end{}" bA
+snippet beg "begin{} / end{}" b
 \\begin{$1}
   $0
 \\end{$1}
+endsnippet
+
+snippet enum "Enumerate List" b
+\\begin{enumerate}[label=\textbf{\arabic*}]
+	$0
+\\end{enumerate}
 endsnippet
 
 # TODO: https://github.com/honza/vim-snippets/blob/master/UltiSnips/tex.snippets

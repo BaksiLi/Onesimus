@@ -12,6 +12,7 @@ let g:which_key_map['t'] = {
   \ 'w' : ['WPModeToggle', 'Toggle Word Processing Mode'],
   \ 'i' : ['IndentLinesToggle', 'Toggle Indent Indicator'],
   \ 'p' : ['ParenthesisToggle', 'Toggle Parenthesis Indicator'],
+  \ 'h' : ['lsp-hover', 'Toggle LSP Hover Window'],
   \ }
 
 " ------ Fuzzy finder ------

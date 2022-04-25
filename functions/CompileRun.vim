@@ -34,13 +34,15 @@ func! s:CompileRun()
     let expr_time = ''
   endif
 
-  exec 'w'
+  exec 'update'
 
   " ------ Run part ------
   if &filetype ==? 'sh'
     call asyncrun#run('', {}, expr_timer.'bash '.fpath)
   elseif &filetype ==? 'python'
     call asyncrun#run('raw', {}, expr_timer.'python '.fpath)
+  elseif &filetype ==? 'ruby'
+    call asyncrun#run('raw', {}, expr_timer.'ruby '.fpath)
   elseif &filetype ==? 'markdown'
     " exec '!~/.vim/markdown.pl % > %.html &'
     " exec '!open -a \"Google Chrome\" %.html &'  " only for macOS
