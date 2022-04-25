@@ -1,6 +1,6 @@
 " Project: Onesimos Vim
 " Maintainer: BaksiLi
-" Version: 0.1.3
+" Version: 0.1.4
 "--------------------------------------------------------------
 " Menu
 "--------------------------------------------------------------
@@ -22,7 +22,10 @@
 if has('vim_starting')
   set encoding=utf-8
   scriptencoding utf-8
-  set nocompatible  " vim_starting prevents this to be reloaded
+
+  if &compatible
+    set nocompatible  " vim_starting prevents this to be reloaded
+  endif
 
   if filereadable(glob($VIMRCDIR.'/automated.vim'))
     so $VIMRCDIR/automated.vim
@@ -30,6 +33,7 @@ if has('vim_starting')
 endif
 
 " g:asc_uname
+" TODO: dependencies for lua, python
 
 "--------------------------------------------------------------
 " General Configurations and Keymaps
@@ -84,6 +88,7 @@ set timeoutlen=750
 
 " Manual folding
 set foldmethod=manual
+set nofoldenable
 "nnoremap <space> @=((foldclosed(line('.')<0)?'zc':'zo'))<CR>
 
 " ------ Indentation ------
@@ -103,7 +108,7 @@ augroup set_indents
     \ concealcursor-=n   " overwritten by indentLine
     \ conceallevel=1
   au Filetype yaml setlocal
-    \ noexpandtab
+    \ expandtab
     \ tabstop=4
     \ shiftwidth=2
   au FileType json setlocal
@@ -134,7 +139,7 @@ nnoremap <C-H> <C-W><C-H>
 
 " Enforcing HJKL-style
 " Make it a Layer? elite_mode?
-" NB this will cause problem to some plugins 
+" NB this will cause problem to some plugins
 " map <Up> <Nop>
 map <Up> :echoe 'Use HJKL (k)!'<cr>k
 map <Down> :echoe 'Use HJKL (j)!'<cr>j
@@ -150,6 +155,9 @@ nnoremap [b :bprev<cr>
 " QuickFix move
 nnoremap [c :cprevious<CR>
 nnoremap ]c :cnext<CR>
+" Tab move
+" nmap <S-Tab> :tabprev<Return>
+" nmap <Tab> :tabnext<Return>
 
 nnoremap X $x
 
@@ -183,7 +191,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
 Plug 'morhetz/gruvbox'
-Plug 'junegunn/seoul256.vim' 
+Plug 'junegunn/seoul256.vim'
 Plug 'arcticicestudio/nord-vim'
 Plug 'sickill/vim-monokai'
 
@@ -196,9 +204,18 @@ Plug 'mattn/vim-gist', { 'on': 'Gist'}
 " Plug 'junegunn/vim-emoji'
 "   command! -range EmojiReplace <line1>,<line2>s/:\([^:]\+\):/\=emoji#for(submatch(1), submatch(0))/g
 
+
 " ------ Language Server Client ------
-Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
+" Snippets
+Plug 'SirVer/ultisnips'
+" Plug 'honza/vim-snippets'
+
+" Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
 " let g:coc_global_extensions = []
+Plug 'prabirshrestha/vim-lsp'
+Plug 'mattn/vim-lsp-settings'
+Plug 'thomasfaingnaert/vim-lsp-snippets'
+Plug 'thomasfaingnaert/vim-lsp-ultisnips'
 
 " Linter and Fixer
 Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
@@ -209,14 +226,15 @@ Plug 'w0rp/ale'  " Config 'ALELintFix.vim'
 Plug 'gabrielelana/vim-markdown', { 'for': 'markdown'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' , 'for': 'markdown' }
 Plug 'BaksiLi/vim-markdown-toc', { 'for': 'markdown' }  " originally 'mzlogin/vim-markdown-toc'
-Plug 'masukomi/vim-markdown-folding', { 'for': 'markdown' } 
+Plug 'masukomi/vim-markdown-folding', { 'for': 'markdown' }
 " This doesn't work for html tags!
 " Should rewrite this
 " Markdown mappings?  like :onoremap ih :<c-u>exec 'normal! ?^==\\+$\r:nohlsearch\rkvg_'<cr>
+Plug 'https://gist.github.com/tpope/287147', { 'for': 'markdown'}
 
 " TeX
 " requires latexmk, `sudo tlmgr install latexmk`; coc-vimtex
-Plug 'lervag/vimtex', { 'for': 'tex' }
+Plug 'lervag/vimtex', { 'for': ['tex', 'bib'] }
 Plug 'KeitaNakamura/tex-conceal.vim', { 'for': 'tex' }
 
 " VimScript Reference
@@ -231,12 +249,7 @@ Plug 'BaksiLi/vim-applescript'
 " Plug 'jparise/vim-graphql'
 
 " Web
-Plug 'mattn/emmet-vim', { 'for': 'html'}
-
-" TODO: coc-settings.json
-" coc-tabnine coclist?
-" coc-json, coc-html
-" coc-python
+Plug 'mattn/emmet-vim', { 'for': 'html' }
 
 " Haskell
 " https://github.com/jaspervdj/stylish-haskell
@@ -273,10 +286,6 @@ Plug 'luochen1990/rainbow', { 'on': 'RainbowToggle' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 
-" Snippets
-Plug 'SirVer/ultisnips'
-":CocInstall coc-snippets
-" Plug 'honza/vim-snippets'
 
 " ------ Miscellanous ------
 " Plug 'jamessan/vim-gnupg'
@@ -343,6 +352,7 @@ nmap <F3> :NERDTreeToggle<cr>
 nmap <F4> :OpenREPL<cr>
 nmap <F5> :CompileRun<cr>
 nmap <F6> :ALEFix<cr>
+" TODO: replace Tagbar with VimtexTocOpen for *.tex?
 
 " TODO: more ctags into a fn
 nnoremap <leader>et command! MakeTags !ctags -R .<cr>
