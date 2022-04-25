@@ -1,4 +1,4 @@
-Onesimos Vim
+# Onesimos Vim
 <img src="./doc/onesimos-logo.png" width:auto height=128pt align="right"/>
 ---
 ![GitHub](https://img.shields.io/github/license/BaksiLi/Onesimos?style=flat-square)
@@ -28,16 +28,17 @@ wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bas
 
 Use `git pull origin master` to update.
 conflict
+
 ### Goals
 - Project
-  - [ ] Something like emacs' **list-packages**. First time install, pops up a checklist of what language to support, and puts those in the custom plugin file
-  - [ ] Compatibility for different platforms (See [Compatibility Milestone](https://github.com/BaksiLi/Onesimos/milestone/1)
-  - [ ] Register Onesismos as a Plugin; Write a doc
+  - [ ] Register Onesimos as a Plugin; Write a doc
+  - [ ] Implement something like emacs' **list-packages**. The first time installation will pop up a checklist of what language to support, and puts those in the custom plugin file
+  - [ ] Full compatibility with Linux (See [Compatibility Milestone](https://github.com/BaksiLi/Onesimos/milestone/1))
 
 - Functionality
-  - [x] Utilize Asynchronous technology in [CompileRun](./functions/CompileRun.vim)
-  - [x] [Word Processing Mode](./functions/WordProcMode.vim)
-  - Support Literate Programming (+ REPL)
+  - [x] Utilize Asynchronous technology in [CompileRun](./functions/CompileRun.vim) and LSP
+  - [x] [Word Processing Mode](./functions/WordProcMode.vim) for Markdown and other plain text format
+  - Built-in Literate Programming (+ REPL)
     - [x] [OpenREPL](./functions/OpenREPL.vim)
     - [ ] Interactive Kernel
     - [ ] Haskell, Python, Wolfram Language
@@ -61,6 +62,10 @@ The default leader key is `\`.
 
 - `]a`/`[a` to go to the next/previous lint position.
 - `]b`/`[b` to go to the next/previous buffer position.
+
+- `gd` to go to the current function definition.
+- `gs`/`gS` to search symbol in the workspace.
+- `<leader>rn` to refactor current cursor function.
 
 #### IDE Features
 - `<leader>ff` to open fuzzy finder for the current working directory (LeaderF).
