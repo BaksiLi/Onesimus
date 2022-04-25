@@ -1,6 +1,6 @@
 # Onesimos Vim
 <img src="./doc/onesimos-logo.png" width:auto height=128pt align="right"/>
----
+
 ![GitHub](https://img.shields.io/github/license/BaksiLi/Onesimos?style=flat-square)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/BaksiLi/Onesimos?include_prereleases&style=flat-square)
 ![GitHub repo size](https://img.shields.io/github/repo-size/BaksiLi/Onesimos?color=yellow&label=size&style=flat-square)
