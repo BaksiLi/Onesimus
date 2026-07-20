@@ -56,6 +56,7 @@ run_vim_test() {
     ale_fix) result=/tmp/onesimus-ale-fix-result ;;
     ale_python) result=/tmp/onesimus-ale-python-result ;;
     cjk_motion) result=/tmp/onesimus-cjk-motion-result ;;
+    guide) result=/tmp/onesimus-guide-result ;;
   esac
   if [ -n "$result" ]; then
     rm -f "$result"
@@ -78,6 +79,9 @@ run_vim_test() {
   fi
 
   if [ "$status" -ne 0 ]; then
+    if [ -n "$result" ] && [ -s "$result" ]; then
+      cat "$result" >>"$log"
+    fi
     record_failure "$name.vim exited with status $status" "$log"
     return
   fi

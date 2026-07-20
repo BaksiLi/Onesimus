@@ -22,6 +22,14 @@ function! s:GuideScriptID() abort
 endfunction
 
 function! s:RunGuideTests() abort
+  " Git-aware actions are contextual.  Give the test its own repository marker
+  " instead of relying on how the outer checkout was produced; actions/checkout
+  " can legitimately use an archive when Git is not yet present in a container.
+  let l:original_cwd = getcwd()
+  let l:git_fixture = tempname()
+  call mkdir(l:git_fixture.'/.git', 'p')
+  execute 'lcd '.fnameescape(l:git_fixture)
+
   call assert_true(OnesimusPopupSupported())
   call assert_false(has_key(g:plugs, 'vim-which-key'),
         \ 'the action guide is native Vim rather than another UI dependency')
@@ -158,6 +166,9 @@ function! s:RunGuideTests() abort
   execute 'call <SNR>'.l:sid.'_FallbackGuide('
         \ .'<SNR>'.l:sid.'_GlobalMenu())'
   call assert_equal('', v:errmsg)
+
+  execute 'lcd '.fnameescape(l:original_cwd)
+  call delete(l:git_fixture, 'rf')
 
   call writefile(empty(v:errors) ? ['PASS'] : ['FAIL'] + v:errors,
         \ '/tmp/onesimus-guide-result')

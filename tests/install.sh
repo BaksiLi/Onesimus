@@ -29,6 +29,24 @@ assert_contains() {
   }
 }
 
+assert_process_stopped() {
+  process_pid=$1
+  message=$2
+  checks=0
+
+  while kill -0 "$process_pid" 2>/dev/null; do
+    process_state=$(ps -o state= -p "$process_pid" 2>/dev/null \
+      | tr -d '[:space:]' || true)
+    case $process_state in
+      Z*) return 0 ;;
+    esac
+    kill -0 "$process_pid" 2>/dev/null || return 0
+    test "$checks" -lt 40 || fail "$message"
+    sleep 0.05
+    checks=$((checks + 1))
+  done
+}
+
 assert_no_staging() {
   search_root=$1
   test -z "$(find "$search_root" -name '.onesimus-install.*' -print)" \
@@ -580,9 +598,8 @@ assert_contains "$work/git-timeout.log" \
 test -s "$stubborn_child_file" \
   || fail 'the stubborn fetch did not publish its child pid'
 stubborn_child=$(sed -n '1p' "$stubborn_child_file")
-if kill -0 "$stubborn_child" 2>/dev/null; then
-  fail 'a TERM-ignoring fetch descendant survived the process-group timeout'
-fi
+assert_process_stopped "$stubborn_child" \
+  'a TERM-ignoring fetch descendant survived the process-group timeout'
 assert_no_staging "$root"
 unset TEST_GIT_BIN ONESIMUS_GIT_TIMEOUT FAKE_PLUGIN_HANG \
   ONESIMUS_PLUGIN_TIMEOUT STUBBORN_CHILD_PID_FILE
@@ -632,9 +649,8 @@ wait "$interrupt_wrapper" || interrupt_status=$?
 test "$interrupt_status" -ne 0 \
   || fail 'an interrupted updater unexpectedly reported success'
 interrupt_child=$(sed -n '1p' "$interrupt_child_file")
-if kill -0 "$interrupt_child" 2>/dev/null; then
-  fail 'an updater interrupt released control before its fetch child died'
-fi
+assert_process_stopped "$interrupt_child" \
+  'an updater interrupt released control before its fetch child died'
 assert_no_staging "$root"
 unset TEST_GIT_BIN INTERRUPT_READY_FILE INTERRUPT_CHILD_PID_FILE
 
