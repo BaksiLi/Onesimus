@@ -1,6 +1,10 @@
 " ------ NERDTree ------
 let g:NERDTreeWinPos = 'left'
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+augroup onesimus_nerdtree
+  autocmd!
+  autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree')
+        \ && b:NERDTree.isTabTree() | quit | endif
+augroup END
 let g:NERDTreeQuitOnOpen=1
 
 let g:NERDTreeFileExtensionHighlightFullName = 1

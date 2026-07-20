@@ -1,25 +1,11 @@
-" ------ vim-markdown ------
-let g:vim_markdown_math = 1
-let g:vim_markdown_json_frontmatter = 1
-let g:vim_markdown_strikethrough = 1
+" Vim's maintained runtime now supplies Markdown syntax, header motions, and
+" folding.  Keep configuration on the native surface and reserve plugins for
+" preview and table-of-contents generation.
+let g:markdown_folding = 1
+let g:markdown_recommended_style = 0
+let g:markdown_syntax_conceal = 0
 
-let g:markdown_enable_conceal = 0
-let g:vim_markdown_new_list_item_indent = 2
-let g:vim_markdown_follow_anchor = 1
-let g:vim_markdown_folding_disabled = 1
-
-let g:markdown_enable_mappings = 0
-" This is evil. Should write a localleader version separately
-" <space>
-" inoremap <buffer> <localleader>e <Esc>:MarkdownEditBlock<CR>
-" inoremap <silent> <buffer> <Leader>ft  <Esc>:call markdown#FormatTable()<CR>a
-
-" ------ vim-markdown-folding ------
-autocmd FileType markdown set foldexpr=NestedMarkdownFolds()
-
-" ------ markdown-preview ------
-let g:mkdp_browser = 'Google Chrome'
+" Let markdown-preview choose the platform browser unless the user overrides
+" it before sourcing Onesimus.
+let g:mkdp_browser = get(g:, 'mkdp_browser', '')
 let g:mkdp_page_title = '${name}_preview'
-" PlantUML, and others
-
-" ------ vim-markdown-toc ------

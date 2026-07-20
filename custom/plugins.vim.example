@@ -1,0 +1,4 @@
+" Copy this file to custom/plugins.vim.  The local file is intentionally
+" ignored by Git so Onesimus updates never compete with personal plugins.
+
+" Plug 'wakatime/vim-wakatime'

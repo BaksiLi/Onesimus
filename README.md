@@ -1,128 +1,258 @@
-# Onesimos Vim
-<img src="./doc/onesimos-logo.png" width:auto height=128pt align="right"/>
+# Onesimus Vim
+<img src="./doc/onesimus-logo.png" alt="Onesimus logo" height="128" align="right">
 
-![GitHub](https://img.shields.io/github/license/BaksiLi/Onesimos?style=flat-square)
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/BaksiLi/Onesimos?include_prereleases&style=flat-square)
-![GitHub repo size](https://img.shields.io/github/repo-size/BaksiLi/Onesimos?color=yellow&label=size&style=flat-square)
+[![Test](https://img.shields.io/github/actions/workflow/status/BaksiLi/Onesimus/test.yml?branch=master&style=flat-square&label=test)](https://github.com/BaksiLi/Onesimus/actions/workflows/test.yml)
+[![MIT License](https://img.shields.io/github/license/BaksiLi/Onesimus?style=flat-square)](./LICENSE)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-blue?style=flat-square)
-[![Contribute](https://img.shields.io/badge/contribute-gray.svg?style=flat-square)](./CONTRIBUTING.md)
 
-<!-- ## About Onesimos -->
-**Onesimos** ('helpful', Latinized *Onesimus*) is a Vim configuration.
+**Onesimus** ('helpful') is my Vim-first, portable editor distribution.
 
-It aims to provide a vim-style experience for both the **daily uses** and **academic production**. 
+I made it for both daily development and academic production: code, Markdown,
+TeX, and the awkward little tasks for which Vim is still the nicest place to
+be. I use other editors now, but this is still the one I want to carry onto an
+ordinary server.
 
-<!-- It is not only usable but aesthetically amusing. -->
-<!-- Markdown, TeX, Python. Haskell -->
-<!-- Future: Agda -->
+Convention over configuration still matters here. Native Vim is the common
+denominator. Plugins should appear only when their context asks for them and
+remain replaceable behind a small, stable set of Onesimus actions. It should be
+quiet before it is clever—and, where that costs nothing, not only usable but
+aesthetically amusing.
 
-General configuration has taken account of [sensible.vim](https://github.com/tpope/vim-sensible) which is probably the highest common factor of many configurations. Other configurations, e.g. keymaps, are following the principle of [*Convention over configuration*](https://en.wikipedia.org/wiki/Convention_over_configuration).
+The long `:Onesimus...` commands are scripting entrypoints. Normal use is
+smaller: familiar Vim motions, F2–F6, Home, and the action guide.
 
-Any concerns related to this repository can be issued.
+## What is included
+
+- One language-tooling surface through ALE: LSP, diagnostics, linting,
+  completion, and formatting
+- Fuzzy finding through Clap, asynchronous jobs, and Git integration
+- Markdown, TeX, a plain-text writing mode, and CJK-aware prose editing
+- Lazy loading for Clap, NERDTree, focus mode, and Chinese word segmentation
+- A compact Home screen and a strictly local feature-adoption journal
+- Stable project roots for ALE, Clap, Fugitive, and `:make`
+
+There is deliberately no bundled AI client. Those tools can live beside Vim
+without becoming a condition for using it. The old Literate Programming
+ambition is deliberately smaller too: `<F4>` remains a practical terminal
+REPL, not the beginning of an embedded notebook system.
+
+## Requirements
+
+- Vim 8.2 or newer, compiled with `+job`, `+channel`, and `+timers`
+- Git and curl for installation and plugin bootstrap
+- Optional: a Vim build with `+python3` for Chinese word segmentation
+- Optional language tools such as language servers, linters, formatters,
+  compilers, and `ctags`; Onesimus reports what is available instead of
+  installing system-wide tools
+
+Neovim is welcome to work, but it is not a design target or part of release
+verification. Vim 8.2 is the contract.
 
 ## Installation
-### Install & Update Script
+
+### New installation
+
 ```bash
-wget https://raw.githubusercontent.com/BaksiLi/Onesimos/master/install.sh && bash ./install.sh
+curl -fsSL -o /tmp/onesimus-install.sh \
+  https://raw.githubusercontent.com/BaksiLi/Onesimus/master/install.sh
+bash /tmp/onesimus-install.sh
 ```
 
-Use `git pull origin master` to update.
-conflict
+The default checkout is `~/vimrc`. Existing `~/.vimrc` content is preserved as
+a timestamped `~/.vimrc.onesimus-backup.*` before Onesimus installs its small
+loader. Use `--root /another/parent` to place the checkout elsewhere, or
+`--no-launch` to install only the core and defer plugin synchronization.
 
-### Goals
-- Project
-  - [ ] Register Onesimos as a Plugin; Write a doc
-  - [ ] Implement something like emacs' **list-packages**. The first time installation will pop up a checklist of what language to support, and puts those in the custom plugin file
-  - [ ] Full compatibility with Linux (See [Compatibility Milestone](https://github.com/BaksiLi/Onesimos/milestone/1))
+### Updating an existing installation
 
-- Functionality
-  - [x] Utilize Asynchronous technology in [CompileRun](./functions/CompileRun.vim) and LSP
-  - [x] [Word Processing Mode](./functions/WordProcMode.vim) for Markdown and other plain text format
-  - Built-in Literate Programming (+ REPL)
-    - [x] [OpenREPL](./functions/OpenREPL.vim)
-    - [ ] Interactive Kernel
-    - [ ] Haskell, Python, Wolfram Language
+From Vim, choose `u  Update` on the Home screen, or press `<Leader>`, then
+`o`, then `u`. The equivalent command is `:OnesimusUpdate`. It updates in the
+background and posts a non-blocking restart notice when the on-disk
+configuration and plugins are ready; the running process is never
+half-reloaded.
+
+From a shell, run the installer inside the checkout:
+
+```bash
+~/vimrc/install.sh --update
+```
+
+An installed copy discovers its own checkout, so the same command works from a
+custom location without repeating `--root`. The updater:
+
+- refuses tracked local changes instead of stashing, resetting, or merging
+  them;
+- follows the current branch's configured upstream, preserving forks, custom
+  remote names, and SSH URLs;
+- serializes updates per checkout, uses a private installer copy, bounds only
+  the network fetch, and then fast-forwards locally before the new installer
+  finishes the migration;
+- migrates only loaders generated by Onesimus/Onesimos; an update never
+  replaces a user-managed `.vimrc` or symlink;
+- attempts a non-blocking vim-plug self-update, then synchronizes declared
+  plugins and their native artifacts with `PlugUpdate --sync`;
+- leaves undeclared plugin directories untouched, because an automatic
+  `PlugClean!` could delete plugins managed by the user.
+
+Use `--core-only` when deliberately updating the configuration without touching
+plugins. A plugin-network failure does not roll the core back; fix the network
+and repeat `install.sh --update` to finish synchronization. Review retired
+plugin directories interactively with `:PlugClean` before approving deletion.
+
+Installations made by Onesimos 0.1.x do not yet understand `--update`. Bootstrap
+their one-time migration with the current installer:
+
+```bash
+curl -fsSL -o /tmp/onesimus-install.sh \
+  https://raw.githubusercontent.com/BaksiLi/Onesimus/master/install.sh
+bash /tmp/onesimus-install.sh --update
+```
+
+Add `--root /the/original/parent` only when that legacy checkout was installed
+outside `~/vimrc`. The old loader is backed up, a historical `vimrc.backup`
+inside the checkout is preserved, and the exact official Onesimos remote is
+migrated to the Onesimus URL. A locally edited legacy `custom/plugins.vim` is
+also preserved byte-for-byte and converted into an ignored personal file.
+Other remotes and tracked modifications are never rewritten.
+
+If a legacy fork has not yet merged the current installer, the migration stops
+after its attempted fast-forward and before touching `.vimrc`. Update that
+fork from Onesimus, then run the same command again; the updater never executes
+an old interactive installer as a handoff target.
 
 ## Keymaps
 The default leader key is `\`.
 
-#### Dotfile
-- `<leader>ed` to edit the dotfile while in vim;
-- `<leader>sd` to reload dotfile.
-- `<leader>h` to view help document.
+Press `\` and pause for the compact action guide. Press `\.` for only the
+actions relevant to the current buffer; neither menu exposes the full internal
+command surface.
 
-#### Editing
-- `lkj` (insert mode) to change to normal mode.
-- `<space>` to fold manually.
-- `<C-e>` to expand snippets.
+### Core Navigation
+- `<leader>ed` - Edit dotfile
+- `<leader>sd` - Reload dotfile
+- `<leader>?` - View help document (`<leader>h` remains an alias)
+- `<leader>.` - Current-buffer action guide
+- `<C-J/K/H/L>` - Navigate between splits
+- `]b/[b` - Next/previous buffer
+- `]c/[c` - Next/previous quickfix item
 
-- `<leader>tr` to toggle enable relative numbering.
-- `<leader>tp` to toggle rainbow parenthesis.
-- `<leader>ti` to toggle indent lines.
+### IDE Features
+- `<leader>ff` - Fuzzy find files (vim-clap)
+- `<leader>fb` - Fuzzy find buffers
+- `<leader>ft` - Fuzzy find tags
+- `[d/]d` or `[a/]a` - Previous/next diagnostic
+- `<leader>ld` - Open diagnostics for the current buffer
+- `<leader>li` - Show concise tool status in a popup
+- `<F2>` - Search symbols/tags in the current buffer
+- `<F3>` - Toggle file tree (NERDTree)
+- `<F4>` - Open REPL
+- `<F5>` - Compile/Run current file
+- `<F6>` - Format current file
+- `<leader>oh` - Open Onesimus Home
+- `<leader>os` - Open the local usage dashboard
 
-- `]a`/`[a` to go to the next/previous lint position.
-- `]b`/`[b` to go to the next/previous buffer position.
+### Editing
+- `lkj` - Alternative to Escape
+- `<leader>tr` - Toggle relative numbering
+- `<leader>tp` - Toggle rainbow parentheses
+- `<leader>ti` - Toggle indent lines
+- `<leader>tw` - Toggle focused writing mode
+- `<leader>tb` - Toggle light/dark background
+- `gd/gr` - Go to definition/find references when an LSP is connected
+- `<leader>. g` - Open the contextual symbol-navigation menu for definition,
+  references, implementation, and type definition
+- `K` - Hover documentation when a language server is connected
+- `gs/gS` - Buffer/workspace symbols
+- `<leader>rn` - Rename symbol (LSP)
+- `<leader>ca` - Code action (LSP)
+- `:ALEInfo` - Open advanced provider diagnostics when the concise status is
+  not enough
 
-- `gd` to go to the current function definition.
-- `gs`/`gS` to search symbol in the workspace.
-- `<leader>rn` to refactor current cursor function.
+CJK support has two layers. The always-available layer is Onesimus plus native
+Vim: `formatoptions+=mM`, linebreak/breakindent, CJK-safe joining, and
+full-width `%` pairs such as `（）`, `「」`, `【】`, and `《》`. With
+vim-surround, `ysiwq` and `ysiwQ` produce `「…」` and `『…』`.
 
-#### IDE Features
-- `<leader>ff` to open fuzzy finder for the current working directory (LeaderF).
-- `<leader>fl` to open fuzzy finder for the current file.
-- `<leader>fb` to open fuzzy finder for buffers.
-- `<leader>ft` to open fuzzy finder for tags.
+Only word segmentation comes from jieba.vim. Its Python/Rust bridge stays
+completely unloaded until a buffer contains Han text. Once ready, `w/W`,
+`b/B`, `e/E`, `ge/gE`, `iw/iW`, and `aw/aW` become
+Chinese-segmentation-aware. Pure ASCII editing retains native Vim behavior; if
+the backend cannot load, Onesimus leaves every motion untouched.
 
-- `<F2>` to Toggle Tagbar.
-- `<F3>` to Toggle File Tree (NERDTree).
-- `<F4>` to Open a terminal window REPL for the specific language of the file (Visual Mode will be supported soon).
-- `<F5>` to Run or Compile the current file.
-  - Preview Markdown, Compile LaTeX, Run Python Script, Load Vim Settings and so on.
-- `<F6>` to Format the current file.
+By default the lazy loader is content-driven in every filetype, so Chinese in
+source comments still gets segmented while an ASCII Markdown file pays no
+jieba startup cost. To restrict automatic activation to Markdown, set this
+before sourcing `init.vim` (the explicit `:OnesimusJiebaEnable` command still
+works anywhere):
 
-## Explained
-I have divided the traditional `.vimrc` into several files and folders in order to improve its scalability with more configurations and compatibility with multiple platforms.
+```vim
+let g:onesimus_jieba_filetypes = ['markdown']
+```
 
-<details>
-<summary>File Structure</summary>
+## Local Usage Journal
 
-<!-- by `tree . -L 1` -->
+Onesimus records adoption of its own stable actions so old features can be
+retired with evidence. The journal is enabled by default and is strictly
+local: it stores action IDs, eligibility, coarse filetypes, and timestamps.
+It never stores filenames, directories, buffer content, commands, queries, or
+host information, and it has no network code.
+
+- `:OnesimusStats` opens the dashboard
+- `:OnesimusStatsPath` shows the journal directory
+- `:OnesimusStatsReset!` deletes the local journals
+- `:OnesimusStatsDisable` disables recording for the current Vim process
+
+To disable it permanently, set this before sourcing `init.vim`:
+
+```vim
+let g:onesimus_usage_enabled = 0
+```
+
+Each Vim process writes its own small session file, so simultaneous Vim
+instances never overwrite one another. A feature is only marked as a cold
+candidate after at least 30 days and 10 sessions in which it was available;
+zero use alone is not treated as evidence.
+
+## Optional Font Glyphs
+
+Airline and Clap use portable separators by default. If the terminal font
+contains Powerline/Nerd Font glyphs, their icons can be enabled explicitly:
+
+```vim
+let g:airline_powerline_fonts = 1
+let g:clap_enable_icon = 1
+```
+
+## Configuration Structure
+
+Personal plugin declarations live in an ignored file, so updating Onesimus
+does not compete with local choices:
+
+```bash
+cp custom/plugins.vim.example custom/plugins.vim
+```
+
 ```
 .
-├── **customs**
-├── **snippets**
-├── **functions**
-├── **plugconf**
-├── init.vim
-├── README.md
-└── automated.vim
+├── custom/         - Local plugin declarations and their example
+├── snippets/       - UltiSnips snippets
+├── functions/      - Custom functions
+├── plugconf/       - Plugin configurations
+├── .editorconfig   - Repository editing conventions
+├── init.vim        - Main configuration
+├── automated.vim   - System setup
+└── README.md       - This file
 ```
 
-where there are (currently) three folders of differenciated functions and a few config file named `init.vim` (main) and `automated.vim`.
+## Contributing
 
-</details>
+Concerns can be opened as issues; changes are easiest to discuss in a pull
+request. The few conventions that matter are in
+[CONTRIBUTING.md](./CONTRIBUTING.md).
 
-### init.vim
-   This is the main config file, which was inherited from the old vimrc. As you could read from the above, it is acting as the outline of all other `.vim`s.
+## License
 
-### automated.vim
-   This is where the system test and install prerequisites to support normal functions of plugins.
+Unless otherwise specified, Onesimus is licensed under the
+[MIT License](./LICENSE).
 
-### ./custom
-  This is where to store custom configurations. `plugins.vim` is the Plugin configuration file.
-
-### ./plugconf
-   The configurations of plugins could be found here with their name as the title followed by '.vim'.
-
-### ./functions
-   The folder where customised functions are stored.
-
-### ./snippets
-   The default folder for storing snippet rules for [UltiSnips](https://github.com/SirVer/ultisnips). The folder under `~/.vim` should be of limited use.
-
-Notice that these folders and files are auto-loaded even for the first time your `.vimrc` is sourced. Adding of any new functionalities will not need manual loading as placing them in their corresponding folder should suffice.
-
-## Acknowledgements
-Unless otherwise specified, the repository is Copyright BaksiLi, and are licenced under the [MIT Licence](./LICENSE).
-
-Copyright (c) 2020 BaksiLi
+Copyright (c) 2020-2026 BaksiLi
