@@ -1,8 +1,5 @@
 let g:UltiSnipsExpandTrigger='<C-e>'
-" let g:UtilSnipsJumpFowardTripgger='<C-e>'
-" let g:UtilSnipsJumpBackwardTripgger='<s-tab>'
 
-let g:UltiSnipsSnippetDirectories=[
-\ $VIMRCDIR.'/snippets',
-\ 'ultisnips']
-
+" An absolute snippets directory must stand alone in UltiSnips.  Standard LSP
+" completion is handled by ALE; this directory remains the personal layer.
+let g:UltiSnipsSnippetDirectories=[$VIMRCDIR.'/snippets']

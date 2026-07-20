@@ -1,11 +1,17 @@
+" Avoid probing dozens of integrations which Onesimus does not declare.
+let g:airline_extensions = [
+      \ 'ale', 'branch', 'fugitiveline', 'hunks', 'quickfix',
+      \ 'tabline', 'term', 'vimtex', 'wordcount',
+      \ ]
+
 let g:airline_skip_empty_sections = 1
 let g:airline_section_c = "%f %{&readonly ? '[RO] ' : ''} %{exists('*FindSubName') ? FindSubName() : ''}"
-let g:airline#extensions#tabline#buffer_idx_mode = 1  " show buffer nu
+let g:airline#extensions#tabline#buffer_idx_mode = 1  " show buffer numbers
 let g:airline#extensions#tabline#enabled = 1  " Automatically displays all buffers when there's only one tab open.
 
-let g:airline_powerline_fonts = 1  " requires powerline-fonts
+let g:airline_powerline_fonts = get(g:, 'airline_powerline_fonts', 0)
 
-if &runtimepath =~ 'asyncrun'
+if PlugInstalled('vim-airline') && PlugInstalled('asyncrun.vim')
   let g:airline_section_error = airline#section#create_right(['%{g:asyncrun_status}'])
 endif
 

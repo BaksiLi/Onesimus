@@ -1,71 +1,81 @@
-" WordProcMode.vim
-"		:- Focused writing experience, part of Onesimos Project
-"
-" Author: Baksi Li <myself@baksili.codes>
-"
-" License: MIT
-"
-" TODO: 
-" 	- CJK wrap using google/budou (maybe worth a plugin, 'CJKwrap.vim'?)
-" 	- Better implementation of restoring the global (prev) settings
-" 	- https://github.com/amix/vim-zenroom2/blob/master/plugin/zenroom2.vim
+" Focused writing mode with reversible state.
 
-func s:Global_set_of(arg)
-  return split(execute('setg '.a:arg.'?'))[0]
-endfun
+let g:onesimus_wordproc_state = get(g:, 'onesimus_wordproc_state', {})
 
-func! s:PlugInstalled(plugname)
-  return &runtimepath =~? a:plugname
-endfun
-
-let g:WPModeSwitch = 0
-
-function! s:WordProcessingMode()
-  " Enable
-  if !g:WPModeSwitch
-    if s:PlugInstalled('vim-signify')
-      SignifyDisable
-    endif
-
-    if s:PlugInstalled('goyo') && s:PlugInstalled('limelight')
-      Goyo | Limelight
-    else
-      setlocal nonumber
-      setlocal textwidth=80
-      silent on
-    endif
-
-    let g:WPModeSwitch = 1
-    echo 'WordProcessingMode On'
-
-    " Disable
-  else
-    if s:PlugInstalled('vim-signify')
-      SignifyEnable
-    endif
-
-    if s:PlugInstalled('Goyo') && s:PlugInstalled('Limelight')
-      Goyo! | Limelight!
-    else
-      exec 'setlocal '.s:Global_set_of('nu')
-      exec 'setlocal '.s:Global_set_of('textwidth')
-    endif
-
-    let g:WPModeSwitch = 0
-    echo 'WordProcessingMode Off'
-  endif
-
-  " set linespace=0
-  " setlocal smartindent
-  " setlocal noexpandtab
-
-  "setlocal spell spelllang=en_uk,en_us
-
-  "inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
-
-  " Smart word count
-  "   -> excl title, code
-  "   -> excl specific section
+function! s:SaveOptions() abort
+  return {
+        \ 'winid': win_getid(),
+        \ 'number': &l:number,
+        \ 'relativenumber': &l:relativenumber,
+        \ 'textwidth': &l:textwidth,
+        \ 'cursorline': &l:cursorline,
+        \ 'wrap': &l:wrap,
+        \ 'linebreak': &l:linebreak,
+        \ 'spell': &l:spell,
+        \ 'plugins': PlugInstalled('goyo.vim')
+        \   && PlugInstalled('limelight.vim')
+        \   && exists(':Goyo') && exists(':Limelight'),
+        \ 'goyo_active': exists('t:goyo_revert'),
+        \ 'limelight_active': exists('#limelight'),
+        \ 'enabled_goyo': 0,
+        \ 'enabled_limelight': 0,
+        \ }
 endfunction
 
-command! WPModeToggle call <sid>WordProcessingMode()
+function! s:RestoreOptions(state) abort
+  if has_key(a:state, 'winid') && win_id2win(a:state.winid) > 0
+    call win_gotoid(a:state.winid)
+  endif
+  for l:option in ['number', 'relativenumber', 'textwidth', 'cursorline',
+        \ 'wrap', 'linebreak', 'spell']
+    if has_key(a:state, l:option)
+      execute 'let &l:'.l:option.' = '.string(a:state[l:option])
+    endif
+  endfor
+endfunction
+
+function! s:Enable() abort
+  let l:state = s:SaveOptions()
+
+  if l:state.plugins
+    if !l:state.goyo_active
+      silent Goyo
+      let l:state.enabled_goyo = 1
+    endif
+    if !l:state.limelight_active
+      silent Limelight
+      let l:state.enabled_limelight = 1
+    endif
+  else
+    setlocal nonumber norelativenumber nocursorline
+    setlocal textwidth=80 wrap linebreak
+  endif
+  let g:onesimus_wordproc_state = l:state
+  echomsg 'Word processing mode on.'
+endfunction
+
+function! s:Disable() abort
+  let l:state = copy(g:onesimus_wordproc_state)
+  if get(l:state, 'enabled_limelight', 0) && exists(':Limelight')
+    silent! Limelight!
+  endif
+  if get(l:state, 'enabled_goyo', 0) && exists(':Goyo')
+    silent! Goyo!
+  endif
+  call s:RestoreOptions(l:state)
+  let g:onesimus_wordproc_state = {}
+  echomsg 'Word processing mode off.'
+endfunction
+
+function! s:ToggleWordProcessingMode() abort
+  if empty(g:onesimus_wordproc_state)
+    call s:Enable()
+  else
+    call s:Disable()
+  endif
+  if exists('*OnesimusTrack')
+    call OnesimusTrack('writing.focus')
+  endif
+endfunction
+
+command! WPModeToggle call <SID>ToggleWordProcessingMode()

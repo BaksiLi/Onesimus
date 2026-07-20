@@ -4,6 +4,9 @@ func! s:ToggleBackground()
   else
     set background=dark
   endif
+  if exists('*OnesimusTrack')
+    call OnesimusTrack('ui.background')
+  endif
 endfunc
 
-command ToggleBackground call <sid>ToggleBackground()
+command! ToggleBackground call <sid>ToggleBackground()

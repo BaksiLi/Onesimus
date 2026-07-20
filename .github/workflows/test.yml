@@ -1,0 +1,111 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  vim:
+    name: Vim / ${{ matrix.image }}
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ubuntu:22.04
+          - ubuntu:24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Install Vim
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive \
+            apt-get install --yes ca-certificates curl git vim-nox
+
+      - name: Install Vim plugins
+        env:
+          HOME: ${{ runner.temp }}/onesimus-home
+        run: |
+          mkdir -p "$HOME/.vim/autoload"
+          curl -fL --silent --show-error \
+            --connect-timeout 10 --max-time 120 \
+            -o "$HOME/.vim/autoload/plug.vim" \
+            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+          log="$RUNNER_TEMP/onesimus-plugin-install.log"
+          plugin_buffer="$RUNNER_TEMP/onesimus-plugin-buffer.log"
+          missing="$RUNNER_TEMP/onesimus-plugin-missing.log"
+          export ONESIMUS_CI_PLUGIN_BUFFER="$plugin_buffer"
+          export ONESIMUS_CI_PLUGIN_MISSING="$missing"
+          attempt=1
+          while test "$attempt" -le 2; do
+            rm -f "$log" "$plugin_buffer" "$missing"
+            if test "$attempt" -eq 1; then
+              plug_command='PlugInstall --sync'
+            else
+              plug_command='PlugUpdate --sync'
+            fi
+            if vim \
+              --cmd 'let g:onesimus_usage_enabled=0 | let g:startify_disable_at_vimenter=1' \
+              -Nu "$GITHUB_WORKSPACE/init.vim" -i NONE -n -es \
+              -c 'for spec in values(g:plugs) | if has_key(spec, "do") | call remove(spec, "do") | endif | endfor' \
+              -c "$plug_command" \
+              -c 'call writefile(getline(1, "$"), $ONESIMUS_CI_PLUGIN_BUFFER)' \
+              -c 'let missing = map(filter(items(g:plugs), "!isdirectory(v:val[1].dir)"), "v:val[0].\"  \".v:val[1].dir") | call writefile(missing, $ONESIMUS_CI_PLUGIN_MISSING)' \
+              -c 'if !empty(missing) | cquit | endif' \
+              -c 'qa!' >"$log" 2>&1; then
+              break
+            fi
+            cat "$log"
+            test ! -s "$plugin_buffer" || cat "$plugin_buffer"
+            if test -s "$missing"; then
+              echo 'Missing plugin directories:'
+              cat "$missing"
+            fi
+            test "$attempt" -lt 2 || exit 1
+            echo 'Plugin installation failed; retrying once with PlugUpdate.'
+            attempt=$((attempt + 1))
+          done
+
+      - name: Reconcile production plugin artifacts
+        env:
+          HOME: ${{ runner.temp }}/onesimus-home
+        run: |
+          report="$RUNNER_TEMP/onesimus-plugin-update.report"
+          log="$RUNNER_TEMP/onesimus-plugin-update.log"
+          attempt=1
+          while test "$attempt" -le 2; do
+            rm -f "$report" "$log"
+            if ONESIMUS_UPDATE_REPORT="$report" vim \
+              --cmd 'let g:onesimus_installing=1 | let g:onesimus_home_enabled=0 | let g:onesimus_usage_enabled=0 | let g:startify_disable_at_vimenter=1' \
+              -Nu "$GITHUB_WORKSPACE/init.vim" -U NONE -i NONE -n -es \
+              -S "$GITHUB_WORKSPACE/scripts/update_plugins.vim" \
+              </dev/null >"$log" 2>&1; then
+              break
+            fi
+            cat "$log"
+            test ! -f "$report" || cat "$report"
+            test "$attempt" -lt 2 || exit 1
+            echo 'Plugin reconciliation failed; retrying once.'
+            attempt=$((attempt + 1))
+          done
+          test "$(sed -n '1p' "$report")" = OK
+          sed -n '2p' "$report"
+
+      - name: Run test suite
+        env:
+          HOME: ${{ runner.temp }}/onesimus-home
+          VIM: vim
+        run: sh tests/run.sh
