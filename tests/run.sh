@@ -54,6 +54,7 @@ run_vim_test() {
 
   case $name in
     ale_fix) result=/tmp/onesimus-ale-fix-result ;;
+    ale_haskell) result=/tmp/onesimus-ale-haskell-result ;;
     ale_python) result=/tmp/onesimus-ale-python-result ;;
     cjk_motion) result=/tmp/onesimus-cjk-motion-result ;;
     guide) result=/tmp/onesimus-guide-result ;;

@@ -27,6 +27,11 @@ function! s:LinterAvailable(filetype, name) abort
         \ 'ale_linters/'.a:filetype.'/'.a:name.'.vim'))
 endfunction
 
+function! s:FixerAvailable(name) abort
+  return !empty(globpath(&runtimepath,
+        \ 'autoload/ale/fixers/'.a:name.'.vim'))
+endfunction
+
 " Preserve the language server installed by the previous vim-lsp-settings
 " setup when it exists.  Fresh installations simply discover pylsp in PATH or
 " in the active project environment through ALE.
@@ -82,6 +87,14 @@ let g:ale_linters = {
       \ }
 
 let s:clean_text = ['remove_trailing_lines', 'trim_whitespace']
+let s:haskell_formatters = [
+      \ {'fixer': 'fourmolu', 'executable': 'fourmolu',
+      \   'configs': ['fourmolu.yaml', '.fourmolu.yaml']},
+      \ {'fixer': 'ormolu', 'executable': 'ormolu',
+      \   'configs': ['.ormolu']},
+      \ {'fixer': 'stylish_haskell', 'executable': 'stylish-haskell',
+      \   'configs': ['.stylish-haskell.yaml']},
+      \ ]
 
 function! s:PythonToolAvailable(buffer, name) abort
   try
@@ -121,26 +134,81 @@ function! s:ConfigurePythonFixers() abort
   endif
 
   let b:ale_fixers = l:fixers + s:clean_text
-  let b:onesimus_python_fixers = 1
 endfunction
 
-function! s:ResetPythonFixers() abort
-  if get(b:, 'onesimus_python_fixers', 0)
-    unlet! b:ale_fixers b:onesimus_python_fixers
+function! s:HaskellFormatter(buffer) abort
+  let l:name = bufname(a:buffer)
+  let l:directory = empty(l:name)
+        \ ? getcwd()
+        \ : fnamemodify(l:name, ':p:h')
+
+  " A checked-in formatter config is a project contract.  If its executable
+  " is absent, do not silently apply a different style and create a noisy diff.
+  while !empty(l:directory)
+    for l:formatter in s:haskell_formatters
+      for l:config in l:formatter.configs
+        if filereadable(l:directory.'/'.l:config)
+          return extend(copy(l:formatter), {
+                \ 'configured': l:config,
+                \ 'ready': s:FixerAvailable(l:formatter.fixer)
+                \   && executable(l:formatter.executable),
+                \ })
+        endif
+      endfor
+    endfor
+
+    let l:parent = fnamemodify(l:directory, ':h')
+    if l:parent ==# l:directory
+      break
+    endif
+    let l:directory = l:parent
+  endwhile
+
+  " With no project policy, follow HLS's default first, then the configurable
+  " Fourmolu fork, then the deliberately narrower import organiser.
+  for l:name in ['ormolu', 'fourmolu', 'stylish_haskell']
+    for l:formatter in s:haskell_formatters
+      if l:formatter.fixer ==# l:name
+            \ && s:FixerAvailable(l:formatter.fixer)
+            \ && executable(l:formatter.executable)
+        return extend(copy(l:formatter), {'configured': '', 'ready': 1})
+      endif
+    endfor
+  endfor
+
+  return {'fixer': '', 'executable': '', 'configured': '', 'ready': 0}
+endfunction
+
+function! s:ConfigureHaskellFixers() abort
+  let b:onesimus_haskell_formatter = s:HaskellFormatter(bufnr(''))
+  let l:fixers = b:onesimus_haskell_formatter.ready
+        \ ? [b:onesimus_haskell_formatter.fixer]
+        \ : []
+  let b:ale_fixers = l:fixers + s:clean_text
+endfunction
+
+function! s:ResetLanguageFixers() abort
+  if exists('b:onesimus_language_fixers')
+    unlet! b:ale_fixers b:onesimus_language_fixers
+          \ b:onesimus_haskell_formatter
   endif
 endfunction
 
-function! s:RefreshPythonFixers() abort
+function! s:RefreshLanguageFixers() abort
+  call s:ResetLanguageFixers()
   if &l:filetype ==# 'python'
     call s:ConfigurePythonFixers()
+    let b:onesimus_language_fixers = 'python'
+  elseif &l:filetype ==# 'haskell'
+    call s:ConfigureHaskellFixers()
+    let b:onesimus_language_fixers = 'haskell'
   endif
 endfunction
 
-augroup onesimus_ale_python_fixers
+augroup onesimus_ale_language_fixers
   autocmd!
-  autocmd FileType * call <SID>ResetPythonFixers()
-  autocmd FileType python call <SID>ConfigurePythonFixers()
-  autocmd BufEnter *.py call <SID>RefreshPythonFixers()
+  autocmd FileType * call <SID>RefreshLanguageFixers()
+  autocmd BufEnter *.py,*.hs,*.lhs call <SID>RefreshLanguageFixers()
 augroup END
 
 " F6 remains the single formatting gesture.  Fixing on save stays off so an
@@ -151,7 +219,7 @@ let g:ale_fixers = {
       \ 'c': ['clangformat'] + s:clean_text,
       \ 'cpp': ['clangformat'] + s:clean_text,
       \ 'go': ['gofmt'] + s:clean_text,
-      \ 'haskell': ['hindent'] + s:clean_text,
+      \ 'haskell': s:clean_text,
       \ 'javascript': ['eslint', 'prettier'] + s:clean_text,
       \ 'javascriptreact': ['eslint', 'prettier'] + s:clean_text,
       \ 'json': ['prettier'] + s:clean_text,
@@ -303,6 +371,9 @@ endfunction
 
 function! s:Format() abort
   if exists(':ALEFix')
+    " Pick up a formatter installed, removed, or configured since this buffer
+    " was entered.  Explicit F6 is the natural refresh boundary.
+    call s:RefreshLanguageFixers()
     call OnesimusTrack('code.format')
     ALEFix
     return
@@ -405,9 +476,24 @@ function! s:JiebaHealthLine() abort
   return 'native   words    run :OnesimusJiebaInstall'
 endfunction
 
+function! s:HaskellFormatterHealthLine() abort
+  if &l:filetype !=# 'haskell'
+    return ''
+  endif
+  let l:formatter = get(b:, 'onesimus_haskell_formatter', {})
+  if get(l:formatter, 'ready', 0)
+    return ''
+  elseif !empty(get(l:formatter, 'configured', ''))
+    return 'missing  format   '.l:formatter.executable
+          \ .' · selected by '.l:formatter.configured
+  endif
+  return 'missing  format   ormolu / fourmolu / stylish-haskell'
+endfunction
+
 function! s:HealthLines() abort
   let l:filetype = &filetype ==# '' ? '[no filetype]' : &filetype
   let l:lines = ['Filetype  '.l:filetype, '']
+  let l:haskell_hls_missing = 0
   if !exists(':ALEInfo')
     call add(l:lines, 'missing  tools    ALE · run :PlugInstall ale')
   else
@@ -422,14 +508,29 @@ function! s:HealthLines() abort
         let l:status = executable(l:executable) ? 'ready  ' : 'missing'
         call add(l:lines, printf('%s %-7s %-20s %s', l:status, l:role,
               \ l:linter.name, l:executable))
+        if &l:filetype ==# 'haskell' && l:linter.name ==# 'hls'
+              \ && l:status ==# 'missing'
+          let l:haskell_hls_missing = 1
+        endif
       endfor
     catch
       call add(l:lines, 'failed   inspect  '.v:exception)
     endtry
 
     let l:fixers = s:ConfiguredFixers()
-    if !empty(l:fixers)
-      call extend(l:lines, ['', 'F6       format   '.join(l:fixers, ', ')])
+    let l:formatters = filter(copy(l:fixers),
+          \ 'index(s:clean_text, v:val) < 0')
+    if !empty(l:formatters)
+      call extend(l:lines, ['', 'F6       format   '.join(l:formatters, ', ')])
+    elseif !empty(l:fixers)
+      call extend(l:lines, ['', 'F6       tidy     whitespace only'])
+    endif
+    let l:haskell_formatter = s:HaskellFormatterHealthLine()
+    if !empty(l:haskell_formatter)
+      call add(l:lines, l:haskell_formatter)
+    endif
+    if l:haskell_hls_missing
+      call add(l:lines, 'hint     inspect  install HLS with GHCup')
     endif
     call add(l:lines, 'Details            :ALEInfo')
   endif
@@ -442,6 +543,8 @@ function! s:HealthLines() abort
 endfunction
 
 function! s:OnesimusHealth() abort
+  " Health is a live inspection, not a snapshot from the last FileType event.
+  call s:RefreshLanguageFixers()
   call OnesimusTrack('code.health')
   let l:lines = s:HealthLines()
   if exists('*OnesimusPopup')
@@ -454,4 +557,4 @@ function! s:OnesimusHealth() abort
 endfunction
 command! OnesimusHealth call <SID>OnesimusHealth()
 
-call s:RefreshPythonFixers()
+call s:RefreshLanguageFixers()

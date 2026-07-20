@@ -31,9 +31,15 @@ function! s:RunSmokeTests() abort
     call assert_true(has_key(g:plugs, 'editorconfig-vim'),
           \ 'older Vim receives the official EditorConfig fallback')
   endif
+  call assert_equal(['haskell', 'cabal'],
+        \ get(g:plugs['haskell-vim'], 'for', []),
+        \ 'the portable Haskell layer also covers Cabal manifests')
   call assert_equal(1, g:ale_linters_explicit)
   call assert_equal(1, g:ale_completion_enabled)
   call assert_equal(['pylsp', 'ruff'], g:ale_linters.python)
+  call assert_equal(['hls'], g:ale_linters.haskell)
+  call assert_equal(['remove_trailing_lines', 'trim_whitespace'],
+        \ g:ale_fixers.haskell)
   call assert_equal('<Plug>(ale_previous_wrap)', maparg('[d', 'n'))
   call assert_equal('<Plug>(ale_next_wrap)', maparg(']d', 'n'))
   call assert_match('OnesimusBufferSymbols', maparg('gs', 'n'))

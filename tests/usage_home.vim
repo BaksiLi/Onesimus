@@ -13,6 +13,10 @@ function! s:RunUsageTests() abort
   call OnesimusTrack('find.files')
   call OnesimusTrack('find.files')
   call OnesimusOffer('repl.open')
+  call OnesimusObserveFiletype('haskell')
+  call assert_equal(1, g:onesimus_usage_runtime.eligible['code.check'])
+  call assert_false(has_key(g:onesimus_usage_runtime.eligible, 'code.run'),
+        \ 'Haskell F5 is measured as inspection rather than execution')
   call OnesimusObserveFiletype('markdown')
   call assert_false(has_key(g:onesimus_usage_runtime.eligible, 'writing.cjk'),
         \ 'segmentation is not offered until the jieba backend really loads')

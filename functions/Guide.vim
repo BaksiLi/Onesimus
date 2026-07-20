@@ -75,7 +75,8 @@ function! s:ContextItems() abort
 
   if index(l:run_filetypes, &l:filetype) >= 0 && exists(':CompileRun')
     let l:label = &l:filetype ==# 'markdown' ? 'Preview'
-          \ : (&l:filetype ==# 'tex' ? 'Compile document' : 'Run / compile')
+          \ : (&l:filetype ==# 'tex' ? 'Compile document'
+          \ : (&l:filetype ==# 'haskell' ? 'Check code' : 'Run / compile'))
     call add(l:items, s:Item('r', l:label, 'CompileRun'))
   endif
   if s:Installed('ale') && exists(':OnesimusFormat')

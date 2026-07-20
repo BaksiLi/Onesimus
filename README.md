@@ -146,7 +146,7 @@ command surface.
 - `<F2>` - Search symbols/tags in the current buffer
 - `<F3>` - Toggle file tree (NERDTree)
 - `<F4>` - Open REPL
-- `<F5>` - Compile/Run current file
+- `<F5>` - Run or check the current context
 - `<F6>` - Format current file
 - `<leader>oh` - Open Onesimus Home
 - `<leader>os` - Open the local usage dashboard
@@ -167,6 +167,16 @@ command surface.
 - `<leader>ca` - Code action (LSP)
 - `:ALEInfo` - Open advanced provider diagnostics when the concise status is
   not enough
+
+Haskell is biased toward reading code and validating small changes. With HLS
+installed, ALE supplies diagnostics, completion, hover, navigation, rename,
+and code actions. `<F5>` checks the nearest Stack or Cabal project; outside a
+project it asks GHC to typecheck the current file without generating code.
+`<F6>` follows a project `fourmolu.yaml`, `.ormolu`, or
+`.stylish-haskell.yaml`; without a declared policy it prefers Ormolu, then
+Fourmolu, then Stylish Haskell. If none is installed, formatting degrades to
+safe whitespace cleanup and `<leader>li` explains what is missing. Onesimus
+never installs or selects a system-wide Haskell toolchain on the user's behalf.
 
 CJK support has two layers. The always-available layer is Onesimus plus native
 Vim: `formatoptions+=mM`, linebreak/breakindent, CJK-safe joining, and

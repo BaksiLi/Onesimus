@@ -8,7 +8,8 @@ call mkdir(s:fixture, 'p')
 call mkdir(s:bin, 'p')
 
 for s:program in [
-      \ 'bash', 'python3', 'python', 'ruby', 'xdg-open', 'ghc', 'go', 'dot',
+      \ 'bash', 'python3', 'python', 'ruby', 'xdg-open', 'ghc', 'cabal',
+      \ 'stack', 'go', 'dot',
       \ 'gcc', 'g++', 'javac', 'java', 'rustc', 'tsc', 'node',
       \ ]
   let s:executable = s:bin.'/'.s:program
@@ -84,6 +85,37 @@ function! s:TestGraphvizIsAtomic() abort
   call assert_equal(1, count(l:call.command, '&&'))
 endfunction
 
+function! s:TestHaskellChecksProjectsWithoutSourceArtifacts() abort
+  let l:stack_root = s:fixture.'/stack project'
+  call mkdir(l:stack_root.'/src', 'p')
+  call writefile(['resolver: lts-22.0'], l:stack_root.'/stack.yaml')
+  " A Stack package also contains Cabal metadata; stack.yaml must still win.
+  call writefile(['packages: [.]'], l:stack_root.'/cabal.project')
+  call writefile(['name: stack-fixture'], l:stack_root.'/fixture.cabal')
+  let [l:source, l:call] = s:Run('haskell',
+        \ 'stack project/src/Library.hs', ['module Library where'])
+  call assert_equal('stack build --fast', l:call.command)
+  call assert_equal({'cwd': l:stack_root}, l:call.options)
+
+  let l:cabal_root = s:fixture.'/cabal project'
+  call mkdir(l:cabal_root.'/package/src', 'p')
+  call writefile(['packages: package'], l:cabal_root.'/cabal.project')
+  call writefile(['name: cabal-fixture'],
+        \ l:cabal_root.'/package/fixture.cabal')
+  let [l:source, l:call] = s:Run('haskell',
+        \ 'cabal project/package/src/Library.hs', ['module Library where'])
+  call assert_equal('cabal build all', l:call.command)
+  call assert_equal({'cwd': l:cabal_root}, l:call.options)
+
+  let l:standalone = s:fixture.'/standalone'
+  call mkdir(l:standalone, 'p')
+  let [l:source, l:call] = s:Run('haskell',
+        \ 'standalone/Audit me.hs', ['module Audit where'])
+  call assert_equal('ghc -fno-code -Wall '.shellescape(l:source),
+        \ l:call.command)
+  call assert_equal({'cwd': l:standalone}, l:call.options)
+endfunction
+
 function! s:TestInterpreterAndTimer() abort
   let [l:python, l:call] = s:Run('python', 'hello world.py', ['print("hello")'])
   call assert_equal('python3 '.shellescape(l:python), l:call.command)
@@ -139,6 +171,7 @@ function! s:RunTests() abort
     call s:TestCompileChains()
     call s:TestJavaUsesFilenameAsClass()
     call s:TestGraphvizIsAtomic()
+    call s:TestHaskellChecksProjectsWithoutSourceArtifacts()
     call s:TestInterpreterAndTimer()
     call s:TestFailuresDoNotDispatch()
   finally

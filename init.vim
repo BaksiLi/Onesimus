@@ -301,8 +301,8 @@ Plug 'BaksiLi/vim-applescript'
 Plug 'mattn/emmet-vim', { 'for': 'html' }
 
 " Haskell
-" https://github.com/jaspervdj/stylish-haskell
-Plug 'neovimhaskell/haskell-vim', { 'for': 'haskell'}
+" Portable syntax and indentation for Haskell source and Cabal manifests.
+Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell', 'cabal'] }
 
 
 

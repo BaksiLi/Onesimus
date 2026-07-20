@@ -87,6 +87,15 @@ function! s:RunGuideTests() abort
   call assert_notmatch('Focus writing', l:code)
   call OnesimusGuideFilter(l:id, "\<Esc>")
 
+  enew
+  file /tmp/onesimus-guide.hs
+  setlocal filetype=haskell
+  let l:id = OnesimusGuide('context')
+  let l:haskell = s:PopupText(l:id)
+  call assert_match('Check code', l:haskell)
+  call assert_notmatch('Run / compile', l:haskell)
+  call OnesimusGuideFilter(l:id, "\<Esc>")
+
   doautocmd User ALELSPStarted
   call assert_equal('', maparg('gi', 'n'),
         \ 'LSP integration preserves Vim''s last-insert command')

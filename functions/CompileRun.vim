@@ -66,6 +66,59 @@ function! s:Timed(command) abort
   return 'time sh -c '.shellescape(a:command)
 endfunction
 
+function! s:HaskellProject(source) abort
+  let l:directory = fnamemodify(a:source, ':p:h')
+  let l:cabal_directory = ''
+
+  while !empty(l:directory)
+    " stack.yaml is the strongest signal because it pins the package set and
+    " GHC version.  A cabal.project is the corresponding explicit Cabal root.
+    if filereadable(l:directory.'/stack.yaml')
+      return {'kind': 'stack', 'root': l:directory}
+    elseif filereadable(l:directory.'/cabal.project')
+      return {'kind': 'cabal', 'root': l:directory}
+    elseif empty(l:cabal_directory)
+          \ && !empty(globpath(l:directory, '*.cabal', 0, 1))
+      let l:cabal_directory = l:directory
+    endif
+
+    let l:parent = fnamemodify(l:directory, ':h')
+    if l:parent ==# l:directory
+      break
+    endif
+    let l:directory = l:parent
+  endwhile
+
+  return empty(l:cabal_directory)
+        \ ? {}
+        \ : {'kind': 'cabal', 'root': l:cabal_directory}
+endfunction
+
+function! s:HaskellPlan(source) abort
+  let l:project = s:HaskellProject(a:source)
+  if get(l:project, 'kind', '') ==# 'stack'
+    return {
+          \ 'command': 'stack build --fast',
+          \ 'options': {'cwd': l:project.root},
+          \ 'requires': ['stack'],
+          \ 'timed': 1,
+          \ }
+  elseif get(l:project, 'kind', '') ==# 'cabal'
+    return {
+          \ 'command': 'cabal build all',
+          \ 'options': {'cwd': l:project.root},
+          \ 'requires': ['cabal'],
+          \ 'timed': 1,
+          \ }
+  endif
+  return {
+        \ 'command': 'ghc -fno-code -Wall '.shellescape(a:source),
+        \ 'options': {'cwd': fnamemodify(a:source, ':h')},
+        \ 'requires': ['ghc'],
+        \ 'timed': 1,
+        \ }
+endfunction
+
 function! s:Plan(filetype, source) abort
   let l:directory = fnamemodify(a:source, ':h')
   let l:options = {'cwd': l:directory}
@@ -87,8 +140,7 @@ function! s:Plan(filetype, source) abort
     return {'command': l:open.command, 'options': l:options,
           \ 'requires': l:open.requires, 'timed': 0}
   elseif a:filetype ==# 'haskell'
-    return {'command': 'ghc '.l:path, 'options': l:options,
-          \ 'requires': ['ghc'], 'timed': 1}
+    return s:HaskellPlan(a:source)
   elseif a:filetype ==# 'go'
     return {'command': 'go run '.l:path, 'options': extend(l:options, {'raw': 1}),
           \ 'requires': ['go'], 'timed': 1}
@@ -170,7 +222,7 @@ function! s:CompileRun() abort
   endtry
 
   if exists('*OnesimusTrack')
-    call OnesimusTrack('code.run')
+    call OnesimusTrack(l:filetype ==# 'haskell' ? 'code.check' : 'code.run')
   endif
 
   if l:filetype ==# 'markdown'
@@ -194,7 +246,7 @@ function! s:CompileRun() abort
   let l:plan = s:Plan(l:filetype, l:source)
   for l:program in l:plan.requires
     if !executable(l:program)
-      return s:Error(l:program.' is required to run this file.')
+      return s:Error(l:program.' is required for this task.')
     endif
   endfor
 

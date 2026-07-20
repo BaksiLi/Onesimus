@@ -27,6 +27,7 @@ let s:catalog = [
       \ {'id': 'nav.workspace_symbols', 'label': 'Workspace symbols', 'group': 'Navigate', 'key': 'gS', 'kind': 'explicit'},
       \ {'id': 'nav.tags', 'label': 'Build project tags', 'group': 'Navigate', 'key': '<Leader>et', 'kind': 'explicit'},
       \ {'id': 'code.run', 'label': 'Compile or run', 'group': 'Code', 'key': 'F5', 'kind': 'explicit', 'tip': 'F5 runs the current file with its language tool.'},
+      \ {'id': 'code.check', 'label': 'Check code', 'group': 'Code', 'key': 'F5', 'kind': 'explicit', 'tip': 'In Haskell, F5 checks the nearest Stack or Cabal project.'},
       \ {'id': 'code.format', 'label': 'Format buffer', 'group': 'Code', 'key': 'F6', 'kind': 'explicit', 'tip': 'F6 formats explicitly; saving never rewrites code.'},
       \ {'id': 'code.diagnostics', 'label': 'Open diagnostics', 'group': 'Code', 'key': '<Leader>ld', 'kind': 'explicit'},
       \ {'id': 'code.health', 'label': 'Check tool health', 'group': 'Code', 'key': '<Leader>li', 'kind': 'explicit', 'tip': '<Leader>li explains the active language tools.'},
@@ -65,7 +66,7 @@ let s:filetypes = {
       \ 'typescript': 1, 'typescriptreact': 1, 'vim': 1, 'yaml': 1,
       \ }
 let s:run_filetypes = {
-      \ 'c': 1, 'cpp': 1, 'dot': 1, 'go': 1, 'haskell': 1, 'html': 1,
+      \ 'c': 1, 'cpp': 1, 'dot': 1, 'go': 1, 'html': 1,
       \ 'java': 1, 'markdown': 1, 'python': 1, 'ruby': 1, 'rust': 1,
       \ 'sh': 1, 'tex': 1, 'typescript': 1, 'vim': 1,
       \ }
@@ -205,6 +206,9 @@ function! OnesimusObserveFiletype(filetype) abort
 
   if has_key(s:run_filetypes, a:filetype)
     call OnesimusOffer('code.run')
+  endif
+  if a:filetype ==# 'haskell'
+    call OnesimusOffer('code.check')
   endif
   if has_key(s:repl_filetypes, a:filetype)
     call OnesimusOffer('repl.open')
