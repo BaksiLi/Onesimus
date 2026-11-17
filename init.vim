@@ -1,6 +1,6 @@
 " Project: Onesimus Vim
 " Maintainer: BaksiLi
-" Version: 0.2.0
+" Version: 0.3.0
 "--------------------------------------------------------------
 " Menu
 "--------------------------------------------------------------
@@ -81,7 +81,7 @@ if !get(g:, 'onesimus_bootstrap_ready', 0)
   finish
 endif
 
-let g:onesimus_version = '0.2.0'
+let g:onesimus_version = '0.3.0'
 
 " g:asc_uname
 " TODO: dependencies for lua, python

@@ -126,11 +126,22 @@ filename selects another destination. To restore installed remote revisions,
 `:source /path/to/snapshot.vim` in Vim with Onesimus loaded. Snapshots record
 actual Git HEADs even when they differ from the lock, and note local checkouts
 and tracked changes; they do not restore uncommitted files or modify local
-development checkouts. A later normal update reapplies the distribution lock.
+development checkouts. A later normal update reapplies the distribution lock
+unless a personal plugin declaration overrides it.
 
-Maintainers update `plugins.lock.json` deliberately after reviewing and testing
-new revisions. Personal `Plug` declarations load after the distribution's
-pins and can select another revision or fork.
+`plugins.lock.json` records the combination tested with each Onesimus release.
+It makes installations reproducible and bug reports easier to investigate.
+Maintainers advance the pins after reviewing and testing new revisions.
+To follow a plugin's default branch, redeclare it in the ignored
+`custom/plugins.vim`, which loads after the distribution's pins:
+
+```vim
+Plug 'BaksiLi/texinsitu.vim', {'do': ':TexInsituInstall'}
+```
+
+Use plain `Plug` for this override; `OnesimusPlugin()` applies the reviewed
+pin. Keep any loading options or build hooks the plugin needs. The personal
+declaration also wins during `:One update`; it can select a tag or fork too.
 
 Installations made by Onesimos 0.1.x do not yet understand `--update`. Bootstrap
 their one-time migration with the current installer:
@@ -181,6 +192,9 @@ hides the row; the letter is never lent to something else.
 | `t` | Outline (F2) | `m` | Rendered formulas | `n` | Rename symbol |
 | `?` | Help for this file | `p` | Spelling marks | `a` | Code action |
 
+`\\h` shows the language tools available for this file (`:One health`).
+`:One help` opens the file's workflow guide, or the manual if it has none.
+
 While the buffer and its file on disk disagree, `\\` shows the conflict
 choices instead: `d` compares them, `u` takes the disk version, and `x` saves
 the reviewed buffer over the disk.
@@ -189,12 +203,18 @@ the reviewed buffer over the disk.
 
 | Group | Keys |
 | --- | --- |
-| `f` Find | `ff` files, `fg` Git files, `fb` buffers, `fw` search project, `fh` recent files, `ft` tags, `fm` marks, `fc` command history |
+| `f` Find | `ff` files, `fg` Git files, `fb` buffers, `fw` search project, `fh` recent files, `ft` buffer tags, `fT` project tags, `fm` marks, `fc` command history |
 | `g` Git | `gs` status, `gd` diff, `gb` blame, `gl` log |
 | `t` Toggle | `tr` relative numbers, `ti` indent guides, `tp` parenthesis colours, `tb` light / dark, `td` redraw |
-| `o` Onesimus | `oh` Home, `oi` tool status, `ou` update, `os` usage, `oc` edit config, `or` reload config |
+| `o` Onesimus | `oh` Home, `oc` edit config, `or` reload config, `ou` update Onesimus, `op` snapshot plugins, `os` local usage |
 
-`\?` opens the manual, `:help onesimus`.
+`\o` manages the distribution; `\\` handles the current file.
+`\?` always opens the full manual, `:help onesimus`.
+
+`:One index` explicitly writes `./tags` from the working directory for Vim's
+native tag navigation (`Ctrl-]`, `:tag`). `:One find tags` browses buffer
+symbols, and `:One find proj_tags` searches project symbols through Clap;
+neither picker requires a prebuilt tags file.
 
 ### Function keys and Vim keys
 - `<F2>` outline, `<F3>` file tree, `<F4>` REPL, `<F5>` build, `<F6>` format
@@ -206,7 +226,7 @@ the reviewed buffer over the disk.
   `:One goto type_definition` reach the rest
 - `gs/gS` - buffer/workspace symbols
 - `]s/[s` and `z=` - Vim's own spelling navigation and suggestions
-- `:ALEInfo` - advanced provider diagnostics when `\oi` is not enough
+- `:ALEInfo` - advanced provider diagnostics when `\\h` is not enough
 
 Haskell is biased toward reading code and validating small changes. With HLS
 installed, ALE supplies diagnostics, completion, hover, navigation, rename,
@@ -215,7 +235,7 @@ project it asks GHC to typecheck the current file without generating code.
 `<F6>` follows a project `fourmolu.yaml`, `.ormolu`, or
 `.stylish-haskell.yaml`; without a declared policy it prefers Ormolu, then
 Fourmolu, then Stylish Haskell. If none is installed, formatting degrades to
-safe whitespace cleanup and `\oi` explains what is missing. Onesimus
+safe whitespace cleanup and `\\h` explains what is missing. Onesimus
 never installs or selects a system-wide Haskell toolchain on the user's behalf.
 
 ### TeX workflow

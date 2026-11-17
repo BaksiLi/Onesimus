@@ -3,6 +3,10 @@
 
 " Plug 'wakatime/vim-wakatime'
 
+" Follow a plugin's default branch instead of the distribution's reviewed pin.
+" Keep its loading options and build hooks; plain Plug overrides the pin.
+" Plug 'BaksiLi/texinsitu.vim', {'do': ':TexInsituInstall'}
+
 " Cogitatum inquiry notes. OnesimusPlugin applies the reviewed source pin.
 " Use a CLI built from the compiler revision listed in that plugin's README.
 " call OnesimusPlugin('BaksiLi/vim-cogitatum', { 'do': 'npm ci && npm run build' })

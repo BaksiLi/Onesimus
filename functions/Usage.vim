@@ -8,7 +8,7 @@ let g:onesimus_usage_enabled = get(g:, 'onesimus_usage_enabled', 1)
 
 let s:catalog = [
       \ {'id': 'meta.home', 'label': 'Open home', 'group': 'Onesimus', 'key': '<Leader>oh', 'kind': 'explicit'},
-      \ {'id': 'meta.help', 'label': 'Read documentation', 'group': 'Onesimus', 'key': '<Leader>o?', 'kind': 'explicit'},
+      \ {'id': 'meta.help', 'label': 'Read documentation', 'group': 'Onesimus', 'key': '<Leader>?', 'kind': 'explicit'},
       \ {'id': 'meta.config', 'label': 'Edit configuration', 'group': 'Onesimus', 'key': '<Leader>oc', 'kind': 'explicit'},
       \ {'id': 'meta.reload', 'label': 'Reload configuration', 'group': 'Onesimus', 'key': '<Leader>or', 'kind': 'explicit'},
       \ {'id': 'meta.update', 'label': 'Update Onesimus', 'group': 'Onesimus', 'key': '<Leader>ou', 'kind': 'explicit'},
@@ -25,12 +25,12 @@ let s:catalog = [
       \ {'id': 'nav.tree', 'label': 'File tree', 'group': 'Navigate', 'key': 'F3', 'kind': 'explicit', 'tip': 'F3 toggles the file tree.'},
       \ {'id': 'nav.buffer_symbols', 'label': 'Buffer symbols', 'group': 'Navigate', 'key': 'F2 / gs', 'kind': 'explicit', 'tip': 'gs lists symbols in the current buffer.'},
       \ {'id': 'nav.workspace_symbols', 'label': 'Workspace symbols', 'group': 'Navigate', 'key': 'gS', 'kind': 'explicit'},
-      \ {'id': 'nav.tags', 'label': 'Build project tags', 'group': 'Navigate', 'key': ':One tags', 'kind': 'explicit'},
+      \ {'id': 'nav.tags', 'label': 'Build project tags', 'group': 'Navigate', 'key': ':One index', 'kind': 'explicit'},
       \ {'id': 'code.run', 'label': 'Compile or run', 'group': 'Code', 'key': 'F5', 'kind': 'explicit', 'tip': 'F5 runs the current file with its language tool.'},
       \ {'id': 'code.check', 'label': 'Check code', 'group': 'Code', 'key': 'F5', 'kind': 'explicit', 'tip': 'In Haskell, F5 checks the nearest Stack or Cabal project.'},
       \ {'id': 'code.format', 'label': 'Format buffer', 'group': 'Code', 'key': 'F6', 'kind': 'explicit', 'tip': 'F6 formats explicitly; saving never rewrites code.'},
       \ {'id': 'code.diagnostics', 'label': 'Open diagnostics', 'group': 'Code', 'key': '\\e', 'kind': 'explicit'},
-      \ {'id': 'code.health', 'label': 'Check tool health', 'group': 'Code', 'key': '<Leader>oi', 'kind': 'explicit', 'tip': '<Leader>oi explains the active language tools.'},
+      \ {'id': 'code.health', 'label': 'Check tool health', 'group': 'Code', 'key': '<Leader><Leader>h', 'kind': 'explicit', 'tip': '<Leader><Leader>h explains the active language tools.'},
       \ {'id': 'code.definition', 'label': 'Go to definition', 'group': 'Code', 'key': 'gd', 'kind': 'explicit'},
       \ {'id': 'code.references', 'label': 'Find references', 'group': 'Code', 'key': 'gr', 'kind': 'explicit'},
       \ {'id': 'code.implementation', 'label': 'Go to implementation', 'group': 'Code', 'key': ':One goto implementation', 'kind': 'explicit'},

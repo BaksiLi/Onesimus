@@ -15,6 +15,7 @@ function! s:Run() abort
   let l:plugs = deepcopy(g:plugs)
   let l:order = copy(g:plugs_order)
   let l:overrides = deepcopy(get(g:, 'onesimus_plugin_overrides', {}))
+  let l:state_home = $XDG_STATE_HOME
   try
     for l:name in ['seoul256.vim', 'vim-monokai', 'helpful.vim', 'vader.vim']
       call assert_false(has_key(g:plugs, l:name), l:name.' is optional')
@@ -25,6 +26,15 @@ function! s:Run() abort
         call assert_equal(l:lock.plugins[l:name].commit, l:spec.commit)
       endif
     endfor
+
+    call plug#('BaksiLi/texinsitu.vim', {'do': ':TexInsituInstall'})
+    call assert_false(has_key(g:plugs['texinsitu.vim'], 'commit'),
+          \ 'a later personal Plug declaration can follow the default branch')
+    call assert_equal(':TexInsituInstall', g:plugs['texinsitu.vim'].do,
+          \ 'following the default branch can retain the build hook')
+    call assert_equal(l:lock.plugins.ale.commit, g:plugs.ale.commit,
+          \ 'overriding one plugin leaves other pins in place')
+    let g:plugs = deepcopy(l:plugs)
 
     call assert_false(exists('g:tabular_loaded'), 'Tabular stays unloaded at startup')
     new
@@ -76,6 +86,15 @@ function! s:Run() abort
     call assert_equal(l:head, g:plugs.remote.commit)
     call assert_false(has_key(g:plugs.local, 'commit'), 'local checkout is never restored')
     call assert_equal('--sync', g:onesimus_test_restore)
+    let $XDG_STATE_HOME = l:work.'/state'
+    One snapshot
+    call assert_true(filereadable(g:onesimus_last_plugin_snapshot),
+          \ 'snapshot without an argument records installed revisions')
+    call assert_match('^'.escape(l:work, '\.^$~[]').'/state/onesimus/plugin-snapshots/',
+          \ g:onesimus_last_plugin_snapshot)
+    execute 'One snapshot '.l:work.'/explicit.vim'
+    call assert_equal(l:work.'/explicit.vim', g:onesimus_last_plugin_snapshot,
+          \ 'snapshot also accepts an explicit filename')
     let g:plugs.remote.uri = 'https://example.invalid/another-fork.git'
     let g:plugs.remote.commit = 'personal'
     execute 'source '.fnameescape(l:snapshot)
@@ -106,6 +125,7 @@ function! s:Run() abort
   catch
     call assert_report(v:exception.' at '.v:throwpoint)
   finally
+    let $XDG_STATE_HOME = l:state_home
     call delete(l:work, 'rf')
   endtry
   if empty(v:errors) | qa! | endif

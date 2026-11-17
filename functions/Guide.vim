@@ -78,7 +78,7 @@ function! s:GlobalMenu() abort
     call add(l:items, {'key': l:key, 'label': l:title,
           \ 'menu': s:Menu(toupper(l:title), l:rows)})
   endfor
-  call add(l:items, {'key': '?', 'label': 'Manual', 'command': 'One manual'})
+  call add(l:items, {'key': '?', 'label': 'Manual', 'command': 'call one#help()'})
   return {'title': 'ACTIONS', 'summary': ':One <Tab> lists every action',
         \ 'items': l:items}
 endfunction

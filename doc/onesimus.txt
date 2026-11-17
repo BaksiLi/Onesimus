@@ -26,6 +26,10 @@ options below. The README covers installation and each workflow in depth.
 			else. <Tab> completes the actions available here and
 			their arguments.
 
+:One help		Help for this file: TeX and writing buffers show their
+			workflow guide; other buffers open this manual.
+			`\?` always opens the full manual.
+
 ==============================================================================
 2. Keys							*onesimus-keys*
 
@@ -61,11 +65,26 @@ Current file (`\\` + key) ~
   r  read	Terminal Reading		c  map		Terminal Map
   i  inquiry	Preview inquiry fences		n  rename	Rename symbol
   a  action	Code action			?  help		Help for this file
+  h  health	Tool status for this buffer
 
 A buffer without an action hides its row; the letter is never lent to
 another action.
 
-Without keys ~
+Global groups (`\` + group + key) ~
+
+  f  Find		f files, g Git files, b buffers, w project text,
+			h recent files, t buffer tags, T project tags,
+			m marks, c command history
+  g  Git		s status, d diff, b blame, l log
+  t  Toggle		r relative numbers, i indent guides, p parentheses,
+			b light/dark, d redraw
+  o  Onesimus		h Home, c edit config, r reload config,
+			u update Onesimus, p snapshot plugins, s local usage
+
+`\o` manages the distribution. Current-file tools belong in `\\`; in
+particular `\\h` shows the tools available for the current filetype.
+
+Other actions and arguments ~
 
   find {picker}		files, git_files, buffers, grep, history, tags,
 			proj_tags, marks, colors, command_history
@@ -77,11 +96,15 @@ Without keys ~
   compare / revert / overwrite
 			Resolve a disk conflict
   stop			Stop this document's preview
-  tags			Build a tags file for the project
+  index			Build ./tags from the working directory with ctags -R.
+			Explicitly writes an index for Vim's |tag| and |CTRL-]|.
+			"find tags" browses current-buffer symbols; "find
+			proj_tags" searches project symbols through Clap.
+			Neither picker requires running "index" first.
   snapshot [{file}]	Record installed plugin revisions for restoring
-  home, health, update, usage, config, reload
-			The `\o` group: Home screen, tool status, update,
-			usage journal, edit and reload the configuration
+  home, config, reload, update, usage
+			The `\o` group: Home screen, edit and reload config,
+			update, plugin snapshots and the usage journal
   numbers, indent, parens, background, redraw
 			The `\t` group
   tree, repl		<F3> and <F4>
@@ -148,6 +171,16 @@ Two files under `custom/` belong to one machine and are ignored by Git:
 
 Copy the `.example` files beside them to start. Hostnames, private paths and
 local checkouts go here, never into the distribution.
+
+The plugin lock records the combination tested with each Onesimus release.
+To follow a plugin's default branch instead, redeclare it in
+`custom/plugins.vim`, which runs after the distribution applies its pins:
+>
+	Plug 'BaksiLi/texinsitu.vim', {'do': ':TexInsituInstall'}
+<
+Keep any filetype, command or build-hook options you still need. Use plain
+`Plug` here: `OnesimusPlugin()` applies the reviewed pin. The personal
+declaration also takes precedence during |:One| update.
 
 The core is Onesimus without third-party plugins, for small machines and
 remote servers. Starting Vim as `vi` selects it, or set |g:onesimus_core|.

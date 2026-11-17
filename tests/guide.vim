@@ -39,7 +39,12 @@ function! s:RunGuideTests() abort
   call assert_match('One indent', maparg('<leader>ti', 'n'))
   call assert_match('One parens', maparg('<leader>tp', 'n'))
   call assert_match('One background', maparg('<leader>tb', 'n'))
-  call assert_match('One health', maparg('<leader>oi', 'n'))
+  call assert_equal('', maparg('<leader>oi', 'n'),
+        \ 'tool status belongs to the current file')
+  call assert_match("one#key('h')", maparg('<leader><leader>h', 'n'))
+  call assert_match('One snapshot', maparg('<leader>op', 'n'))
+  call assert_match('One find tags', maparg('<leader>ft', 'n'))
+  call assert_match('One find proj_tags', maparg('<leader>fT', 'n'))
   call assert_match('One build', maparg('<F5>', 'n'))
   call assert_match("one#key('b')", maparg('<leader><leader>b', 'n'))
   call assert_equal('', maparg('<leader>.', 'n'), 'the old file-menu entry is gone')
@@ -65,12 +70,19 @@ function! s:RunGuideTests() abort
   call assert_match('Files', l:find)
   call assert_match('Buffers', l:find)
   call assert_match('Search project', l:find)
+  call assert_match('t\s\+Buffer tags', l:find)
+  call assert_match('T\s\+Project tags', l:find)
   call OnesimusGuideFilter(l:id, "\<Esc>")
 
   let l:id = OnesimusGuide()
   call OnesimusGuideFilter(l:id, 'o')
-  call assert_match('Update', s:PopupText(l:id))
-  call assert_match('Usage', s:PopupText(l:id))
+  let l:maintenance = s:PopupText(l:id)
+  call assert_match('Edit config', l:maintenance)
+  call assert_match('Reload config', l:maintenance)
+  call assert_match('Update Onesimus', l:maintenance)
+  call assert_match('Snapshot plugins', l:maintenance)
+  call assert_match('Local usage', l:maintenance)
+  call assert_notmatch('Tool status', l:maintenance)
   let v:errmsg = ''
   call OnesimusGuideFilter(l:id, 'r')
   call feedkeys('', 'x')
@@ -84,6 +96,7 @@ function! s:RunGuideTests() abort
   let l:code = s:PopupText(l:id)
   call assert_match('b\s\+Build & show', l:code)
   call assert_match('t\s\+Outline', l:code)
+  call assert_match('h\s\+Tool status', l:code)
   call assert_notmatch('Word count\|Spelling', l:code,
         \ 'writing actions stay out of code buffers')
   call OnesimusGuideFilter(l:id, "\<Esc>")
@@ -128,9 +141,12 @@ function! s:RunGuideTests() abort
   setlocal filetype=tex
   call assert_match('^No unsaved edits', OnesimusTexMenuSummary(),
         \ 'an untouched unnamed buffer must not claim it has been saved')
-  file /tmp/onesimus-guide.tex
-  call setline(1, 'A modified TeX buffer.')
+  let l:tex_file = l:git_fixture.'/guide.tex'
+  call writefile(['A saved TeX buffer.'], l:tex_file)
+  execute 'edit '.fnameescape(l:tex_file)
   setlocal filetype=tex
+  call OnesimusRecordDiskBaseline(bufnr('%'))
+  call setline(1, 'A modified TeX buffer.')
   call feedkeys('\\', 'xt')
   call assert_match('TEX PAPER', s:PopupText(popup_list()[-1]),
         \ 'a pause after \\ shows the file menu')
@@ -179,7 +195,7 @@ function! s:RunGuideTests() abort
     redraw
     let l:position = popup_getpos(l:id)
     call assert_true(l:position.firstline > 1,
-          \ 'touch/wheel selection remains visible on a short terminal')
+          \ 'touch/wheel selection remains visible on a short terminal: '.string(l:position))
     call assert_true(l:position.width <= &columns)
     let l:selected_line = match(getbufline(winbufnr(l:id), 1, '$'), '^> ') + 1
     call assert_true(l:selected_line > 0
@@ -193,6 +209,21 @@ function! s:RunGuideTests() abort
     let &lines = l:saved_lines
     let &columns = l:saved_columns
   endtry
+
+  let l:id = OnesimusGuide()
+  call OnesimusGuideFilter(l:id, '?')
+  call feedkeys('', 'x')
+  call assert_equal('help', &buftype, 'the global manual ignores filetype')
+  call assert_match('/doc/onesimus.txt$', expand('%:p'))
+  helpclose
+  call feedkeys('\\?', 'xt')
+  let l:help = popup_list()[-1]
+  call assert_match('TEX WRITING & COLLABORATION', s:PopupText(l:help),
+        \ 'file help keeps the TeX workflow guide')
+  call popup_close(l:help)
+  call feedkeys('\?', 'xt')
+  call assert_equal('help', &buftype, 'typed \\? opens the full manual')
+  helpclose
 
   enew
   call setline(1, 'An ASCII Markdown buffer.')

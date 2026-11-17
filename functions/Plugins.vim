@@ -55,8 +55,8 @@ function! OnesimusPluginSnapshot(...) abort
   return l:path
 endfunction
 
-function! s:Snapshot(path) abort
-  echomsg 'Plugin snapshot: '.OnesimusPluginSnapshot(a:path)
+function! s:Snapshot(...) abort
+  echomsg 'Plugin snapshot: '.call('OnesimusPluginSnapshot', a:000)
 endfunction
 call one#define('snapshot', '*', function('s:Snapshot'))
 call one#arguments('snapshot', 'file')

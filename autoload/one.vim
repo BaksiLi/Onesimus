@@ -27,6 +27,7 @@ let s:file_menu = [
       \ ['i', 'inquiry', 'Preview inquiry fences'],
       \ ['n', 'rename', 'Rename symbol'],
       \ ['a', 'action', 'Code action'],
+      \ ['h', 'health', 'Tool status'],
       \ ['?', 'help', 'Help for this file'],
       \ ]
 
@@ -47,6 +48,7 @@ let s:global_menu = [
       \   ['w', 'One find grep', 'Search project'],
       \   ['h', 'One find history', 'Recent files'],
       \   ['t', 'One find tags', 'Buffer tags'],
+      \   ['T', 'One find proj_tags', 'Project tags'],
       \   ['m', 'One find marks', 'Marks'],
       \   ['c', 'One find command_history', 'Command history']]],
       \ ['g', 'Git', [
@@ -62,11 +64,11 @@ let s:global_menu = [
       \   ['d', 'One redraw', 'Redraw screen  (Ctrl-L)']]],
       \ ['o', 'Onesimus', [
       \   ['h', 'One home', 'Home'],
-      \   ['i', 'One health', 'Tool status'],
-      \   ['u', 'One update', 'Update'],
-      \   ['s', 'One usage', 'Usage'],
       \   ['c', 'One config', 'Edit config'],
-      \   ['r', 'One reload', 'Reload config']]],
+      \   ['r', 'One reload', 'Reload config'],
+      \   ['u', 'One update', 'Update Onesimus'],
+      \   ['p', 'One snapshot', 'Snapshot plugins'],
+      \   ['s', 'One usage', 'Local usage']]],
       \ ]
 
 let s:function_keys = {'<F2>': 'outline', '<F3>': 'tree', '<F4>': 'repl',
@@ -92,6 +94,13 @@ endfunction
 " Completions for a verb's argument: a list, or a getcompletion() type.
 function! one#arguments(verb, values) abort
   let s:arguments[a:verb] = a:values
+endfunction
+
+" :One help is contextual; \? always opens the distribution manual.
+function! one#help() abort
+  call OnesimusTrack('meta.help')
+  execute 'helptags '.fnameescape($VIMRCDIR.'/doc')
+  help onesimus
 endfunction
 
 function! s:Handler(verb) abort
@@ -191,7 +200,7 @@ function! one#map() abort
   " guide doubles as the reminder for every chord it lists.
   nnoremap <silent> <Leader> :<C-U>One<CR>
   nnoremap <silent> <Leader><Leader> :<C-U>call OnesimusGuide('context')<CR>
-  nnoremap <silent> <Leader>? :<C-U>One manual<CR>
+  nnoremap <silent> <Leader>? :<C-U>call one#help()<CR>
   for [l:group, l:title, l:rows] in s:global_menu
     for [l:key, l:command, l:label] in l:rows
       execute 'nnoremap <silent> <Leader>'.l:group.l:key.' :<C-U>'.l:command.'<CR>'

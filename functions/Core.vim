@@ -43,13 +43,6 @@ function! s:ScheduleHome() abort
   endif
 endfunction
 
-function! s:OpenHelp() abort
-  call s:Track('meta.help')
-  " doc/tags is generated, not tracked; one file makes this instant.
-  execute 'helptags '.fnameescape($VIMRCDIR.'/doc')
-  help onesimus
-endfunction
-
 function! s:EditConfig() abort
   call s:Track('meta.config')
   execute 'vsplit '.fnameescape($MYVIMDOT)
@@ -251,7 +244,7 @@ function! s:ToggleTree() abort
   NERDTreeToggle
 endfunction
 
-function! s:BuildTags() abort
+function! s:BuildIndex() abort
   if !executable('ctags')
     echohl WarningMsg
     echomsg 'Project tags need Universal Ctags in PATH.'
@@ -329,14 +322,13 @@ function! OnesimusConfigureParentheses() abort
 endfunction
 
 call one#define('home', '*', function('s:OpenHome', [1]))
-call one#define('manual', '*', function('s:OpenHelp'))
-call one#define('help', '*', function('s:OpenHelp'))
+call one#define('help', '*', function('one#help'))
 call one#define('config', '*', function('s:EditConfig'))
 call one#define('update', '*', function('s:Update'))
 call one#define('reload', '*', function('OnesimusReloadConfig'))
 call one#define('numbers', '*', function('s:ToggleRelativeNumber'))
 call one#define('tree', '*', function('s:ToggleTree'))
-call one#define('tags', '*', function('s:BuildTags'))
+call one#define('index', '*', function('s:BuildIndex'))
 call one#define('indent', '*', function('s:ToggleIndentGuides'))
 call one#define('parens', '*', function('s:ToggleParentheses'))
 augroup onesimus_native_indent_guides
