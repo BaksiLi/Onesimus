@@ -125,6 +125,7 @@ function! s:RunGuideTests() abort
   call assert_match('\\\\v is not available', execute('1messages'))
 
   enew
+  setlocal filetype=tex
   call assert_match('^No unsaved edits', OnesimusTexMenuSummary(),
         \ 'an untouched unnamed buffer must not claim it has been saved')
   file /tmp/onesimus-guide.tex

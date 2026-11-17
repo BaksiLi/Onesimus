@@ -1,5 +1,8 @@
 " Copy to custom/settings.vim. Options load before plugin declarations.
 
+" The core: no third-party plugins, as when Vim starts as `vi`.
+" let g:onesimus_core = 1
+
 " Extra themes: seoul256 and monokai.
 " let g:onesimus_extra_themes = 1
 

@@ -612,6 +612,13 @@ files: a relay hostname for previews (`g:webpreview_host`), local checkouts,
 credentials. Both `custom/` files stay out of the distribution and out of
 updates.
 
+Start Vim as `vi` for the core: Onesimus without third-party plugins, so the
+options, keys, `:One`, the status line, safe saving and the themes, in about
+half the startup time. On a light machine, make it the default with
+`let g:onesimus_core = 1` in `custom/settings.vim`. The TeX module needs
+VimTeX and stays out of the core; in the full distribution it loads with the
+first TeX buffer.
+
 The default themes are Gruvbox for terminals and Nord for MacVim. Both ship in
 `packages/themes` as plain `:highlight` lists that
 `scripts/build_themes.vim` generates from pinned upstream commits and checks
@@ -642,7 +649,8 @@ CLI and the currently local-only texinsitu checkout.
 ├── custom/         - Local settings and plugins (ignored) with examples
 ├── config/         - Distribution policies and plugin lock loader
 ├── snippets/       - UltiSnips snippets
-├── functions/      - Custom functions
+├── functions/      - Onesimus modules; tex/ loads with the first TeX buffer
+├── ftplugin/       - Filetype loaders for those modules
 ├── plugconf/       - Plugin configurations
 ├── .editorconfig   - Repository editing conventions
 ├── init.vim        - Main configuration

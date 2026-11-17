@@ -14,7 +14,8 @@
 " 3 Plugin Configurations
 "       plugconf/*.vim
 " 4 Custom Functions and Keys
-"       functions/*.vim
+"       functions/*.vim, plus functions/tex/ on the first TeX buffer
+"       (ftplugin/tex/onesimus.vim)
 
 " The configuration is its own source of truth.  A loader may override the
 " root for an embedded installation, but invoking `vim -Nu /path/init.vim`
@@ -26,8 +27,8 @@ endif
 if empty($MYVIMDOT)
   let $MYVIMDOT = $VIMRCDIR.'/init.vim'
 endif
-" autoload/ holds code that loads on first use.  The root has no plugin/ or
-" ftplugin/ directory, so joining 'runtimepath' runs nothing at startup;
+" autoload/ and ftplugin/ hold code that loads on first use.  The root has no
+" plugin/ directory, so joining 'runtimepath' runs nothing at startup;
 " snippets/ is kept from UltiSnips' SnipMate reader in plugconf/UltiSnips.vim.
 if index(split(&runtimepath, ','), $VIMRCDIR) < 0
   execute 'set runtimepath^='.fnameescape($VIMRCDIR)
@@ -47,6 +48,18 @@ let g:onesimus_vim_plug = fnamemodify(
       \ get(g:, 'onesimus_vim_plug',
       \   empty($ONESIMUS_VIM_PLUG) ? '~/.vim/autoload/plug.vim'
       \                             : $ONESIMUS_VIM_PLUG), ':p')
+
+" Personal options come first: they may choose the core, and plugin
+" declarations read them.
+if filereadable($VIMRCDIR.'/custom/settings.vim')
+  execute 'source '.fnameescape($VIMRCDIR.'/custom/settings.vim')
+endif
+
+" The core is Onesimus without third-party plugins: options, keys, :One, the
+" status line, safe saving and its own packages.  Starting Vim as `vi` (the
+" same binary on most systems) or setting g:onesimus_core = 1 in
+" custom/settings.vim chooses it, for light machines and quick edits.
+let g:onesimus_core = get(g:, 'onesimus_core', v:progname ==# 'vi')
 
 "--------------------------------------------------------------
 " Automated Installations
@@ -69,11 +82,6 @@ if !get(g:, 'onesimus_bootstrap_ready', 0)
 endif
 
 let g:onesimus_version = '0.2.0'
-
-" Personal options must be available before plugin declarations are evaluated.
-if filereadable($VIMRCDIR.'/custom/settings.vim')
-  execute 'source '.fnameescape($VIMRCDIR.'/custom/settings.vim')
-endif
 
 " g:asc_uname
 " TODO: dependencies for lua, python
@@ -225,15 +233,20 @@ nnoremap X $x
 "--------------------------------------------------------------
 " Plugins
 "--------------------------------------------------------------
-call plug#begin(g:onesimus_plugin_home)
-execute 'source '.fnameescape($VIMRCDIR.'/config/plugins.vim')
-
-" ------ IDE and UI features ------
 " Vim 9.0.1799 and newer ship the same EditorConfig implementation as an
 " optional package.  Keep older supported Vims coherent with one conditional
 " fallback instead of asking each machine to install an external parser.
 let s:onesimus_native_editorconfig =
       \ isdirectory($VIMRUNTIME.'/pack/dist/opt/editorconfig')
+
+if g:onesimus_core
+  filetype plugin indent on
+  syntax enable
+else
+call plug#begin(g:onesimus_plugin_home)
+execute 'source '.fnameescape($VIMRCDIR.'/config/plugins.vim')
+
+" ------ IDE and UI features ------
 if !s:onesimus_native_editorconfig
   Plug 'editorconfig/editorconfig-vim', { 'tag': 'v1.2.1' }
 endif
@@ -371,6 +384,7 @@ endif
 
 " ------ Initialize Plugin System ------
 call plug#end()
+endif
 for s:package in ['webpreview.vim', 'themes', 'autocorrect']
   let s:package = $VIMRCDIR.'/packages/'.s:package
   if index(split(&runtimepath, ','), s:package) < 0
@@ -522,6 +536,9 @@ endif
 "--------------------------------------------------------------
 " Load all functions
 SourceAll $VIMRCDIR.'/functions'
+if exists('g:onesimus_tex_module')
+  SourceAll $VIMRCDIR.'/functions/tex'
+endif
 
 " \ (global), \\ (this file) and F2-F6, from the tables in autoload/one.vim.
 call one#map()

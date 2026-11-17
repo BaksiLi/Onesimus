@@ -15,6 +15,88 @@ else
   let g:asc_uname = 'posix'
 endif
 
+" TODO: detect if the dependency are installed
+" Install nodejs and yarn if not installed; use shell script?
+"   https://gist.github.com/JamieMason/4761049
+" download skim if none for tex; download vint
+
+" Recursive source function
+function! s:source_all(dir)
+  for l:name in sort(readdir(a:dir))
+    let l:path = a:dir.'/'.l:name
+    if l:name =~# '\.vim$' && getftype(l:path) ==# 'file'
+      execute 'source '.fnameescape(l:path)
+    endif
+  endfor
+endfunction
+command! -nargs=1 -bar SourceAll  call s:source_all(<args>)
+
+function! PlugInstalled(name) abort
+  return has_key(get(g:, 'plugs', {}), a:name)
+        \ && isdirectory(get(g:plugs[a:name], 'dir', ''))
+endfunction
+
+" Keep reload outside functions sourced from functions/*.vim.  Otherwise the
+" active function would redefine itself halfway through :source (E127).
+function! OnesimusReloadConfig() abort
+  if !filereadable($MYVIMDOT)
+    echohl ErrorMsg
+    echomsg 'Onesimus configuration not found: '.$MYVIMDOT
+    echohl None
+    return
+  endif
+  if exists('*OnesimusTrack')
+    call OnesimusTrack('meta.reload')
+  endif
+  execute 'source '.fnameescape($MYVIMDOT)
+  echomsg 'Onesimus configuration reloaded.'
+endfunction
+
+" Some plugins moved GitHub owners without changing their vim-plug directory
+" names.  vim-plug treats that as a URI conflict, so migrate only exact known
+" legacy remotes before plugin declarations are read.
+function! s:MigratePluginOrigin(directory, old, new) abort
+  let l:dir = g:onesimus_plugin_home.'/'.a:directory
+  let l:config = l:dir.'/.git/config'
+  if !executable('git') || !filereadable(l:config)
+    return
+  endif
+
+  let l:origin = ''
+  let l:in_origin = 0
+  for l:line in readfile(l:config)
+    if l:line =~# '^\s*\['
+      let l:in_origin = l:line =~? '^\s*\[\s*remote\s\+"origin"\s*\]\s*$'
+    elseif l:in_origin && l:line =~? '^\s*url\s*='
+      let l:origin = substitute(l:line, '^\s*url\s*=\s*', '', '')
+      break
+    endif
+  endfor
+
+  let l:legacy = [
+        \ 'https://github.com/'.a:old,
+        \ 'https://github.com/'.a:old.'.git',
+        \ 'git@github.com:'.a:old,
+        \ 'git@github.com:'.a:old.'.git',
+        \ ]
+  if index(l:legacy, l:origin) >= 0
+    call system('git -C '.shellescape(l:dir).' remote set-url origin '
+          \ .shellescape('https://github.com/'.a:new.'.git'))
+  endif
+endfunction
+call s:MigratePluginOrigin('ale', 'w0rp/ale', 'dense-analysis/ale')
+call s:MigratePluginOrigin('nerdtree', 'scrooloose/nerdtree',
+      \ 'preservim/nerdtree')
+
+" Configuration
+" cf. https://github.com/skywind3000/vim/blob/master/bundle.vim
+
+" A core Vim has no third-party plugins to install.
+if g:onesimus_core
+  let g:onesimus_bootstrap_ready = 1
+  finish
+endif
+
 " Bootstrap vim-plug before any Plug declarations are evaluated.  Keep the
 " location configurable, but default to Vim's conventional autoload path.
 let g:onesimus_bootstrap_ready = 0
@@ -93,78 +175,3 @@ if s:plug_bootstrapped && !get(g:, 'onesimus_installing', 0)
           \ | call timer_start(0, function('<SID>FinishBootstrap'))
   augroup END
 endif
-" TODO: detect if the dependency are installed
-" Install nodejs and yarn if not installed; use shell script?
-"   https://gist.github.com/JamieMason/4761049
-" download skim if none for tex; download vint
-
-" Recursive source function
-function! s:source_all(dir)
-  for l:name in sort(readdir(a:dir))
-    let l:path = a:dir.'/'.l:name
-    if l:name =~# '\.vim$' && getftype(l:path) ==# 'file'
-      execute 'source '.fnameescape(l:path)
-    endif
-  endfor
-endfunction
-command! -nargs=1 -bar SourceAll  call s:source_all(<args>)
-
-function! PlugInstalled(name) abort
-  return has_key(get(g:, 'plugs', {}), a:name)
-        \ && isdirectory(get(g:plugs[a:name], 'dir', ''))
-endfunction
-
-" Keep reload outside functions sourced from functions/*.vim.  Otherwise the
-" active function would redefine itself halfway through :source (E127).
-function! OnesimusReloadConfig() abort
-  if !filereadable($MYVIMDOT)
-    echohl ErrorMsg
-    echomsg 'Onesimus configuration not found: '.$MYVIMDOT
-    echohl None
-    return
-  endif
-  if exists('*OnesimusTrack')
-    call OnesimusTrack('meta.reload')
-  endif
-  execute 'source '.fnameescape($MYVIMDOT)
-  echomsg 'Onesimus configuration reloaded.'
-endfunction
-
-" Some plugins moved GitHub owners without changing their vim-plug directory
-" names.  vim-plug treats that as a URI conflict, so migrate only exact known
-" legacy remotes before plugin declarations are read.
-function! s:MigratePluginOrigin(directory, old, new) abort
-  let l:dir = g:onesimus_plugin_home.'/'.a:directory
-  let l:config = l:dir.'/.git/config'
-  if !executable('git') || !filereadable(l:config)
-    return
-  endif
-
-  let l:origin = ''
-  let l:in_origin = 0
-  for l:line in readfile(l:config)
-    if l:line =~# '^\s*\['
-      let l:in_origin = l:line =~? '^\s*\[\s*remote\s\+"origin"\s*\]\s*$'
-    elseif l:in_origin && l:line =~? '^\s*url\s*='
-      let l:origin = substitute(l:line, '^\s*url\s*=\s*', '', '')
-      break
-    endif
-  endfor
-
-  let l:legacy = [
-        \ 'https://github.com/'.a:old,
-        \ 'https://github.com/'.a:old.'.git',
-        \ 'git@github.com:'.a:old,
-        \ 'git@github.com:'.a:old.'.git',
-        \ ]
-  if index(l:legacy, l:origin) >= 0
-    call system('git -C '.shellescape(l:dir).' remote set-url origin '
-          \ .shellescape('https://github.com/'.a:new.'.git'))
-  endif
-endfunction
-call s:MigratePluginOrigin('ale', 'w0rp/ale', 'dense-analysis/ale')
-call s:MigratePluginOrigin('nerdtree', 'scrooloose/nerdtree',
-      \ 'preservim/nerdtree')
-
-" Configuration
-" cf. https://github.com/skywind3000/vim/blob/master/bundle.vim
