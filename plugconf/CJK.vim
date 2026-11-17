@@ -19,8 +19,9 @@ let s:jieba_loading = 0
 let g:onesimus_jieba_filetypes = get(g:, 'onesimus_jieba_filetypes', [])
 
 function! OnesimusJiebaReady() abort
-  if !has('python3') || !exists('g:loaded_jieba_vim')
-        \ || !exists('*JiebaModelNmap')
+  " jieba loads only after OnesimusJiebaLoad() has found Python, so its own
+  " marker answers first; has('python3') here would load libpython at start.
+  if !exists('g:loaded_jieba_vim') || !exists('*JiebaModelNmap')
     return 0
   endif
 
@@ -172,8 +173,7 @@ function! s:JiebaFiletypeAllowed() abort
 endfunction
 
 function! s:MaybeLoadJieba() abort
-  if get(g:, 'onesimus_jieba_loaded', 0) || !has('python3')
-        \ || !s:JiebaFiletypeAllowed()
+  if get(g:, 'onesimus_jieba_loaded', 0) || !s:JiebaFiletypeAllowed()
     return
   endif
   if s:BufferHasHan()
@@ -182,8 +182,7 @@ function! s:MaybeLoadJieba() abort
 endfunction
 
 function! s:MaybeLoadJiebaCurrentLine() abort
-  if !get(g:, 'onesimus_jieba_loaded', 0)
-        \ && has('python3') && s:JiebaFiletypeAllowed()
+  if !get(g:, 'onesimus_jieba_loaded', 0) && s:JiebaFiletypeAllowed()
         \ && getline('.') =~# s:han_pattern
     call OnesimusJiebaLoad()
   endif
@@ -240,50 +239,12 @@ function! s:ManualJiebaEnable() abort
 endfunction
 command! OnesimusJiebaEnable call <SID>ManualJiebaEnable()
 
-function! s:ConfigureCJKProse() abort
-  " Let gq and 'textwidth' break between CJK characters, and keep :join from
-  " inserting spaces around them.  These are Vim's native multibyte flags.
-  setlocal formatoptions+=mM
-
-  " Preserve English words while displaying wrapped prose.  Wrapped Markdown
-  " list items align with their text rather than gaining arbitrary padding.
-  setlocal wrap linebreak breakindent
-  setlocal breakindentopt=list:-1
-
-  " Make Vim's native % motion understand common full-width prose pairs.
-  for l:pair in ['（:）', '「:」', '『:』', '【:】', '《:》']
-    if index(split(&l:matchpairs, ','), l:pair) < 0
-      let &l:matchpairs .= ','.l:pair
-    endif
-  endfor
-
-  " vim-surround shortcuts for the two common Chinese quotation levels:
-  " ysiwq -> 「word」, ysiwQ -> 『word』.
-  let b:surround_113 = "「\r」"
-  let b:surround_81 = "『\r』"
-
-  if !get(b:, 'onesimus_cjk_prose', 0)
-    let l:undo = 'setlocal formatoptions< wrap< linebreak< breakindent< matchpairs< '
-          \ . 'breakindentopt< | unlet! b:surround_113 b:surround_81 '
-          \ . 'b:onesimus_cjk_prose'
-    let b:undo_ftplugin = empty(get(b:, 'undo_ftplugin', ''))
-          \ ? l:undo : b:undo_ftplugin.' | '.l:undo
-    let b:onesimus_cjk_prose = 1
-  endif
-endfunction
-
-let g:onesimus_prose_filetypes = get(g:, 'onesimus_prose_filetypes',
-      \ ['gitcommit', 'markdown', 'text', 'tex'])
-
-augroup onesimus_cjk_prose
-  autocmd!
-  execute 'autocmd FileType '.join(g:onesimus_prose_filetypes, ',')
-        \ .' call <SID>ConfigureCJKProse()'
-augroup END
-
 augroup onesimus_jieba
   autocmd!
-  if has('python3') && has_key(get(g:, 'plugs', {}), 'jieba.vim')
+  " OnesimusJiebaLoad() checks has('python3'); asking here would load
+  " libpython at startup for buffers that never contain Han text.
+  if (has('python3_dynamic') || has('python3'))
+        \ && has_key(get(g:, 'plugs', {}), 'jieba.vim')
         \ && !get(g:, 'onesimus_jieba_loaded', 0)
         \ && empty(get(g:, 'onesimus_jieba_error', ''))
     autocmd BufReadPost,BufNewFile * call <SID>MaybeLoadJieba()
@@ -298,7 +259,4 @@ augroup END
 
 " Also makes :source $MYVIMRC take effect immediately after startup.
 call OnesimusConfigureJieba()
-if index(g:onesimus_prose_filetypes, &filetype) >= 0
-  call s:ConfigureCJKProse()
-endif
 call s:MaybeLoadJieba()

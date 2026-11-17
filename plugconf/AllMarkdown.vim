@@ -4,8 +4,8 @@
 let g:markdown_folding = 1
 let g:markdown_recommended_style = 0
 let g:markdown_syntax_conceal = 0
+" Updating a generated TOC is explicit, just like formatting with F6.
+let g:vmt_auto_update_on_save = get(g:, 'vmt_auto_update_on_save', 0)
 
-" Let markdown-preview choose the platform browser unless the user overrides
-" it before sourcing Onesimus.
-let g:mkdp_browser = get(g:, 'mkdp_browser', '')
-let g:mkdp_page_title = '${name}_preview'
+" WebPreview owns Markdown rendering, browser configuration and sessions.
+call webpreview#setup()

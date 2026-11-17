@@ -24,6 +24,10 @@ endif
 " reconciliation below covers a missing artifact in an unchanged checkout.
 
 try
+  " Capture HEAD, not the requested lock, before any plugin can change.
+  if exists('*OnesimusPluginSnapshot')
+    call OnesimusPluginSnapshot()
+  endif
   " vim-plug upgrades itself transactionally and keeps the old copy as
   " plug.vim.old.  A network failure here does not prevent the installed
   " manager from reconciling plugins below.
@@ -82,41 +86,6 @@ function! s:ReconcileClap(errors) abort
   endif
 endfunction
 
-function! s:ReconcileMarkdownPreview(errors) abort
-  let l:dir = s:PluginDir('markdown-preview.nvim')
-  if empty(l:dir)
-    return
-  endif
-  try
-    let l:manifest = l:dir.'/package.json'
-    if !filereadable(l:manifest)
-      throw 'package.json is missing'
-    endif
-    let l:package = json_decode(join(readfile(l:manifest), "\n"))
-    if type(l:package) != type({})
-          \ || type(get(l:package, 'version', 0)) != type('')
-          \ || empty(trim(l:package.version))
-      throw 'package.json has no usable version'
-    endif
-    let l:expected = trim(l:package.version)
-
-    call plug#load('markdown-preview.nvim')
-    " Autoload functions intentionally do not make exists('*name#func') true
-    " before their first call; invoke them and let Vim resolve runtimepath.
-    silent call mkdp#util#install_sync(v:true)
-    let l:actual = trim(mkdp#util#pre_build_version())
-    if empty(l:actual)
-      throw 'preview binary is unavailable after installation'
-    endif
-    if l:actual !=# l:expected
-      throw printf('preview binary version mismatch: expected %s, got %s',
-            \ l:expected, l:actual)
-    endif
-  catch
-    call add(a:errors, 'markdown-preview.nvim build: '.v:exception)
-  endtry
-endfunction
-
 function! s:ReconcileJieba(errors) abort
   let l:dir = s:PluginDir('jieba.vim')
   if empty(l:dir) || !has('python3')
@@ -136,7 +105,6 @@ function! s:ReconcileJieba(errors) abort
 endfunction
 
 call s:ReconcileClap(s:errors)
-call s:ReconcileMarkdownPreview(s:errors)
 call s:ReconcileJieba(s:errors)
 
 let s:missing = []

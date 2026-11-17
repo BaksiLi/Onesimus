@@ -1,71 +1,94 @@
-" Focused writing mode with reversible state.
+" Focus changes only presentation; source-layout and spelling are independent.
 
 let g:onesimus_wordproc_state = get(g:, 'onesimus_wordproc_state', {})
 
-function! s:SaveOptions() abort
-  return {
-        \ 'winid': win_getid(),
-        \ 'number': &l:number,
-        \ 'relativenumber': &l:relativenumber,
-        \ 'textwidth': &l:textwidth,
-        \ 'cursorline': &l:cursorline,
-        \ 'wrap': &l:wrap,
-        \ 'linebreak': &l:linebreak,
-        \ 'spell': &l:spell,
-        \ 'plugins': PlugInstalled('goyo.vim')
-        \   && PlugInstalled('limelight.vim')
-        \   && exists(':Goyo') && exists(':Limelight'),
-        \ 'goyo_active': exists('t:goyo_revert'),
-        \ 'limelight_active': exists('#limelight'),
-        \ 'enabled_goyo': 0,
-        \ 'enabled_limelight': 0,
-        \ }
+function! OnesimusWritingFocusActive() abort
+  return !empty(g:onesimus_wordproc_state)
 endfunction
 
-function! s:RestoreOptions(state) abort
-  if has_key(a:state, 'winid') && win_id2win(a:state.winid) > 0
-    call win_gotoid(a:state.winid)
-  endif
-  for l:option in ['number', 'relativenumber', 'textwidth', 'cursorline',
-        \ 'wrap', 'linebreak', 'spell']
-    if has_key(a:state, l:option)
-      execute 'let &l:'.l:option.' = '.string(a:state[l:option])
-    endif
+function! s:SaveView() abort
+  let l:view = {'winid': win_getid(), 'bufnr': bufnr(''), 'options': {}}
+  for l:option in ['number', 'relativenumber', 'cursorline', 'wrap',
+        \ 'linebreak', 'breakindent', 'showbreak']
+    let l:view.options[l:option] = eval('&l:'.l:option)
   endfor
+  return l:view
+endfunction
+
+function! s:RestoreView(state) abort
+  let l:view = get(a:state, 'view', {})
+  if empty(l:view)
+    return
+  endif
+  let l:windows = getwininfo(l:view.winid)
+  if !empty(l:windows) && l:windows[0].bufnr == l:view.bufnr
+    let l:commands = []
+    for [l:option, l:value] in items(l:view.options)
+      call add(l:commands, 'let &l:'.l:option.' = '.string(l:value))
+    endfor
+    " Restoring another window must not switch tabs (which can close Goyo),
+    " or apply the old buffer's settings to a different draft.
+    call win_execute(l:view.winid, join(l:commands, ' | '))
+  endif
+  let a:state.view = {}
 endfunction
 
 function! s:Enable() abort
-  let l:state = s:SaveOptions()
-
-  if l:state.plugins
-    if !l:state.goyo_active
-      silent Goyo
-      let l:state.enabled_goyo = 1
-    endif
-    if !l:state.limelight_active
-      silent Limelight
-      let l:state.enabled_limelight = 1
-    endif
-  else
-    setlocal nonumber norelativenumber nocursorline
-    setlocal textwidth=80 wrap linebreak
+  let l:state = {'enabled_goyo': 0, 'enabled_limelight': 0}
+  if PlugInstalled('goyo.vim') && exists(':Goyo') && !exists('t:goyo_revert')
+    silent Goyo
+    let l:state.enabled_goyo = 1
+    let l:state.goyo_win = win_getid()
   endif
+  if PlugInstalled('limelight.vim') && exists(':Limelight') && !exists('#limelight')
+    silent Limelight
+    let l:state.enabled_limelight = 1
+  endif
+
+  " Snapshot the window we actually modify: Goyo creates a temporary tab.
+  let l:state.view = s:SaveView()
+  setlocal nonumber norelativenumber nocursorline wrap linebreak breakindent
+  let &l:showbreak = '↳ '
   let g:onesimus_wordproc_state = l:state
   echomsg 'Word processing mode on.'
 endfunction
 
 function! s:Disable() abort
-  let l:state = copy(g:onesimus_wordproc_state)
+  let l:state = g:onesimus_wordproc_state
+  " GoyoLeave/BufLeave can fire during teardown.  Release ownership first.
+  let g:onesimus_wordproc_state = {}
+  call s:RestoreView(l:state)
   if get(l:state, 'enabled_limelight', 0) && exists(':Limelight')
     silent! Limelight!
   endif
   if get(l:state, 'enabled_goyo', 0) && exists(':Goyo')
+        \ && win_id2tabwin(l:state.goyo_win)[0] == tabpagenr()
+        \ && exists('t:goyo_revert')
     silent! Goyo!
   endif
-  call s:RestoreOptions(l:state)
-  let g:onesimus_wordproc_state = {}
   echomsg 'Word processing mode off.'
 endfunction
+
+function! s:LeaveView() abort
+  let l:state = g:onesimus_wordproc_state
+  let l:view = get(l:state, 'view', {})
+  if empty(l:view) || l:view.winid != win_getid() || l:view.bufnr != bufnr('')
+    return
+  endif
+  " Vim remembers window options for hidden buffers.  Restore before leaving,
+  " while this window still displays the draft whose options were borrowed.
+  call s:RestoreView(l:state)
+  if !get(l:state, 'enabled_goyo', 0)
+    call s:Disable()
+  endif
+endfunction
+
+augroup onesimus_writing_focus
+  autocmd!
+  autocmd BufLeave,WinLeave * call <SID>LeaveView()
+  autocmd User GoyoLeave if get(g:onesimus_wordproc_state, 'enabled_goyo', 0)
+        \ | call <SID>Disable() | endif
+augroup END
 
 function! s:ToggleWordProcessingMode() abort
   if empty(g:onesimus_wordproc_state)

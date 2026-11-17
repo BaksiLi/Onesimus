@@ -970,7 +970,7 @@ fi
 assert_same "$work/old-vim-vimrc" "$old_vim_home/.vimrc"
 assert_absent "$old_vim_root"
 assert_contains "$work/old-vim.log" \
-  'Vim 8.2 or newer with +job, +channel, and +timers is required'
+  'Vim 8.2+ with +job, +channel, +timers, and sha256() is required'
 
 assert_contains "$installer" 'https://github.com/BaksiLi/Onesimus.git'
 

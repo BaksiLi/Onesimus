@@ -28,7 +28,8 @@ if empty($MYVIMDOT)
 endif
 
 if v:version < 802 || !has('job') || !has('channel') || !has('timers')
-  echoerr 'Onesimus requires Vim 8.2 or newer with +job, +channel, and +timers.'
+      \ || !exists('*sha256')
+  echoerr 'Onesimus requires Vim 8.2+ with +job, +channel, +timers, and sha256().'
   finish
 endif
 
@@ -63,6 +64,11 @@ endif
 
 let g:onesimus_version = '0.2.0'
 
+" Personal options must be available before plugin declarations are evaluated.
+if filereadable($VIMRCDIR.'/custom/settings.vim')
+  execute 'source '.fnameescape($VIMRCDIR.'/custom/settings.vim')
+endif
+
 " g:asc_uname
 " TODO: dependencies for lua, python
 
@@ -72,6 +78,17 @@ let g:onesimus_version = '0.2.0'
 " Set alternative leader key (default: '\')
 let mapleader = '\'
 let maplocalleader = ','
+
+" One remote preview hostname across document renderers.
+let g:onesimus_preview_host = get(g:, 'onesimus_preview_host',
+      \ get(g:, 'onesimus_tex_browser_host', '127.0.0.1'))
+let g:webpreview_host = get(g:, 'webpreview_host', g:onesimus_preview_host)
+let g:webpreview_browser = get(g:, 'webpreview_browser',
+      \ get(g:, 'onesimus_preview_browser', ''))
+let g:webpreview_browserfunc = 'OnesimusOpenBrowser'
+let g:webpreview_notify = 'OnesimusNotify'
+let g:webpreview_open = extend({'tex': 'OnesimusTexView'}, get(g:, 'webpreview_open', {}))
+let g:webpreview_tex_port = get(g:, 'webpreview_tex_port', get(g:, 'onesimus_tex_browser_port', 0))
 
 " ------ Meta ------
 " Stable Onesimus entrypoints are defined after plugin setup.
@@ -119,10 +136,27 @@ set showmatch
 set ignorecase
 " set smartcase
 
-set nobackup
-set nowritebackup
-set autoread      " if file is edited outside, reload automatically
-set confirm       " confirm when read-only
+" Source writes are always explicit.  Swap/undo/backups provide recovery
+" without turning idle timers, compilation, or focus changes into writes.
+set noautowrite noautowriteall
+set autoread
+set confirm       " ask before abandoning a modified buffer
+set writebackup
+
+let s:onesimus_state_base = empty($XDG_STATE_HOME)
+      \ ? expand('~/.local/state') : expand($XDG_STATE_HOME)
+let s:onesimus_recovery = s:onesimus_state_base.'/onesimus/vim'
+if isdirectory(s:onesimus_recovery)
+      \ || mkdir(s:onesimus_recovery, 'p', 0700)
+  for s:recovery_kind in ['backup', 'swap', 'undo']
+    call mkdir(s:onesimus_recovery.'/'.s:recovery_kind, 'p', 0700)
+  endfor
+  let &backupdir = s:onesimus_recovery.'/backup//'
+  let &directory = '.,'.s:onesimus_recovery.'/swap//,/var/tmp//,/tmp//'
+  let &undodir = s:onesimus_recovery.'/undo//'
+  set backup undofile
+endif
+unlet! s:recovery_kind
 
 set cmdheight=1
 set sidescroll=10
@@ -133,6 +167,7 @@ set timeoutlen=750
 " Manual folding
 set foldmethod=manual
 set nofoldenable
+set foldopen+=jump,insert
 "nnoremap <space> @=((foldclosed(line('.')<0)?'zc':'zo'))<CR>
 
 " ------ Indentation ------
@@ -148,9 +183,6 @@ set softtabstop=2
 
 augroup set_indents
   autocmd!
-  au Filetype tex setlocal
-    \ concealcursor-=n
-    \ conceallevel=1
   au Filetype yaml setlocal
     \ expandtab
     \ tabstop=4
@@ -174,8 +206,10 @@ augroup end
 " Fast split navigations
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
-nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
+" Keep Ctrl-L's familiar redraw meaning for unreliable remote terminals.
+" Moving to the right split remains available as Vim's native Ctrl-W l.
+nnoremap <silent> <C-L> :OnesimusRedraw<CR>
 
 " Stable fuzzy-finder actions.  The wrapper explains how to install vim-clap
 " instead of leaving a raw E492 when plugins have not been bootstrapped yet.
@@ -215,6 +249,7 @@ nnoremap X $x
 " Plugins
 "--------------------------------------------------------------
 call plug#begin(g:onesimus_plugin_home)
+execute 'source '.fnameescape($VIMRCDIR.'/config/plugins.vim')
 
 " ------ IDE and UI features ------
 " Vim 9.0.1799 and newer ship the same EditorConfig implementation as an
@@ -249,15 +284,12 @@ Plug 'liuchengxu/vim-clap', {
 unlet g:onesimus_clap_install
 
 " ------ Colour Schemes ------
-" TODO: Airline remove battery, add pyenv, cf :h statusline
-"   if the font is not compatible, use another separator
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-
-Plug 'morhetz/gruvbox'
-Plug 'junegunn/seoul256.vim'
-Plug 'arcticicestudio/nord-vim'
-Plug 'sickill/vim-monokai'
+" Gruvbox and Nord live in packages/themes; the status and tab lines are
+" Onesimus's own (functions/Statusline.vim).
+if get(g:, 'onesimus_extra_themes', 0)
+  Plug 'junegunn/seoul256.vim'
+  Plug 'sickill/vim-monokai'
+endif
 
 " ------ Git Support ------
 Plug 'tpope/vim-fugitive'
@@ -276,20 +308,20 @@ Plug 'SirVer/ultisnips'
 Plug 'dense-analysis/ale'
 
 " ------ Lang-specific Plugs ------
-" Markdown
-Plug 'iamcco/markdown-preview.nvim', {
-      \ 'do': ':call mkdp#util#install_sync()',
-      \ 'for': 'markdown',
-      \ }
-Plug 'BaksiLi/mdtoc.vim', { 'for': 'markdown' }
+" Markdown preview is bundled with WebPreview.vim; external providers are optional.
+call OnesimusPlugin('BaksiLi/mdtoc.vim', { 'for': 'markdown' })
 
 " TeX
 " requires latexmk, for example: `sudo tlmgr install latexmk`
-Plug 'lervag/vimtex', { 'for': ['tex', 'bib'] }
+" VimTeX already loads through ftplugins/autoload.  External lazy loading can
+" break inverse search; v2.15 preserves Onesimus's unqualified Vim 8.2 floor.
+Plug 'lervag/vimtex', { 'tag': 'v2.15' }
 
 " VimScript Reference
-Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion' }
-Plug 'junegunn/vader.vim', { 'on': 'Vader' }
+if get(g:, 'onesimus_developer_plugins', 0)
+  Plug 'tweekmonster/helpful.vim', { 'on': 'HelpfulVersion' }
+  Plug 'junegunn/vader.vim', { 'on': 'Vader' }
+endif
 
 " Highlight not already covered by Vim's current runtime.
 Plug 'BaksiLi/vim-applescript'
@@ -314,11 +346,14 @@ Plug 'tpope/vim-repeat'
 " Comment operator (gc)
 Plug 'tpope/vim-commentary'
 " Tabular
-Plug 'godlygeek/tabular'
+Plug 'godlygeek/tabular', { 'on': 'Tabularize' }
 
 " Chinese word motions and text objects.  Keep the plugin out of Vim builds
 " without +python3, and pin its native backend to a reproducible release.
-if has('python3')
+" has('python3') loads libpython in dynamic builds (about 5 ms in MacVim), so
+" startup asks only whether the feature was compiled in; the real check waits
+" until a buffer contains Han text.
+if has('python3_dynamic') || has('python3')
   let g:jieba_vim_keymap = 0
   Plug 'kkew3/jieba.vim', {
         \ 'tag': 'v2.1.1',
@@ -351,12 +386,22 @@ Plug 'junegunn/limelight.vim', { 'on': 'Limelight' }
 " Plug 'jamessan/vim-gnupg'
 
 " ------ Load Custom Plugins ------
+" Lock the distribution before personal declarations, which may override it.
+call OnesimusLockPlugins()
 if filereadable($VIMRCDIR.'/custom/plugins.vim')
   execute 'source '.fnameescape($VIMRCDIR.'/custom/plugins.vim')
 endif
 
 " ------ Initialize Plugin System ------
 call plug#end()
+for s:package in ['webpreview.vim', 'themes', 'autocorrect']
+  let s:package = $VIMRCDIR.'/packages/'.s:package
+  if index(split(&runtimepath, ','), s:package) < 0
+    execute 'set runtimepath^='.fnameescape(s:package)
+  endif
+endfor
+unlet s:package
+runtime plugin/webpreview.vim
 
 " plug#end() enables syntax plus filetype plugins/indent exactly once, after
 " the final runtimepath is known.
@@ -404,6 +449,13 @@ endif
 " Load config files
 SourceAll $VIMRCDIR.'/plugconf'
 
+" The provider hook also covers an explicit :EditorConfigReload.  Register
+" once across :OnesimusReload; the named function picks up later definitions.
+if exists(':EditorConfigReload') && !get(g:, 'onesimus_prose_editorconfig_hook', 0)
+  call editorconfig#AddNewHook(function('OnesimusEnforceProseSoftWrap'))
+  let g:onesimus_prose_editorconfig_hook = 1
+endif
+
 " AsyncRun for fugitive
 if PlugInstalled('asyncrun.vim')
   command! -bang -nargs=* -complete=file Make AsyncRun -program=make @ <args>
@@ -413,21 +465,49 @@ endif
 if exists('+termguicolors')
   set termguicolors
 endif
+
+" Zellij versions before 0.44.1 could leave the active background colour in
+" end-of-line padding when Vim scrolled one screen row.  A long-lived remote
+" session may still be served by that older process after the client binary is
+" upgraded.  Stop advertising background-colour erase inside Zellij; Vim then
+" repaints those cells explicitly.  The small bandwidth cost is preferable to
+" stale coloured stripes on a touch terminal.
+if !exists('s:onesimus_zellij_t_ut_saved')
+  let s:onesimus_zellij_t_ut_saved = ''
+  let s:onesimus_zellij_t_ut_changed = 0
+endif
+function! OnesimusConfigureTerminalRendering() abort
+  if !exists('+t_ut')
+    return
+  endif
+  if !empty($ZELLIJ) && get(g:, 'onesimus_zellij_bce_workaround', 1)
+    if !s:onesimus_zellij_t_ut_changed
+      let s:onesimus_zellij_t_ut_saved = &t_ut
+    endif
+    set t_ut=
+    let s:onesimus_zellij_t_ut_changed = 1
+  elseif s:onesimus_zellij_t_ut_changed
+    let &t_ut = s:onesimus_zellij_t_ut_saved
+    let s:onesimus_zellij_t_ut_changed = 0
+  endif
+endfunction
+call OnesimusConfigureTerminalRendering()
+
+function! OnesimusRedraw() abort
+  redraw!
+  echohl MoreMsg
+  echomsg 'Onesimus: terminal display redrawn.'
+  echohl None
+  return 1
+endfunction
+command! OnesimusRedraw call OnesimusRedraw()
 if has('gui_running')
-  try
-    colorscheme nord
-  catch /^Vim\%((\a\+)\)\=:E185/
-    colorscheme default
-  endtry
+  set guioptions-=T
+  set guitablabel=%M%t
+  colorscheme nord
 else
-  let g:gruvbox_improved_warnings = 1
   set background=dark
-  try
-    colorscheme gruvbox
-    let g:airline_theme = 'gruvbox'
-  catch /^Vim\%((\a\+)\)\=:E185/
-    colorscheme default
-  endtry
+  colorscheme gruvbox
 endif
 
 " Change cursor under different modes (for iTerm2 only)
@@ -443,9 +523,21 @@ endif
 " TODO: if two tmux detected, set notermguicolors to avoid colour lost
 
 " start a clientserver under terminal?
-" if empty(v:servername) && exists('*remote_startserver')
-" call remote_startserver('VIM')
-" endif
+" VimTeX inverse search needs a server even in terminal Vim.  A per-process
+" name avoids collisions across tmux/zellij panes and simultaneous SSH jobs.
+if has('clientserver') && empty(v:servername) && exists('*remote_startserver')
+      \ && has('ttyin') && has('ttyout')
+      \ && (!empty($DISPLAY) || has('socketserver'))
+  let s:onesimus_server_error = v:errmsg
+  try
+    call remote_startserver('ONESIMUS_'.getpid())
+  catch
+    " Some headless builds advertise clientserver without a usable transport.
+  finally
+    let v:errmsg = s:onesimus_server_error
+    unlet s:onesimus_server_error
+  endtry
+endif
 
 
 "--------------------------------------------------------------
@@ -458,7 +550,7 @@ SourceAll $VIMRCDIR.'/functions'
 nmap <silent> <F2> :OnesimusBufferSymbols<cr>
 nmap <silent> <F3> :OnesimusTree<cr>
 nmap <F4> :OpenREPL<cr>
-nmap <F5> :CompileRun<cr>
+nnoremap <silent> <F5> :CompileRun<CR>
 nmap <silent> <F6> :OnesimusFormat<cr>
 
 nnoremap <silent> <leader>et :OnesimusTags<cr>

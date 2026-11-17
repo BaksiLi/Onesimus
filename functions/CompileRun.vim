@@ -8,7 +8,7 @@ let g:asyncrun_bell = get(g:, 'asyncrun_bell', 1)
 let g:compilerun_timer = get(g:, 'compilerun_timer', 1)
 
 let s:supported_filetypes = [
-      \ 'c', 'cpp', 'dot', 'go', 'haskell', 'html', 'java', 'markdown',
+      \ 'c', 'cpp', 'dot', 'go', 'haskell', 'html', 'java', 'markdown', 'cogitatum',
       \ 'python', 'ruby', 'rust', 'sh', 'tex', 'typescript', 'vim',
       \ ]
 
@@ -210,12 +210,18 @@ function! s:CompileRun() abort
     return s:Error('cannot run filetype '.(empty(l:filetype) ? '(none)' : l:filetype).'.')
   endif
 
+  if index(['tex', 'markdown', 'cogitatum'], l:filetype) >= 0
+    return OnesimusWritingPreview(1)
+  endif
+
   if empty(bufname('%'))
     return s:Error('save this buffer before running it.')
   endif
   let l:source = expand('%:p')
 
   try
+    " Non-TeX languages keep Vim's native timestamp/write behavior.  The
+    " fingerprinted safe-write facade is deliberately scoped to TeX/Bib.
     update
   catch
     return s:Error('could not save '.fnamemodify(l:source, ':t').': '.v:exception)
@@ -225,20 +231,7 @@ function! s:CompileRun() abort
     call OnesimusTrack(l:filetype ==# 'haskell' ? 'code.check' : 'code.run')
   endif
 
-  if l:filetype ==# 'markdown'
-    if exists(':MarkdownPreview') == 2
-      MarkdownPreview
-      echomsg 'Markdown preview toggled.'
-      return 1
-    endif
-    return s:Error('Markdown preview is unavailable; run :PlugInstall markdown-preview.nvim.')
-  elseif l:filetype ==# 'tex'
-    if exists(':VimtexCompile') == 2
-      VimtexCompile
-      return 1
-    endif
-    return s:Error('VimTeX is unavailable; run :PlugInstall vimtex.')
-  elseif l:filetype ==# 'vim'
+  if l:filetype ==# 'vim'
     execute 'source '.fnameescape(l:source)
     return 1
   endif

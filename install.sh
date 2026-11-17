@@ -333,11 +333,11 @@ command -v "$vim_bin" >/dev/null 2>&1 || fail 'Vim is required'
 # Ask Vim itself: feature names and v:version are less fragile than parsing the
 # human-readable --version output, and catch minimal builds as well as old ones.
 if ! "$vim_bin" -Nu NONE -U NONE -i NONE -n -es \
-    --cmd 'if v:version < 802 || !has("job") || !has("channel") || !has("timers") | cquit 42 | endif' \
+    --cmd 'if v:version < 802 || !has("job") || !has("channel") || !has("timers") || !exists("*sha256") | cquit 42 | endif' \
     -c 'qa!' </dev/null >/dev/null 2>&1; then
   vim_version=$({ "$vim_bin" --version 2>/dev/null || true; } | sed -n '1p')
   [[ -n $vim_version ]] || vim_version='unknown Vim build'
-  fail "Vim 8.2 or newer with +job, +channel, and +timers is required ($vim_version)"
+  fail "Vim 8.2+ with +job, +channel, +timers, and sha256() is required ($vim_version)"
 fi
 
 is_onesimus_checkout() {

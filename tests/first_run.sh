@@ -39,6 +39,10 @@ function! plug#onesimus_register(repository, ...) abort
   let g:plugs[l:name] = {'dir': expand('~/.vim/bundle/'.l:name)}
 endfunction
 
+function! plug#(repository, ...) abort
+  return call('plug#onesimus_register', [a:repository] + a:000)
+endfunction
+
 function! plug#end() abort
   silent! delcommand Plug
   let g:onesimus_fixture_plug_end = get(g:,

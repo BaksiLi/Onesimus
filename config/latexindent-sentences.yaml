@@ -1,0 +1,13 @@
+# Explicit migration profile for :OnesimusTexSentenceLines.
+#
+# This is deliberately not loaded by F6, BufWrite, or BufRead.  Sentence
+# detection is heuristic, so the command changes only the current buffer and
+# leaves the result unsaved for review.
+modifyLineBreaks:
+  preserveBlankLines: 1
+  condenseMultipleBlankLinesInto: 0
+  oneSentencePerLine:
+    manipulateSentences: 1
+    removeSentenceLineBreaks: 1
+    multipleSpacesToSingle: 0
+    textWrapSentences: 0

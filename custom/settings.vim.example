@@ -1,0 +1,13 @@
+" Copy to custom/settings.vim. Options load before plugin declarations.
+
+" Extra themes: seoul256 and monokai.
+" let g:onesimus_extra_themes = 1
+
+" Vimscript development: HelpfulVersion and Vader.
+" let g:onesimus_developer_plugins = 1
+
+" Develop MdToc from a local checkout.
+" let g:onesimus_plugin_overrides = {'mdtoc.vim': '~/Developer/mdtoc.vim'}
+
+" Keep TOC updates explicit. Opt in only if save should update generated text.
+" let g:vmt_auto_update_on_save = 1

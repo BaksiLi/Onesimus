@@ -7,10 +7,50 @@ let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
 let g:ale_lint_on_save = 1
 
+" Linting the first file starts its linters and language servers before Vim
+" draws anything: about 20 ms in MacVim, several times that on a small
+" machine over SSH. Start with linting on entry off, so the screen comes
+" first, then turn it on and check the windows that are already open.
+let g:ale_lint_on_enter = v:vim_did_enter
+function! s:LintAfterStart(...) abort
+  let g:ale_lint_on_enter = 1
+  if !exists('g:loaded_ale')
+    return
+  endif
+  call ale#events#Init()
+  for l:buf in uniq(sort(tabpagebuflist()))
+    call ale#Queue(0, 'lint_file', l:buf)
+  endfor
+endfunction
+augroup onesimus_ale_start
+  autocmd!
+  autocmd VimEnter * ++once call timer_start(0, function('s:LintAfterStart'))
+augroup END
+
 let g:ale_sign_column_always = 1
-let g:ale_echo_cursor = 1
 let g:ale_hover_to_floating_preview = 1
 let g:ale_floating_preview = 1
+
+" Signs mark every problem line; the message itself appears only on the
+" cursor line, in ALE's own comment-coloured annotation. The prefix drops
+" ALE's default comment leader: in TeX a "% W:" annotation reads like a
+" source comment. Vim without text properties echoes the message instead.
+let g:ale_virtualtext_cursor = 'current'
+let g:ale_virtualtext_prefix = '  %type%: '
+let g:ale_echo_cursor = !(has('patch-9.0.0297') && has('textprop')
+      \ && has('popupwin'))
+" ALE links its annotation groups once, on first use; :colorscheme clears
+" them, so restore the links after every scheme.
+function! s:QuietAnnotations() abort
+  for l:severity in ['Error', 'Warning', 'Info', 'StyleError', 'StyleWarning']
+    execute 'highlight default link ALEVirtualText'.l:severity 'Comment'
+  endfor
+endfunction
+augroup onesimus_diagnostic_colours
+  autocmd!
+  autocmd ColorScheme * call <SID>QuietAnnotations()
+augroup END
+call s:QuietAnnotations()
 
 " ALE's completion remains Vim-native.  UltiSnips keeps its independent
 " <C-e> expansion path, so completion and personal snippets do not compete.
@@ -59,7 +99,7 @@ let g:ale_python_pylsp_config = {
       \ },
       \ }
 
-let s:markdown_linters = ['markdownlint']
+let s:markdown_linters = ['markdownlint', 'autocorrect']
 if s:LinterAvailable('markdown', 'marksman')
   call insert(s:markdown_linters, 'marksman')
 endif
@@ -79,7 +119,8 @@ let g:ale_linters = {
       \ 'python': ['pylsp', 'ruff'],
       \ 'rust': ['analyzer'],
       \ 'sh': ['language_server', 'shellcheck'],
-      \ 'tex': ['chktex'],
+      \ 'tex': ['chktex', 'autocorrect'],
+      \ 'text': ['autocorrect'],
       \ 'typescript': ['tsserver', 'eslint'],
       \ 'typescriptreact': ['tsserver', 'eslint'],
       \ 'vim': ['vimls', 'vint'],
@@ -214,6 +255,10 @@ augroup END
 " F6 remains the single formatting gesture.  Fixing on save stays off so an
 " upgrade never rewrites a file merely because it was opened and saved.
 let g:ale_fix_on_save = 0
+" Generic whitespace cleanup destroys Markdown hard breaks and may change
+" fenced/verbatim examples.  Let each markup-aware formatter own its output.
+" Prettier's default proseWrap=preserve respects authored sentence/clause
+" lines; a project's explicit proseWrap setting still wins.
 let g:ale_fixers = {
       \ '*': s:clean_text,
       \ 'c': ['clangformat'] + s:clean_text,
@@ -223,15 +268,28 @@ let g:ale_fixers = {
       \ 'javascript': ['eslint', 'prettier'] + s:clean_text,
       \ 'javascriptreact': ['eslint', 'prettier'] + s:clean_text,
       \ 'json': ['prettier'] + s:clean_text,
-      \ 'markdown': ['prettier'] + s:clean_text,
+      \ 'markdown': ['prettier', 'onesimus#autocorrect#Fix'],
       \ 'python': s:clean_text,
       \ 'rust': ['rustfmt'] + s:clean_text,
       \ 'sh': ['shfmt'] + s:clean_text,
-      \ 'tex': ['latexindent'] + s:clean_text,
+      \ 'tex': ['latexindent', 'onesimus#autocorrect#Fix'],
+      \ 'text': ['onesimus#autocorrect#Fix'] + s:clean_text,
       \ 'typescript': ['eslint', 'prettier'] + s:clean_text,
       \ 'typescriptreact': ['eslint', 'prettier'] + s:clean_text,
       \ 'yaml': ['prettier'] + s:clean_text,
       \ }
+
+" MacTeX's Perl script may lack modules while Homebrew's packaged executable
+" includes them. Both F6 and sentence layout use ALE's one shared setting.
+if !exists('g:ale_tex_latexindent_executable')
+  for s:latexindent in ['/opt/homebrew/bin/latexindent', '/usr/local/bin/latexindent']
+    if executable(s:latexindent)
+      let g:ale_tex_latexindent_executable = s:latexindent
+      break
+    endif
+  endfor
+  unlet! s:latexindent
+endif
 
 " Semantic mappings appear only after an LSP server has actually connected.
 " Treat them as a reversible buffer lease: FileType changes can invalidate an

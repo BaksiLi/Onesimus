@@ -17,30 +17,22 @@ trap 'rm -rf "$work"' EXIT HUP INT TERM
 fixture="$work/update cases with a 'quote'"
 mkdir -p "$fixture"
 vimrc="$fixture/stub vimrc.vim"
-stub_runtime="$fixture/stub runtime"
-mkdir -p "$stub_runtime/autoload"
-
-{
-  printf '%s\n' \
-    'function! plug#load(name) abort' \
-    "  execute 'set runtimepath^='.fnameescape(g:plugs[a:name].dir)" \
-    'endfunction'
-} >"$stub_runtime/autoload/plug.vim"
-
 {
   printf '%s\n' \
     'set nocompatible' \
-    "execute 'set runtimepath^='.fnameescape(\$ONESIMUS_STUB_RUNTIME)" \
     'let s:plugin_root = $ONESIMUS_STUB_PLUGIN_ROOT' \
     "let g:plugs = {'present': {'uri': 'https://example.invalid/present.git', 'dir': s:plugin_root.'/present'}}" \
-    "let g:plugs['vim-clap'] = {'dir': '', 'do': './install.sh'}" \
-    "let g:plugs['markdown-preview.nvim'] = {'dir': \$ONESIMUS_STUB_MARKDOWN_DIR, 'do': ':call mkdp#util#install_sync()'}" \
+    "let g:plugs['vim-clap'] = {'dir': \$ONESIMUS_STUB_CLAP_DIR, 'do': './install.sh'}" \
     "let g:plugs['jieba.vim'] = {'dir': '', 'do': ':call OnesimusJiebaInstall()'}" \
     "if \$ONESIMUS_STUB_MODE ==# 'missing'" \
     "  let g:plugs.absent = {'uri': 'https://example.invalid/absent.git', 'dir': s:plugin_root.'/absent'}" \
     'endif' \
+    'function! OnesimusPluginSnapshot() abort' \
+    "  call writefile(['snapshot'], \$ONESIMUS_STUB_LOG, 'a')" \
+    "  if \$ONESIMUS_STUB_MODE ==# 'snapshot-error' | throw 'snapshot refused' | endif" \
+    'endfunction' \
     'function! OnesimusTestPlugUpdate(args) abort' \
-    "  for name in ['vim-clap', 'markdown-preview.nvim', 'jieba.vim']" \
+    "  for name in ['vim-clap', 'jieba.vim']" \
     "    if !has_key(g:plugs[name], 'do') | throw 'update helper removed '.name.' hook' | endif" \
     '  endfor' \
     "  call writefile(['update '.a:args], \$ONESIMUS_STUB_LOG, 'a')" \
@@ -72,8 +64,7 @@ run_case() {
   expected_reconcile=${5:-}
   case_dir="$fixture/$case_name"
   plugin_root="$case_dir/plugin home"
-  markdown_dir=
-  markdown_actual=
+  clap_dir=
   report="$case_dir/update report"
   calls="$case_dir/stub calls"
   vim_log="$case_dir/vim output"
@@ -82,26 +73,21 @@ run_case() {
   : >"$calls"
 
   case $mode in
-    markdown-current|markdown-stale)
-      markdown_dir="$plugin_root/markdown-preview.nvim"
-      mkdir -p "$markdown_dir/autoload/mkdp"
-      if [ "$mode" = markdown-current ]; then
-        markdown_expected=0.0.10
-        markdown_actual=' 0.0.10 '
-      else
-        markdown_expected=0.0.11
-        markdown_actual=0.0.10
-      fi
-      printf '{"version":"%s"}\n' "$markdown_expected" >"$markdown_dir/package.json"
-      {
-        printf '%s\n' \
-          'function! mkdp#util#install_sync(...) abort' \
-          "  call writefile(['markdown-install'], \$ONESIMUS_STUB_LOG, 'a')" \
-          'endfunction' \
-          'function! mkdp#util#pre_build_version() abort' \
-          '  return $ONESIMUS_STUB_MARKDOWN_ACTUAL' \
-          'endfunction'
-      } >"$markdown_dir/autoload/mkdp/util.vim"
+    clap-build|clap-failed)
+      clap_dir="$plugin_root/vim-clap"
+      mkdir -p "$clap_dir"
+      cat >"$clap_dir/install.sh" <<'EOF'
+#!/bin/sh
+printf '%s\n' clap-install >>"$ONESIMUS_STUB_LOG"
+if [ "$ONESIMUS_STUB_MODE" = clap-failed ]; then
+  echo 'fixture build failed'
+  exit 1
+fi
+mkdir -p bin
+: >bin/maple
+chmod +x bin/maple
+EOF
+      chmod +x "$clap_dir/install.sh"
       ;;
   esac
 
@@ -109,9 +95,7 @@ run_case() {
       ONESIMUS_STUB_LOG="$calls" \
       ONESIMUS_STUB_MODE="$mode" \
       ONESIMUS_STUB_PLUGIN_ROOT="$plugin_root" \
-      ONESIMUS_STUB_MARKDOWN_DIR="$markdown_dir" \
-      ONESIMUS_STUB_MARKDOWN_ACTUAL="$markdown_actual" \
-      ONESIMUS_STUB_RUNTIME="$stub_runtime" \
+      ONESIMUS_STUB_CLAP_DIR="$clap_dir" \
       "$vim_bin" -Nu "$vimrc" -i NONE -n -es \
       -S "$repo/scripts/update_plugins.vim" >"$vim_log" 2>&1; then
     status=0
@@ -139,22 +123,28 @@ run_case() {
   [ -z "$(sed -n '3p' "$report")" ] \
     || fail "$case_name wrote unexpected extra report lines" "$report"
 
-  [ "$(sed -n '1p' "$calls")" = upgrade ] \
-    || fail "$case_name did not invoke PlugUpgrade first" "$calls"
-  [ "$(sed -n '2p' "$calls")" = 'update --sync' ] \
+  [ "$(sed -n '1p' "$calls")" = snapshot ] \
+    || fail "$case_name did not snapshot before changing plugins" "$calls"
+  if [ "$mode" = snapshot-error ]; then
+    [ "$(wc -l <"$calls" | tr -d ' ')" = 1 ] \
+      || fail "$case_name changed plugins after a failed snapshot" "$calls"
+    return
+  fi
+  [ "$(sed -n '2p' "$calls")" = upgrade ] \
+    || fail "$case_name did not invoke PlugUpgrade after the snapshot" "$calls"
+  [ "$(sed -n '3p' "$calls")" = 'update --sync' ] \
     || fail "$case_name did not invoke PlugUpdate --sync" "$calls"
-  [ "$(sed -n '3p' "$calls")" = "$expected_reconcile" ] \
+  [ "$(sed -n '4p' "$calls")" = "$expected_reconcile" ] \
     || fail "$case_name invoked the wrong reconciliation command" "$calls"
-  [ -z "$(sed -n '4p' "$calls")" ] \
+  [ -z "$(sed -n '5p' "$calls")" ] \
     || fail "$case_name invoked unexpected plugin commands" "$calls"
 }
 
-run_case success success zero '4 plugins synchronized'
+run_case success success zero '3 plugins synchronized'
 run_case plugin-error error nonzero 'x failed to update present'
 run_case missing-plugin missing nonzero 'missing plugin: absent'
-run_case markdown-current markdown-current zero '4 plugins synchronized' markdown-install
-run_case markdown-stale markdown-stale nonzero \
-  'markdown-preview.nvim build: preview binary version mismatch: expected 0.0.11, got 0.0.10' \
-  markdown-install
+run_case snapshot-error snapshot-error nonzero 'snapshot refused'
+run_case clap-build clap-build zero '3 plugins synchronized' clap-install
+run_case clap-failed clap-failed nonzero 'vim-clap build: fixture build failed' clap-install
 
 echo 'PASS: plugin updater reports synchronization and reconciliation failures'

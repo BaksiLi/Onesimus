@@ -2,3 +2,18 @@
 " ignored by Git so Onesimus updates never compete with personal plugins.
 
 " Plug 'wakatime/vim-wakatime'
+
+" Cogitatum inquiry notes. OnesimusPlugin applies the reviewed source pin.
+" Use a CLI built from the compiler revision listed in that plugin's README.
+" call OnesimusPlugin('BaksiLi/vim-cogitatum', { 'do': 'npm ci && npm run build' })
+
+" Developing a plugin locally: override its checkout without changing the
+" public declaration. Local builds remain explicit; PlugUpdate leaves it alone.
+" let g:onesimus_plugin_overrides = {
+"       \ 'vim-cogitatum': '~/Developer/vim-cogitatum',
+"       \ 'texinsitu.vim': '~/Developer/texinsitu.vim',
+"       \ }
+
+" texinsitu.vim currently needs a local checkout plus utftex. Its remote
+" repository is not published yet; declare it only with an override above.
+" call OnesimusPlugin('BaksiLi/texinsitu.vim')

@@ -53,11 +53,17 @@ run_vim_test() {
   result=
 
   case $name in
+    ale_autocorrect) result=/tmp/onesimus-ale-autocorrect-result ;;
     ale_fix) result=/tmp/onesimus-ale-fix-result ;;
     ale_haskell) result=/tmp/onesimus-ale-haskell-result ;;
     ale_python) result=/tmp/onesimus-ale-python-result ;;
+    tex_workflow) result=/tmp/onesimus-tex-workflow-result ;;
     cjk_motion) result=/tmp/onesimus-cjk-motion-result ;;
     guide) result=/tmp/onesimus-guide-result ;;
+    wordproc) result=/tmp/onesimus-wordproc-result ;;
+    writing_layout) result=/tmp/onesimus-writing-layout-result ;;
+    writing_display) result=/tmp/onesimus-writing-display-result ;;
+    writing_preview) result=/tmp/onesimus-writing-preview-result ;;
   esac
   if [ -n "$result" ]; then
     rm -f "$result"
@@ -69,6 +75,19 @@ run_vim_test() {
     if (unset VIMRCDIR MYVIMDOT; "$vim_bin" -Nu "$repo/init.vim" \
         -i NONE -n -es -S "$test_file") \
         >"$log" 2>&1; then
+      status=0
+    else
+      status=$?
+    fi
+  elif [ "$name" = tex_workflow ]; then
+    if printf 'y\n' | "$vim_bin" -Nu "$test_file" -i NONE -n -es -c 'call OnesimusRunTeXTests()' >"$log" 2>&1; then
+      status=0
+    else
+      status=$?
+    fi
+  elif [ "$name" = writing_display ] || [ "$name" = writing_selection ]; then
+    # screenpos()/screenstring() require normal screen initialization, not Ex.
+    if "$vim_bin" -Nu "$test_file" -i NONE -n -T xterm >"$log" 2>&1; then
       status=0
     else
       status=$?

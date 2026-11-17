@@ -355,3 +355,20 @@ augroup END
 
 call OnesimusConfigureIndentGuides()
 call OnesimusConfigureParentheses()
+
+" Characters that change meaning without showing themselves: no-break and
+" narrow no-break spaces, the soft hyphen, zero-width and bidirectional
+" controls (Unicode TR #36 and UTS #39; the "Trojan Source" reordering), and
+" a stray byte-order mark. Vim draws some as <200b> in faint SpecialKey and
+" others as plain spaces. Collaborators and generated text slip them in, so
+" every window marks them as errors.
+function! s:MarkInvisible() abort
+  if !exists('w:onesimus_invisible')
+    let w:onesimus_invisible = matchadd('Error',
+          \ '[\u00a0\u00ad\u200b-\u200f\u202a-\u202f\u2060-\u2064\u2066-\u2069\ufeff]', -1)
+  endif
+endfunction
+augroup onesimus_invisible
+  autocmd!
+  autocmd VimEnter,WinNew * call <SID>MarkInvisible()
+augroup END

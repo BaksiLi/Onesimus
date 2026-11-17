@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "plugins": {
+    "ale": {
+      "repository": "dense-analysis/ale",
+      "commit": "d0ea94323207abcdee717d76bb57b38d46055664"
+    },
+    "asyncrun.vim": {
+      "repository": "skywind3000/asyncrun.vim",
+      "commit": "7191d0c30dd105e5d7f897b9a6ee19cabe734466"
+    },
+    "mdtoc.vim": {
+      "repository": "BaksiLi/mdtoc.vim",
+      "commit": "6a585cd0e01b77948ce9dd8a47e0a803cb0ab7c4"
+    },
+    "editorconfig-vim": {
+      "repository": "editorconfig/editorconfig-vim",
+      "commit": "3c2813f2566d9392ff3614248c5db43c3fda9d5f"
+    },
+    "emmet-vim": {
+      "repository": "mattn/emmet-vim",
+      "commit": "def5d57a1ae5afb1b96ebe83c4652d1c03640f4d"
+    },
+    "goyo.vim": {
+      "repository": "junegunn/goyo.vim",
+      "commit": "fa0263d456dd43f5926484d1c4c7022dfcb21ba9"
+    },
+    "haskell-vim": {
+      "repository": "neovimhaskell/haskell-vim",
+      "commit": "f35d02204b4813d1dbe8b0e98cc39701a4b8e15e"
+    },
+    "helpful.vim": {
+      "repository": "tweekmonster/helpful.vim",
+      "commit": "a78830a5de091ec0ce14417faf1fdc47d955e477"
+    },
+    "jieba.vim": {
+      "repository": "kkew3/jieba.vim",
+      "commit": "80e951b6a5c5b8ecbfbc6f0f826b716e19c1f561"
+    },
+    "limelight.vim": {
+      "repository": "junegunn/limelight.vim",
+      "commit": "86aaec1700b27618d33d6182f44691d84d2cb6e5"
+    },
+    "nerdtree": {
+      "repository": "preservim/nerdtree",
+      "commit": "fc85a6f07c2cd694be93496ffad75be126240068"
+    },
+    "rainbow": {
+      "repository": "luochen1990/rainbow",
+      "commit": "61f719aebe0dc5c3048330c50db72cfee1afdd34"
+    },
+    "seoul256.vim": {
+      "repository": "junegunn/seoul256.vim",
+      "commit": "b21c9e63f7c2d543db8b34a393a0b42ec7e9b891"
+    },
+    "tabular": {
+      "repository": "godlygeek/tabular",
+      "commit": "339091ac4dd1f17e225fe7d57b48aff55f99b23a"
+    },
+    "ultisnips": {
+      "repository": "SirVer/ultisnips",
+      "commit": "0ad238b1910d447476b2d98f593322c1cdb71285"
+    },
+    "vader.vim": {
+      "repository": "junegunn/vader.vim",
+      "commit": "6fff477431ac3191c69a3a5e5f187925466e275a"
+    },
+    "vim-applescript": {
+      "repository": "BaksiLi/vim-applescript",
+      "commit": "5763380141f32525345c667bc2d3ef47ae081cbe"
+    },
+    "vim-clap": {
+      "repository": "liuchengxu/vim-clap",
+      "commit": "10669b0f2caa92013b3c966f13f2290b129c7a0d"
+    },
+    "vim-cogitatum": {
+      "repository": "BaksiLi/vim-cogitatum",
+      "commit": "05e0d6655bf301d78175d39c7cb2f990da0dc448"
+    },
+    "vim-commentary": {
+      "repository": "tpope/vim-commentary",
+      "commit": "e87cd90dc09c2a203e13af9704bd0ef79303d755"
+    },
+    "vim-fugitive": {
+      "repository": "tpope/vim-fugitive",
+      "commit": "5f0d280b517cacb16f59316659966c7ca5e2bea2"
+    },
+    "vim-gitgutter": {
+      "repository": "airblade/vim-gitgutter",
+      "commit": "21c977e8597c468c7dc76001389b0b430d46a4b0"
+    },
+    "vim-monokai": {
+      "repository": "sickill/vim-monokai",
+      "commit": "6fb52e32863646e38cdebce57ae0d1688f334a79"
+    },
+    "vim-repeat": {
+      "repository": "tpope/vim-repeat",
+      "commit": "24afe922e6a05891756ecf331f39a1f6743d3d5a"
+    },
+    "vim-speeddating": {
+      "repository": "tpope/vim-speeddating",
+      "commit": "5a36fd29df63ea3f65562bd2bb837be48a5ec90b"
+    },
+    "vim-startify": {
+      "repository": "mhinz/vim-startify",
+      "commit": "81e36c352a8deea54df5ec1e2f4348685569bed2"
+    },
+    "vim-surround": {
+      "repository": "tpope/vim-surround",
+      "commit": "3d188ed2113431cf8dac77be61b842acb64433d9"
+    },
+    "vimtex": {
+      "repository": "lervag/vimtex",
+      "commit": "9f6a5bb0a9c9f1542fe88dc07511ce8401242e2a"
+    }
+  }
+}

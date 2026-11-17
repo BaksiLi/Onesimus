@@ -13,7 +13,7 @@ let s:catalog = [
       \ {'id': 'meta.reload', 'label': 'Reload configuration', 'group': 'Onesimus', 'key': '<Leader>sd', 'kind': 'explicit'},
       \ {'id': 'meta.update', 'label': 'Update Onesimus', 'group': 'Onesimus', 'key': '<Leader> o u', 'kind': 'explicit'},
       \ {'id': 'meta.stats', 'label': 'Usage dashboard', 'group': 'Onesimus', 'key': '<Leader>os', 'kind': 'explicit'},
-      \ {'id': 'meta.whichkey', 'label': 'Open action guide', 'group': 'Onesimus', 'key': '<Leader>', 'kind': 'explicit', 'tip': 'Pause after <Leader> for a short action guide; <Leader>. adapts to this buffer.'},
+      \ {'id': 'meta.whichkey', 'label': 'Open action guide', 'group': 'Onesimus', 'key': '<Leader>', 'kind': 'explicit', 'tip': 'Pause after <Leader> for global tools; press it again for this file.'},
       \ {'id': 'find.files', 'label': 'Find files', 'group': 'Find', 'key': '<Leader>ff', 'kind': 'explicit', 'tip': '<Leader>ff finds files without leaving Vim.'},
       \ {'id': 'find.git_files', 'label': 'Find Git files', 'group': 'Find', 'key': '<Leader>fg', 'kind': 'explicit'},
       \ {'id': 'find.buffers', 'label': 'Find buffers', 'group': 'Find', 'key': '<Leader>fb', 'kind': 'explicit'},
@@ -39,6 +39,22 @@ let s:catalog = [
       \ {'id': 'code.rename', 'label': 'Rename symbol', 'group': 'Code', 'key': '<Leader>rn', 'kind': 'explicit'},
       \ {'id': 'code.action', 'label': 'Code action', 'group': 'Code', 'key': '<Leader>ca', 'kind': 'explicit'},
       \ {'id': 'repl.open', 'label': 'Open REPL', 'group': 'Code', 'key': 'F4', 'kind': 'explicit'},
+      \ {'id': 'tex.build_once', 'label': 'Save, build and open TeX PDF', 'group': 'Write', 'key': 'F5', 'kind': 'explicit', 'tip': 'In TeX, F5 conflict-checks, saves, then builds once.'},
+      \ {'id': 'tex.save', 'label': 'Safely save TeX', 'group': 'Write', 'key': '\\s', 'kind': 'explicit'},
+      \ {'id': 'tex.sync', 'label': 'Check collaborator edits', 'group': 'Write', 'key': '\\or', 'kind': 'explicit'},
+      \ {'id': 'tex.live_build', 'label': 'Toggle TeX live build', 'group': 'Write', 'key': '\\ol', 'kind': 'explicit'},
+      \ {'id': 'tex.compare_disk', 'label': 'Compare TeX with disk', 'group': 'Write', 'key': '\\od', 'kind': 'explicit', 'tip': '<Leader>. shows safe conflict actions for TeX.'},
+      \ {'id': 'tex.status', 'label': 'TeX workflow status', 'group': 'Write', 'key': '\\oi', 'kind': 'explicit'},
+      \ {'id': 'tex.view', 'label': 'View TeX PDF', 'group': 'Write', 'key': '\\v', 'kind': 'explicit'},
+      \ {'id': 'tex.outline', 'label': 'Open TeX outline', 'group': 'Write', 'key': '\\t', 'kind': 'explicit'},
+      \ {'id': 'tex.errors', 'label': 'Open TeX build problems', 'group': 'Write', 'key': '\\e', 'kind': 'explicit'},
+      \ {'id': 'tex.output', 'label': 'Open TeX compiler output', 'group': 'Write', 'key': '\\oc', 'kind': 'explicit'},
+      \ {'id': 'tex.word_count', 'label': 'Count TeX words', 'group': 'Write', 'key': '\\w', 'kind': 'explicit'},
+      \ {'id': 'tex.sentence_lines', 'label': 'Normalize TeX sentence lines', 'group': 'Write', 'key': '\\n', 'kind': 'explicit'},
+      \ {'id': 'writing.math', 'label': 'Toggle automatic formulas', 'group': 'Write', 'key': '\\m', 'kind': 'explicit'},
+      \ {'id': 'tex.resolve_write', 'label': 'Save reviewed TeX merge', 'group': 'Write', 'key': '\\x', 'kind': 'explicit'},
+      \ {'id': 'tex.use_disk', 'label': 'Use TeX disk version', 'group': 'Write', 'key': '\\u', 'kind': 'explicit'},
+      \ {'id': 'tex.help', 'label': 'TeX writing guide', 'group': 'Write', 'key': '\\o?', 'kind': 'explicit'},
       \ {'id': 'writing.focus', 'label': 'Focus writing mode', 'group': 'Write', 'key': '<Leader>tw', 'kind': 'explicit', 'tip': '<Leader>tw enters a distraction-free writing view.'},
       \ {'id': 'writing.cjk', 'label': 'CJK segmentation active', 'group': 'Write', 'key': 'w / iw', 'kind': 'passive'},
       \ {'id': 'ui.relative_number', 'label': 'Relative numbers', 'group': 'Interface', 'key': '<Leader>tr', 'kind': 'explicit'},
@@ -209,6 +225,14 @@ function! OnesimusObserveFiletype(filetype) abort
   endif
   if a:filetype ==# 'haskell'
     call OnesimusOffer('code.check')
+  elseif a:filetype ==# 'tex'
+    for l:id in ['tex.build_once', 'tex.save', 'tex.sync', 'tex.live_build',
+          \ 'tex.compare_disk', 'tex.status', 'tex.view', 'tex.outline',
+          \ 'tex.errors', 'tex.output', 'tex.word_count',
+          \ 'tex.sentence_lines', 'tex.symbols', 'tex.resolve_write',
+          \ 'tex.use_disk', 'tex.help']
+      call OnesimusOffer(l:id)
+    endfor
   endif
   if has_key(s:repl_filetypes, a:filetype)
     call OnesimusOffer('repl.open')
@@ -430,12 +454,14 @@ function! s:DiscoveryTip(summary) abort
 endfunction
 
 function! OnesimusHomeHeader() abort
-  let l:cwd = pathshorten(fnamemodify(getcwd(), ':~'))
+  let l:cwd = fnamemodify(getcwd(), ':~')
+  let l:room = max([12, winwidth(0) - 24])
+  if strchars(l:cwd) > l:room
+    let l:cwd = '…'.strcharpart(l:cwd, strchars(l:cwd) - l:room + 1)
+  endif
   return [
-        \ '  ONESIMUS',
-        \ printf('  Vim, made helpful · Vim %d.%d',
-        \   v:version / 100, v:version % 100),
-        \ '  '.l:cwd,
+        \ '  Onesimus — Vim, made helpful for human agents',
+        \ printf('  %s · Vim %d.%d', l:cwd, v:version / 100, v:version % 100),
         \ ]
 endfunction
 

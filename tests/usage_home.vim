@@ -18,6 +18,10 @@ function! s:RunUsageTests() abort
   call assert_false(has_key(g:onesimus_usage_runtime.eligible, 'code.run'),
         \ 'Haskell F5 is measured as inspection rather than execution')
   call OnesimusObserveFiletype('markdown')
+  call OnesimusObserveFiletype('tex')
+  call assert_equal(1, g:onesimus_usage_runtime.eligible['tex.word_count'])
+  call assert_true(OnesimusTrack('tex.help'))
+  call assert_equal(1, g:onesimus_usage_runtime.counts['tex.help'])
   call assert_false(has_key(g:onesimus_usage_runtime.eligible, 'writing.cjk'),
         \ 'segmentation is not offered until the jieba backend really loads')
   set filetype=lisp
@@ -86,7 +90,7 @@ function! s:RunUsageTests() abort
 
   OnesimusHome
   let l:home = join(getline(1, '$'), "\n")
-  call assert_match('ONESIMUS', l:home)
+  call assert_match('Onesimus — Vim, made helpful for human agents', l:home)
   call assert_match('Action guide', l:home)
   call assert_match('\\os for usage', l:home)
   call assert_match('Local only', l:home)

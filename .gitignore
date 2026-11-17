@@ -1,5 +1,6 @@
 # Local plugin declarations belong to the installation, not the distribution.
 /custom/plugins.vim
+/custom/settings.vim
 
 # Files produced by Vim and Onesimus actions.
 [._]*.s[a-v][a-z]
@@ -8,6 +9,7 @@ Session.vim
 Sessionx.vim
 .netrwhist
 *~
+__pycache__/
 
 # Project indexes created by :OnesimusTags or related tools.
 tags
