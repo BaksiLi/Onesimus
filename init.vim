@@ -97,7 +97,6 @@ let maplocalleader = ','
 let g:webpreview_browserfunc = 'OnesimusOpenBrowser'
 let g:webpreview_notify = 'OnesimusNotify'
 let g:webpreview_open = extend({'tex': 'OnesimusTexView'}, get(g:, 'webpreview_open', {}))
-let g:webpreview_tex_port = get(g:, 'webpreview_tex_port', get(g:, 'onesimus_tex_browser_port', 0))
 
 " ------ Meta ------
 " One command, :One, carries every Onesimus action (autoload/one.vim); its
@@ -298,8 +297,14 @@ Plug 'SirVer/ultisnips'
 Plug 'dense-analysis/ale'
 
 " ------ Lang-specific Plugs ------
-" Markdown preview is bundled with WebPreview.vim; external providers are optional.
+" Our writing plugins, published separately and pinned like any other.
 call OnesimusPlugin('BaksiLi/mdtoc.vim', { 'for': 'markdown' })
+call OnesimusPlugin('BaksiLi/webpreview.vim')
+" Formulas in place need text properties from Vim 9.0.0121; the install hook
+" fetches the prebuilt kernel for the pinned release.
+if has('patch-9.0.0121')
+  call OnesimusPlugin('BaksiLi/texinsitu.vim', { 'do': ':TexInsituInstall' })
+endif
 
 " TeX
 " requires latexmk, for example: `sudo tlmgr install latexmk`
@@ -385,14 +390,13 @@ endif
 " ------ Initialize Plugin System ------
 call plug#end()
 endif
-for s:package in ['webpreview.vim', 'themes', 'autocorrect']
+for s:package in ['themes', 'autocorrect']
   let s:package = $VIMRCDIR.'/packages/'.s:package
   if index(split(&runtimepath, ','), s:package) < 0
     execute 'set runtimepath^='.fnameescape(s:package)
   endif
 endfor
 unlet s:package
-runtime plugin/webpreview.vim
 
 " plug#end() enables syntax plus filetype plugins/indent exactly once, after
 " the final runtimepath is known.

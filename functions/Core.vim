@@ -44,15 +44,10 @@ function! s:ScheduleHome() abort
 endfunction
 
 function! s:OpenHelp() abort
-  let l:help = $VIMRCDIR.'/README.md'
-  if !filereadable(l:help)
-    echohl ErrorMsg
-    echomsg 'Onesimus documentation not found: '.l:help
-    echohl None
-    return
-  endif
   call s:Track('meta.help')
-  execute 'view '.fnameescape(l:help)
+  " doc/tags is generated, not tracked; one file makes this instant.
+  execute 'helptags '.fnameescape($VIMRCDIR.'/doc')
+  help onesimus
 endfunction
 
 function! s:EditConfig() abort

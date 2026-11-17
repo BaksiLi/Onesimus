@@ -7,13 +7,7 @@
 " Use a CLI built from the compiler revision listed in that plugin's README.
 " call OnesimusPlugin('BaksiLi/vim-cogitatum', { 'do': 'npm ci && npm run build' })
 
-" Developing a plugin locally: override its checkout without changing the
-" public declaration. Local builds remain explicit; PlugUpdate leaves it alone.
-" let g:onesimus_plugin_overrides = {
-"       \ 'vim-cogitatum': '~/Developer/vim-cogitatum',
-"       \ 'texinsitu.vim': '~/Developer/texinsitu.vim',
-"       \ }
-
-" texinsitu.vim currently needs a local checkout plus utftex. Its remote
-" repository is not published yet; declare it only with an override above.
-" call OnesimusPlugin('BaksiLi/texinsitu.vim')
+" Developing a plugin locally: map its name to a checkout in
+" g:onesimus_plugin_overrides. Set it in custom/settings.vim, which loads
+" before the distribution declares mdtoc.vim, webpreview.vim and texinsitu.vim.
+" Local builds remain explicit; PlugUpdate leaves the checkout alone.

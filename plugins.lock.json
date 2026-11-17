@@ -9,10 +9,6 @@
       "repository": "skywind3000/asyncrun.vim",
       "commit": "7191d0c30dd105e5d7f897b9a6ee19cabe734466"
     },
-    "mdtoc.vim": {
-      "repository": "BaksiLi/mdtoc.vim",
-      "commit": "6a585cd0e01b77948ce9dd8a47e0a803cb0ab7c4"
-    },
     "editorconfig-vim": {
       "repository": "editorconfig/editorconfig-vim",
       "commit": "3c2813f2566d9392ff3614248c5db43c3fda9d5f"
@@ -41,6 +37,10 @@
       "repository": "junegunn/limelight.vim",
       "commit": "86aaec1700b27618d33d6182f44691d84d2cb6e5"
     },
+    "mdtoc.vim": {
+      "repository": "BaksiLi/mdtoc.vim",
+      "commit": "145a12b756603b1b39223126ca31d9a176cfd7bc"
+    },
     "nerdtree": {
       "repository": "preservim/nerdtree",
       "commit": "fc85a6f07c2cd694be93496ffad75be126240068"
@@ -56,6 +56,10 @@
     "tabular": {
       "repository": "godlygeek/tabular",
       "commit": "339091ac4dd1f17e225fe7d57b48aff55f99b23a"
+    },
+    "texinsitu.vim": {
+      "repository": "BaksiLi/texinsitu.vim",
+      "commit": "623b1094f19d52800327852d78f985a74b91033c"
     },
     "ultisnips": {
       "repository": "SirVer/ultisnips",
@@ -112,6 +116,10 @@
     "vimtex": {
       "repository": "lervag/vimtex",
       "commit": "9f6a5bb0a9c9f1542fe88dc07511ce8401242e2a"
+    },
+    "webpreview.vim": {
+      "repository": "BaksiLi/webpreview.vim",
+      "commit": "94f208641bd66a3f79adc2f634f7b7507a4dd3dd"
     }
   }
 }

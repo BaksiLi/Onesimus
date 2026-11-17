@@ -9,8 +9,8 @@
 " Vimscript development: HelpfulVersion and Vader.
 " let g:onesimus_developer_plugins = 1
 
-" Develop MdToc from a local checkout.
-" let g:onesimus_plugin_overrides = {'mdtoc.vim': '~/Developer/mdtoc.vim'}
+" Develop a plugin from a local checkout instead of its pinned release.
+" let g:onesimus_plugin_overrides = {'webpreview.vim': '~/src/webpreview.vim'}
 
 " Keep TOC updates explicit. Opt in only if save should update generated text.
 " let g:vmt_auto_update_on_save = 1

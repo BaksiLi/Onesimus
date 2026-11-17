@@ -19,8 +19,9 @@ remain replaceable behind a small, stable set of Onesimus actions. It should be
 quiet before it is clever—and, where that costs nothing, not only usable but
 aesthetically amusing.
 
-The long `:Onesimus...` commands are scripting entrypoints. Normal use is
-smaller: familiar Vim motions, F2–F6, Home, and the action guide.
+Normal use is small: familiar Vim motions, F2–F6, Home, and the action
+guide. `:help onesimus` lists the whole public surface: the `:One` actions,
+keys and options.
 
 ## What is included
 
@@ -193,7 +194,7 @@ the reviewed buffer over the disk.
 | `t` Toggle | `tr` relative numbers, `ti` indent guides, `tp` parenthesis colours, `tb` light / dark, `td` redraw |
 | `o` Onesimus | `oh` Home, `oi` tool status, `ou` update, `os` usage, `oc` edit config, `or` reload config |
 
-`\?` opens the manual.
+`\?` opens the manual, `:help onesimus`.
 
 ### Function keys and Vim keys
 - `<F2>` outline, `<F3>` file tree, `<F4>` REPL, `<F5>` build, `<F6>` format
@@ -266,7 +267,7 @@ These checks cannot provide an atomic filesystem compare-and-swap against anothe
 Use separate Git worktrees for independent concurrent changes.
 
 Formulas render in place through [texinsitu.vim](https://github.com/BaksiLi/texinsitu.vim),
-declared in `custom/plugins.vim` (see `plugins.vim.example`). In TeX, Markdown
+which needs Vim 9.0.0121 or newer; older Vims keep the raw source. In TeX, Markdown
 and Cogitatum source, entering a formula reveals its TeX and leaving it shows
 the rendering again; yanks, saves and undo always operate on source. `\\m`
 switches the buffer between rendered formulas and raw source. Onesimus turns
@@ -358,18 +359,17 @@ That copy is not synchronized by Onesimus.
 For a local browser reading a remote build, a standalone helper is also available:
 
 ```sh
-~/vimrc/packages/webpreview.vim/bin/webpreview --host my-ssh-alias --pdf '/remote/path/main.pdf'
+~/.vim/bundle/webpreview.vim/bin/webpreview --host my-ssh-alias --pdf '/remote/path/main.pdf'
 ```
 
 The helper uses your SSH configuration and needs Python 3 on both machines.
 Complete revisions transfer through one SSH connection; interrupted transfers keep the last PDF and retry.
 Ctrl-C ends this explicit standalone session. Editor-owned sessions instead end with Vim.
 
-Browser preview now comes from the bundled, independently usable
-[WebPreview.vim](packages/webpreview.vim/README.md). It contains the shared Vim
+Browser preview comes from [webpreview.vim](https://github.com/BaksiLi/webpreview.vim),
+an independent plugin pinned like the others. It contains the shared Vim
 interface, PDF provider and built-in Markdown provider; Cogitatum connects its own renderer.
-Its Python command is `webpreview`; Vim uses the bundled launcher without pip.
-Onesimus supplies save/build and conflict policy through the package's hooks.
+Onesimus supplies save/build and conflict policy through the plugin's hooks.
 External PDF applications are for inspecting the final output; browser reading,
 source navigation and Changes belong to WebPreview.
 
@@ -405,7 +405,7 @@ Markdown whole-document preview uses the same Locate/Select in source rules and
 keeps live drafts, source ranges, local images and math inside WebPreview.vim.
 Markdown parsing defaults to remark with source-positioned MDAST; markdown-it
 remains an optional build profile. KaTeX typesets formulas, and all browser assets
-are bundled. See [WebPreview's product boundaries and extension API](packages/webpreview.vim/README.md).
+are bundled. See [webpreview.vim's extension API](https://github.com/BaksiLi/webpreview.vim).
 The standalone Markdown preview plugin and its compatibility adapter are removed.
 Inquiry fences keep Cogitatum's source navigation and terminal Reading/Map.
 The Cogitatum preview accepts the configured relay hostname while keeping its listener on loopback.
@@ -615,9 +615,11 @@ updates.
 Start Vim as `vi` for the core: Onesimus without third-party plugins, so the
 options, keys, `:One`, the status line, safe saving and the themes, in about
 half the startup time. On a light machine, make it the default with
-`let g:onesimus_core = 1` in `custom/settings.vim`. The TeX module needs
-VimTeX and stays out of the core; in the full distribution it loads with the
-first TeX buffer.
+`let g:onesimus_core = 1` in `custom/settings.vim`. A wrapper script, such as
+Homebrew's `vi` for MacVim, hides the name; use
+`vim --cmd 'let g:onesimus_core = 1'` there. The core has no preview, formula
+rendering or language server. The TeX module needs VimTeX and stays out of the
+core; in the full distribution it loads with the first TeX buffer.
 
 The default themes are Gruvbox for terminals and Nord for MacVim. Both ship in
 `packages/themes` as plain `:highlight` lists that
@@ -636,17 +638,18 @@ previews, and `texinsitu.vim` for formulas in place. `vim-cogitatum` keeps its
 established language-host name. Old TOC commands and document markers remain
 compatible.
 
-Optional self-maintained plugins may use `OnesimusPlugin(repo, options)` in
-`custom/plugins.vim` to share the reviewed pin. Set
-`g:onesimus_plugin_overrides` there to map a plugin name to a local checkout.
-Local overrides are never updated or built by the remote plugin updater;
-build those projects explicitly. The example documents Cogitatum's matching
-CLI and the currently local-only texinsitu checkout.
+Optional plugins may use `OnesimusPlugin(repo, options)` in
+`custom/plugins.vim` to share the reviewed pin. To develop a plugin from a
+local checkout, map its name in `g:onesimus_plugin_overrides` in
+`custom/settings.vim`, which loads before any declaration. Local overrides are
+never updated or built by the remote plugin updater; build those projects
+explicitly.
 
 ```
 .
 ├── autoload/one.vim - The :One actions, menus and keys
 ├── custom/         - Local settings and plugins (ignored) with examples
+├── doc/            - The :help onesimus reference and brand assets
 ├── config/         - Distribution policies and plugin lock loader
 ├── snippets/       - UltiSnips snippets
 ├── functions/      - Onesimus modules; tex/ loads with the first TeX buffer
@@ -658,6 +661,17 @@ CLI and the currently local-only texinsitu checkout.
 ├── plugins.lock.json - Reviewed remote plugin revisions
 └── README.md       - This file
 ```
+
+## Plugins from Onesimus
+
+Three plugins grew here and now stand on their own. Each works without
+Onesimus; the distribution pins their releases and wires them into `:One`.
+
+| Plugin | Does |
+| --- | --- |
+| [mdtoc.vim](https://github.com/BaksiLi/mdtoc.vim) | Markdown tables of contents |
+| [webpreview.vim](https://github.com/BaksiLi/webpreview.vim) | Browser preview for Markdown and TeX PDFs, with source navigation |
+| [texinsitu.vim](https://github.com/BaksiLi/texinsitu.vim) | TeX formulas rendered in place in the buffer |
 
 ## Contributing
 

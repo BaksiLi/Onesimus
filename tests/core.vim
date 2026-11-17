@@ -11,6 +11,11 @@ call assert_equal(2, exists(':One'))
 call assert_true(index(getcompletion('One ', 'cmdline'), 'redraw') >= 0)
 call assert_equal('%!OnesimusStatusline()', &statusline)
 
+One manual
+call assert_equal('help', &buftype)
+call assert_match('/doc/onesimus.txt$', expand('%:p'), '\\? opens :help onesimus')
+helpclose
+
 let s:dir = tempname()
 call mkdir(s:dir)
 execute 'edit '.fnameescape(s:dir.'/paper.tex')

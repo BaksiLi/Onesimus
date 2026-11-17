@@ -7,7 +7,7 @@ let $MYVIMDOT = $VIMRCDIR.'/init.vim'
 let g:vimtex_enabled = 0
 let g:onesimus_usage_enabled = 0
 let g:startify_disable_at_vimenter = 1
-let g:onesimus_tex_browser_port = 0
+let g:webpreview_tex_port = 0
 " Serve without opening a browser, as over SSH.
 let $SSH_CONNECTION = 'follow test'
 execute 'source '.fnameescape($MYVIMDOT)

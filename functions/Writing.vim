@@ -156,15 +156,19 @@ function! s:Prose() abort
   return &l:filetype !=# 'bib'
 endfunction
 
+function! s:PreviewAvailable() abort
+  return PlugInstalled('webpreview.vim')
+endfunction
+
 function! s:MathAvailable() abort
   return exists(':TexInsituToggle') == 2 && s:Prose()
 endfunction
 
 call one#define('save', 'writing', function('OnesimusWritingSave'))
-call one#define('view', ['markdown', 'cogitatum'], function('OnesimusWritingPreview'))
-call one#define('stop', ['tex', 'markdown', 'cogitatum'], function('OnesimusWritingPreviewStop'))
+call one#define('view', ['markdown', 'cogitatum'], function('OnesimusWritingPreview'), function('s:PreviewAvailable'))
+call one#define('stop', ['tex', 'markdown', 'cogitatum'], function('OnesimusWritingPreviewStop'), function('s:PreviewAvailable'))
 call one#define('words', 'writing', function('OnesimusWritingCountWords'), function('s:Prose'))
 call one#define('spell', 'writing', function('OnesimusWritingToggleSpell'), function('s:Prose'))
 call one#define('math', 'writing', 'TexInsituToggle', function('s:MathAvailable'))
-call one#define('diff', 'markdown', 'WebPreviewChanges')
+call one#define('diff', 'markdown', 'WebPreviewChanges', function('s:PreviewAvailable'))
 call one#define('help', 'writing', function('OnesimusWritingHelp'))

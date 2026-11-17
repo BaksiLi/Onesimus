@@ -1,0 +1,196 @@
+*onesimus.txt*	A Vim distribution for writing and code
+
+Onesimus ('helpful') is a Vim 8.2 distribution. Everything it adds to the
+editor is one command, |:One|, a few keys that run its actions, and the
+options below. The README covers installation and each workflow in depth.
+
+1. The :One command			|onesimus-command|
+2. Keys					|onesimus-keys|
+3. Actions				|onesimus-actions|
+4. Options				|onesimus-options|
+5. Local settings and the core		|onesimus-local|
+6. Adding actions			|onesimus-define|
+7. Plugins from Onesimus		|onesimus-plugins|
+
+==============================================================================
+1. The :One command					*onesimus-command*
+
+							*:One*
+:One			Open the action guide for the current buffer.
+
+:One {action} [{argument}]
+			Run {action}. One action name means the same thing in
+			every filetype: "build" compiles TeX, previews Markdown
+			and checks a Haskell project. An action the current
+			buffer lacks reports that instead of doing something
+			else. <Tab> completes the actions available here and
+			their arguments.
+
+==============================================================================
+2. Keys							*onesimus-keys*
+
+The leader is `\`. Each menu row is also a real mapping, so a key learned
+from a menu works without opening it.
+
+`\` then a pause	Global tools, in four groups:
+			`\f` Find, `\g` Git, `\t` Toggle, `\o` Onesimus.
+			`\?` opens this help.
+`\\` then a pause	Actions for the current file. The letters are the
+			first column of |onesimus-actions|.
+
+While a buffer and its file on disk disagree, `\\` offers only the conflict
+choices: `d` compare, `u` use the disk version, `x` save the reviewed buffer.
+
+<F2>  outline		<F3>  file tree		<F4>  REPL
+<F5>  build		<F6>  format		<C-L> redraw
+
+In menus, arrows and <Enter> select, Left or <BS> returns to the parent menu,
+and taps work where the terminal passes mouse events through.
+
+==============================================================================
+3. Actions						*onesimus-actions*
+
+Current file (`\\` + key) ~
+
+  b  build	Build and show (F5)		f  format	Format (F6)
+  v  view	Show the cursor in the preview	d  diff		Show changes
+  s  save	Save safely			w  words	Word count
+  e  errors	Problems			z  focus	Focus mode
+  t  outline	Outline (F2)			m  math		Rendered formulas
+  p  spell	Spelling marks			l  sentences	One sentence per line
+  r  read	Terminal Reading		c  map		Terminal Map
+  i  inquiry	Preview inquiry fences		n  rename	Rename symbol
+  a  action	Code action			?  help		Help for this file
+
+A buffer without an action hides its row; the letter is never lent to
+another action.
+
+Without keys ~
+
+  find {picker}		files, git_files, buffers, grep, history, tags,
+			proj_tags, marks, colors, command_history
+  goto {target}		definition, references, implementation,
+			type_definition (needs a language server)
+  symbols		Workspace symbols
+  lang			Language tools for this buffer
+  check			Look for changes made on disk now
+  compare / revert / overwrite
+			Resolve a disk conflict
+  stop			Stop this document's preview
+  tags			Build a tags file for the project
+  snapshot [{file}]	Record installed plugin revisions for restoring
+  home, health, update, usage, config, reload
+			The `\o` group: Home screen, tool status, update,
+			usage journal, edit and reload the configuration
+  numbers, indent, parens, background, redraw
+			The `\t` group
+  tree, repl		<F3> and <F4>
+  jieba enable|install	Chinese word motions
+
+==============================================================================
+4. Options						*onesimus-options*
+
+Set these in `custom/settings.vim` (|onesimus-local|). Plugins keep their own
+names, such as `g:webpreview_host` and `g:texinsitu_*`.
+
+*g:onesimus_core*		Default: 1 when Vim starts as `vi`, else 0
+	Load the core: no third-party plugins. See |onesimus-core|.
+
+*g:onesimus_plugin_overrides*	Default: {}
+	Map a plugin name to a local checkout, for developing it:
+>
+	let g:onesimus_plugin_overrides = {'mdtoc.vim': '~/src/mdtoc.vim'}
+<	Local checkouts are never updated or built by |:One| update.
+
+*g:onesimus_plugin_home*	Default: `~/.vim/bundle`, or $ONESIMUS_PLUGIN_HOME
+	Where plugins are installed.
+
+*g:onesimus_extra_themes*	Default: 0
+	Add the Seoul256 and Monokai colour schemes.
+
+*g:onesimus_developer_plugins*	Default: 0
+	Add HelpfulVersion and Vader for Vim script development.
+
+*g:onesimus_home_enabled*	Default: 1
+	Show the Home screen when Vim starts without files.
+
+*g:onesimus_usage_enabled*	Default: 1
+	Keep the local usage journal. It records action names and coarse
+	filetypes only, and never leaves the machine.
+
+*g:onesimus_refresh_interval*	Default: 1000
+	Milliseconds between checks for changes made on disk by others.
+
+*g:onesimus_prose_filetypes*
+	Default: ['gitcommit', 'markdown', 'text', 'tex', 'cogitatum']
+	Filetypes treated as writing: soft wrap, word count and the writing
+	actions. Extend the list rather than replacing it.
+
+*g:onesimus_jieba_filetypes*	Default: [] (all)
+	Filetypes where Chinese word motions may load.
+
+*g:onesimus_tex_sentence_config*
+	Default: `config/latexindent-sentences.yaml`
+	The latexindent settings for one sentence per line in TeX.
+
+*g:onesimus_zellij_bce_workaround*	Default: 1
+	Inside Zellij, avoid background colour erase so the theme fills the
+	screen.
+
+==============================================================================
+5. Local settings and the core			*onesimus-local* *onesimus-core*
+
+Two files under `custom/` belong to one machine and are ignored by Git:
+
+  `custom/settings.vim`	Options, read before anything else.
+  `custom/plugins.vim`	Personal plugin declarations, read after the
+			distribution's own.
+
+Copy the `.example` files beside them to start. Hostnames, private paths and
+local checkouts go here, never into the distribution.
+
+The core is Onesimus without third-party plugins, for small machines and
+remote servers. Starting Vim as `vi` selects it, or set |g:onesimus_core|.
+A wrapper script that runs Vim under its own name, such as Homebrew's `vi`
+for MacVim, hides the name; there, select the core explicitly:
+>
+	alias vi="vim --cmd 'let g:onesimus_core = 1'"
+<
+The core keeps |:One|, the menus, safe saving, the status line and the
+themes; it has no preview, formula rendering or language server.
+
+==============================================================================
+6. Adding actions					*onesimus-define*
+
+one#define({action}, {kinds}, {Run} [, {When}])		*one#define()*
+	Make {action} available to |:One|. {kinds} is a filetype, "writing"
+	for any prose buffer, "*" for every buffer, or a list of these. A
+	filetype match wins over "writing", which wins over "*". {Run} is a
+	Funcref, called with the typed argument if there is one, or an Ex
+	command that receives it as text. The optional {When} Funcref hides
+	the action while it returns false.
+>
+	call one#define('build', 'rust', 'make build')
+<
+	Register from a script that runs after startup, such as a file in
+	`~/.vim/after/plugin/`: Onesimus registers its own actions while it
+	starts and would replace an earlier definition for the same kind.
+	An action with a letter in |onesimus-actions| appears in the `\\`
+	menu automatically.
+
+one#arguments({action}, {values})			*one#arguments()*
+	Complete the argument of {action} from a list, or from a
+	|getcompletion()| type such as "file".
+
+==============================================================================
+7. Plugins from Onesimus				*onesimus-plugins*
+
+These grew inside Onesimus and are published on their own. Each works
+without the distribution, which pins their releases and wires them into
+|:One|.
+
+  mdtoc.vim		Markdown tables of contents
+  webpreview.vim	Browser preview for Markdown and TeX PDFs
+  texinsitu.vim		TeX formulas rendered in place (Vim 9.0.0121+)
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

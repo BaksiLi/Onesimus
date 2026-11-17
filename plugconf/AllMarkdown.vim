@@ -8,4 +8,7 @@ let g:markdown_syntax_conceal = 0
 let g:vmt_auto_update_on_save = get(g:, 'vmt_auto_update_on_save', 0)
 
 " WebPreview owns Markdown rendering, browser configuration and sessions.
-call webpreview#setup()
+" Absent in the core and before the first install finishes.
+if PlugInstalled('webpreview.vim')
+  call webpreview#setup()
+endif
