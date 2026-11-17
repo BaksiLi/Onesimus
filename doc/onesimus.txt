@@ -64,8 +64,8 @@ Current file (`\\` + key) ~
   p  spell	Spelling marks			l  sentences	One sentence per line
   r  read	Terminal Reading		c  map		Terminal Map
   i  inquiry	Preview inquiry fences		n  rename	Rename symbol
-  a  action	Code action			?  help		Help for this file
-  h  health	Tool status for this buffer
+  a  action	Code action			h  health	Tool status
+  ?  help	Help for this file
 
 A buffer without an action hides its row; the letter is never lent to
 another action.
@@ -96,11 +96,8 @@ Other actions and arguments ~
   compare / revert / overwrite
 			Resolve a disk conflict
   stop			Stop this document's preview
-  index			Build ./tags from the working directory with ctags -R.
-			Explicitly writes an index for Vim's |tag| and |CTRL-]|.
-			"find tags" browses current-buffer symbols; "find
-			proj_tags" searches project symbols through Clap.
-			Neither picker requires running "index" first.
+  index			Write ./tags with ctags -R for |:tag| and |CTRL-]|.
+			"find tags" and "find proj_tags" need no tags file.
   snapshot [{file}]	Record installed plugin revisions for restoring
   home, config, reload, update, usage
 			The `\o` group: Home screen, edit and reload config,

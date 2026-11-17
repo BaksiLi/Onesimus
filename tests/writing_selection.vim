@@ -1,10 +1,9 @@
 " Browser-selected text must match actual source before entering Visual.
-set nocompatible
-let s:root = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
-execute 'set runtimepath^='.fnameescape(s:root)
-let s:plugins = empty($ONESIMUS_PLUGIN_HOME) ? expand('~/.vim/bundle') : $ONESIMUS_PLUGIN_HOME
-execute 'set runtimepath^='.fnameescape(s:plugins.'/webpreview.vim')
-execute 'source '.fnameescape(s:root.'/functions/Writing.vim')
+" The configuration locates webpreview.vim, including local checkout overrides.
+let $VIMRCDIR = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
+let g:startify_disable_at_vimenter = 1
+let g:onesimus_usage_enabled = 0
+execute 'source '.fnameescape($VIMRCDIR.'/init.vim')
 function! s:Select(lines, text, anchor, expected) abort
   enew!
   call setline(1, a:lines)

@@ -129,19 +129,18 @@ and tracked changes; they do not restore uncommitted files or modify local
 development checkouts. A later normal update reapplies the distribution lock
 unless a personal plugin declaration overrides it.
 
-`plugins.lock.json` records the combination tested with each Onesimus release.
-It makes installations reproducible and bug reports easier to investigate.
-Maintainers advance the pins after reviewing and testing new revisions.
-To follow a plugin's default branch, redeclare it in the ignored
-`custom/plugins.vim`, which loads after the distribution's pins:
+`plugins.lock.json` pins the plugin revisions tested with each release, so an
+installation behaves like the one that was tested and bug reports can be
+reproduced. To follow a plugin's default branch instead, redeclare it in the
+ignored `custom/plugins.vim`, which loads after the pins:
 
 ```vim
 Plug 'BaksiLi/texinsitu.vim', {'do': ':TexInsituInstall'}
 ```
 
-Use plain `Plug` for this override; `OnesimusPlugin()` applies the reviewed
-pin. Keep any loading options or build hooks the plugin needs. The personal
-declaration also wins during `:One update`; it can select a tag or fork too.
+Use plain `Plug` (`OnesimusPlugin()` would reapply the pin) and keep any
+build hook the plugin needs. The declaration also wins during `:One update`,
+and can name a tag or fork.
 
 Installations made by Onesimos 0.1.x do not yet understand `--update`. Bootstrap
 their one-time migration with the current installer:
@@ -190,10 +189,11 @@ hides the row; the letter is never lent to something else.
 | `s` | Save safely | `w` | Word count | `c` | Terminal Map |
 | `e` | Problems | `z` | Focus mode | `i` | Preview inquiry fences |
 | `t` | Outline (F2) | `m` | Rendered formulas | `n` | Rename symbol |
-| `?` | Help for this file | `p` | Spelling marks | `a` | Code action |
+| `h` | Tool status | `p` | Spelling marks | `a` | Code action |
+| `?` | Help for this file | | | | |
 
-`\\h` shows the language tools available for this file (`:One health`).
-`:One help` opens the file's workflow guide, or the manual if it has none.
+`\\h` lists the language tools this file can use. `\\?` (`:One help`) opens
+the file's workflow guide, or the manual if it has none.
 
 While the buffer and its file on disk disagree, `\\` shows the conflict
 choices instead: `d` compares them, `u` takes the disk version, and `x` saves
@@ -211,10 +211,9 @@ the reviewed buffer over the disk.
 `\o` manages the distribution; `\\` handles the current file.
 `\?` always opens the full manual, `:help onesimus`.
 
-`:One index` explicitly writes `./tags` from the working directory for Vim's
-native tag navigation (`Ctrl-]`, `:tag`). `:One find tags` browses buffer
-symbols, and `:One find proj_tags` searches project symbols through Clap;
-neither picker requires a prebuilt tags file.
+`\ft` and `\fT` search symbols in the buffer and the project without a tags
+file. `:One index` writes `./tags` with `ctags -R` for Vim's own `Ctrl-]` and
+`:tag`.
 
 ### Function keys and Vim keys
 - `<F2>` outline, `<F3>` file tree, `<F4>` REPL, `<F5>` build, `<F6>` format
