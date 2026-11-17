@@ -76,8 +76,8 @@ function! s:WorkspaceSymbols() abort
   endif
 endfunction
 
-command! OnesimusBufferSymbols call <SID>BufferSymbols()
-command! OnesimusWorkspaceSymbols call <SID>WorkspaceSymbols()
+call one#define('outline', '*', function('s:BufferSymbols'))
+call one#define('symbols', '*', function('s:WorkspaceSymbols'))
 
-nnoremap <silent> gs :OnesimusBufferSymbols<CR>
-nnoremap <silent> gS :OnesimusWorkspaceSymbols<CR>
+nnoremap <silent> gs :<C-U>One outline<CR>
+nnoremap <silent> gS :<C-U>One symbols<CR>

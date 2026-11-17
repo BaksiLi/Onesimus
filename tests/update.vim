@@ -70,8 +70,8 @@ function! s:RunUpdateTests() abort
         \ 'printf "%s\\n" "let g:onesimus_test_reloaded = 1" > "$root/init.vim"',
         \ ])
 
-  OnesimusUpdate
-  OnesimusUpdate
+  One update
+  One update
   call s:WaitForUpdate()
   call assert_equal(['run'], readfile(l:count),
         \ 'a second invocation never starts a concurrent updater')
@@ -103,7 +103,7 @@ function! s:RunUpdateTests() abort
         \ ])
   let g:onesimus_test_popup_supported = 0
   silent messages clear
-  OnesimusUpdate
+  One update
   call s:WaitForUpdate()
   let l:messages = execute('messages')
   call assert_equal(7, g:onesimus_update_state.exit_status)
@@ -112,12 +112,12 @@ function! s:RunUpdateTests() abort
   call assert_match('Update failed (exit 7)', l:messages)
   call assert_match('local changes block fast-forward', l:messages)
   call assert_match('resolve the branch first', l:messages)
-  call assert_match(':OnesimusUpdate again', l:messages)
+  call assert_match(':One update again', l:messages)
   call assert_equal(2, g:onesimus_usage_runtime.counts['meta.update'])
 
   let l:actions = OnesimusHomeActions()
   call assert_true(index(map(copy(l:actions), 'v:val.cmd'),
-        \ 'OnesimusUpdate') >= 0)
+        \ 'One update') >= 0)
   call assert_equal('u', g:startify_lists[0].indices[-1])
 
   let g:onesimus_usage_enabled = 0

@@ -14,12 +14,12 @@ function! s:RunSmokeTests() abort
   let l:redraw = maparg('<C-L>', 'n', 0, 1)
   call assert_true(get(l:redraw, 'noremap', 0))
   call assert_true(get(l:redraw, 'silent', 0))
-  call assert_match('OnesimusRedraw', get(l:redraw, 'rhs', ''))
+  call assert_match('One redraw', get(l:redraw, 'rhs', ''))
   call assert_equal(2, exists(':ALEInfo'), 'ALE command is available')
   call assert_equal(2, exists(':Clap'), 'vim-clap command is available')
   call assert_equal(2, exists(':GitGutter'), 'vim-gitgutter command is available')
-  call assert_equal(2, exists(':OnesimusHealth'), 'health command is available')
-  call assert_equal(2, exists(':OnesimusStats'), 'stats command is available')
+  call assert_true(one#available('health'), 'health is available')
+  call assert_equal(2, exists(':One'), 'stats command is available')
   call assert_false(has_key(g:plugs, 'vim-lsp'), 'vim-lsp is not declared')
   call assert_false(has_key(g:plugs, 'vim-lsp-settings'),
         \ 'vim-lsp-settings is not declared')
@@ -97,12 +97,12 @@ function! s:RunSmokeTests() abort
         \ g:ale_fixers.haskell)
   call assert_equal('<Plug>(ale_previous_wrap)', maparg('[d', 'n'))
   call assert_equal('<Plug>(ale_next_wrap)', maparg(']d', 'n'))
-  call assert_match('OnesimusBufferSymbols', maparg('gs', 'n'))
-  call assert_match('OnesimusBufferSymbols', maparg('<F2>', 'n'))
-  call assert_equal(2, exists(':OnesimusClap'))
-  call assert_match('OnesimusClap files', maparg('<leader>ff', 'n'))
-  call assert_match('OnesimusClap marks', maparg('<leader>fm', 'n'))
-  call assert_match('OnesimusFormat', maparg('<F6>', 'n'))
+  call assert_match('One outline', maparg('gs', 'n'))
+  call assert_match('One outline', maparg('<F2>', 'n'))
+  call assert_true(one#available('find'))
+  call assert_match('One find files', maparg('<leader>ff', 'n'))
+  call assert_match('One find marks', maparg('<leader>fm', 'n'))
+  call assert_match('One format', maparg('<F6>', 'n'))
   call assert_match('Use k (up)', maparg('<Up>', 'n'))
   call assert_equal('', maparg('<Up>', 'x'),
         \ 'the Normal-mode HJKL hint does not pollute Visual mode')
@@ -217,7 +217,7 @@ function! s:RunSmokeTests() abort
       call OnesimusConfigureTerminalRendering()
     endtry
   endif
-  call assert_equal(2, exists(':OnesimusRedraw'))
+  call assert_true(one#available('redraw'))
 
   enew
   call setline(1, 'An ASCII-only Markdown buffer.')
@@ -276,10 +276,10 @@ function! s:RunSmokeTests() abort
   call assert_equal('「中文」', getline(1), 'q creates Chinese corner quotes')
 
   let v:errmsg = ''
-  silent OnesimusReload
+  silent One reload
   call assert_notmatch('E127:', v:errmsg,
         \ 'reload must not redefine its active implementation')
-  call assert_equal(2, exists(':OnesimusStats'))
+  call assert_equal(2, exists(':One'))
 
   enew
   let l:rainbow_dir = g:plugs.rainbow.dir
@@ -287,7 +287,7 @@ function! s:RunSmokeTests() abort
   set filetype=lisp
   call assert_false(exists('b:rainbow_confs'),
         \ 'a missing first-run plugin leaves native matching alone')
-  silent OnesimusReload
+  silent One reload
   call assert_true(exists('b:rainbow_confs'),
         \ 'reload configures an already-open Lisp buffer after installation')
   call assert_equal(l:rainbow_dir, g:plugs.rainbow.dir)
@@ -301,7 +301,7 @@ function! s:RunSmokeTests() abort
   let l:nerdtree_dir = g:plugs.nerdtree.dir
   let g:plugs.nerdtree.dir = '/tmp/onesimus-plugin-not-installed'
   let v:errmsg = ''
-  silent OnesimusTree
+  silent One tree
   call assert_notmatch('E492:', v:errmsg,
         \ 'a missing lazy plugin gets a first-run hint, not a raw command error')
   let g:plugs.nerdtree.dir = l:nerdtree_dir
@@ -309,7 +309,7 @@ function! s:RunSmokeTests() abort
   let l:clap_dir = g:plugs['vim-clap'].dir
   let g:plugs['vim-clap'].dir = '/tmp/onesimus-plugin-not-installed'
   let v:errmsg = ''
-  silent OnesimusClap files
+  silent One find files
   call assert_notmatch('E492:', v:errmsg,
         \ 'the picker facade validates its lazy plugin directory')
   let g:plugs['vim-clap'].dir = l:clap_dir

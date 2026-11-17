@@ -384,8 +384,6 @@ function! s:ConfigureLSPBuffer() abort
   call s:MapLSPAction('gd', '<Plug>(ale_go_to_definition)', 'code.definition')
   call s:MapLSPAction('gr', '<Plug>(ale_find_references)', 'code.references')
   call s:MapLSPAction('K', '<Plug>(ale_hover)', 'code.hover')
-  call s:MapLSPAction('<leader>rn', '<Plug>(ale_rename)', 'code.rename')
-  call s:MapLSPAction('<leader>ca', '<Plug>(ale_code_action)', 'code.action')
 endfunction
 
 augroup onesimus_ale_lsp
@@ -495,13 +493,26 @@ function! OnesimusLSPNavigate(target) abort
   return 1
 endfunction
 
-command! OnesimusDiagnostics call <SID>OpenDiagnostics()
-command! OnesimusLanguageInfo call <SID>LanguageInfo()
-command! OnesimusFormat call <SID>Format()
-command! OnesimusRenameSymbol call <SID>RenameSymbol()
-command! OnesimusCodeAction call <SID>CodeAction()
-nnoremap <silent> <leader>ld :OnesimusDiagnostics<CR>
-nnoremap <silent> <leader>li :OnesimusHealth<CR>
+function! s:HasLinters() abort
+  return has_key(get(g:, 'ale_linters', {}), &l:filetype)
+endfunction
+
+function! s:HasFixers() abort
+  let l:fixers = get(g:, 'ale_fixers', {})
+  return has_key(l:fixers, &l:filetype) || has_key(l:fixers, '*')
+endfunction
+
+function! s:LSPReady() abort
+  return get(b:, 'onesimus_lsp_ready', 0)
+endfunction
+
+call one#define('errors', '*', function('s:OpenDiagnostics'), function('s:HasLinters'))
+call one#define('format', '*', function('s:Format'), function('s:HasFixers'))
+call one#define('rename', '*', function('s:RenameSymbol'), function('s:LSPReady'))
+call one#define('action', '*', function('s:CodeAction'), function('s:LSPReady'))
+call one#define('goto', '*', function('OnesimusLSPNavigate'), function('s:LSPReady'))
+call one#arguments('goto', keys(s:lsp_navigation))
+call one#define('lang', '*', function('s:LanguageInfo'))
 
 function! s:ConfiguredFixers() abort
   if exists('b:ale_fixers') && type(b:ale_fixers) is v:t_list
@@ -531,7 +542,7 @@ function! s:JiebaHealthLine() abort
   elseif !exists('g:loaded_jieba_vim')
     return 'lazy     words    activates when Han text appears'
   endif
-  return 'native   words    run :OnesimusJiebaInstall'
+  return 'native   words    run :One jieba install'
 endfunction
 
 function! s:HaskellFormatterHealthLine() abort
@@ -613,6 +624,6 @@ function! s:OnesimusHealth() abort
     endfor
   endif
 endfunction
-command! OnesimusHealth call <SID>OnesimusHealth()
+call one#define('health', '*', function('s:OnesimusHealth'))
 
 call s:RefreshLanguageFixers()

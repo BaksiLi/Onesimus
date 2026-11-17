@@ -1,6 +1,7 @@
 " Browser-selected text must match actual source before entering Visual.
 set nocompatible
 let s:root = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
+execute 'set runtimepath^='.fnameescape(s:root)
 execute 'set runtimepath^='.fnameescape(s:root.'/packages/webpreview.vim')
 execute 'source '.fnameescape(s:root.'/functions/Writing.vim')
 function! s:Select(lines, text, anchor, expected) abort

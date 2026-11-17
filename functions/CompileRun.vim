@@ -252,7 +252,10 @@ function! s:CompileRun() abort
   return 1
 endfunction
 
-command! -bang -nargs=0 CompileRun call <SID>CompileRun()
+function! s:Runnable() abort
+  return index(s:supported_filetypes, &l:filetype) >= 0
+endfunction
+call one#define('build', '*', function('s:CompileRun'), function('s:Runnable'))
 
 " Add range support for asyncrun.
 command! -bang -range=% -nargs=* AsyncRunRange call asyncrun#run('<bang>', {}, <q-args>)

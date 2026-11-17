@@ -8,10 +8,10 @@ let g:onesimus_usage_enabled = get(g:, 'onesimus_usage_enabled', 1)
 
 let s:catalog = [
       \ {'id': 'meta.home', 'label': 'Open home', 'group': 'Onesimus', 'key': '<Leader>oh', 'kind': 'explicit'},
-      \ {'id': 'meta.help', 'label': 'Read documentation', 'group': 'Onesimus', 'key': '<Leader>h', 'kind': 'explicit'},
-      \ {'id': 'meta.config', 'label': 'Edit configuration', 'group': 'Onesimus', 'key': '<Leader>ed', 'kind': 'explicit'},
-      \ {'id': 'meta.reload', 'label': 'Reload configuration', 'group': 'Onesimus', 'key': '<Leader>sd', 'kind': 'explicit'},
-      \ {'id': 'meta.update', 'label': 'Update Onesimus', 'group': 'Onesimus', 'key': '<Leader> o u', 'kind': 'explicit'},
+      \ {'id': 'meta.help', 'label': 'Read documentation', 'group': 'Onesimus', 'key': '<Leader>o?', 'kind': 'explicit'},
+      \ {'id': 'meta.config', 'label': 'Edit configuration', 'group': 'Onesimus', 'key': '<Leader>oc', 'kind': 'explicit'},
+      \ {'id': 'meta.reload', 'label': 'Reload configuration', 'group': 'Onesimus', 'key': '<Leader>or', 'kind': 'explicit'},
+      \ {'id': 'meta.update', 'label': 'Update Onesimus', 'group': 'Onesimus', 'key': '<Leader>ou', 'kind': 'explicit'},
       \ {'id': 'meta.stats', 'label': 'Usage dashboard', 'group': 'Onesimus', 'key': '<Leader>os', 'kind': 'explicit'},
       \ {'id': 'meta.whichkey', 'label': 'Open action guide', 'group': 'Onesimus', 'key': '<Leader>', 'kind': 'explicit', 'tip': 'Pause after <Leader> for global tools; press it again for this file.'},
       \ {'id': 'find.files', 'label': 'Find files', 'group': 'Find', 'key': '<Leader>ff', 'kind': 'explicit', 'tip': '<Leader>ff finds files without leaving Vim.'},
@@ -25,37 +25,37 @@ let s:catalog = [
       \ {'id': 'nav.tree', 'label': 'File tree', 'group': 'Navigate', 'key': 'F3', 'kind': 'explicit', 'tip': 'F3 toggles the file tree.'},
       \ {'id': 'nav.buffer_symbols', 'label': 'Buffer symbols', 'group': 'Navigate', 'key': 'F2 / gs', 'kind': 'explicit', 'tip': 'gs lists symbols in the current buffer.'},
       \ {'id': 'nav.workspace_symbols', 'label': 'Workspace symbols', 'group': 'Navigate', 'key': 'gS', 'kind': 'explicit'},
-      \ {'id': 'nav.tags', 'label': 'Build project tags', 'group': 'Navigate', 'key': '<Leader>et', 'kind': 'explicit'},
+      \ {'id': 'nav.tags', 'label': 'Build project tags', 'group': 'Navigate', 'key': ':One tags', 'kind': 'explicit'},
       \ {'id': 'code.run', 'label': 'Compile or run', 'group': 'Code', 'key': 'F5', 'kind': 'explicit', 'tip': 'F5 runs the current file with its language tool.'},
       \ {'id': 'code.check', 'label': 'Check code', 'group': 'Code', 'key': 'F5', 'kind': 'explicit', 'tip': 'In Haskell, F5 checks the nearest Stack or Cabal project.'},
       \ {'id': 'code.format', 'label': 'Format buffer', 'group': 'Code', 'key': 'F6', 'kind': 'explicit', 'tip': 'F6 formats explicitly; saving never rewrites code.'},
-      \ {'id': 'code.diagnostics', 'label': 'Open diagnostics', 'group': 'Code', 'key': '<Leader>ld', 'kind': 'explicit'},
-      \ {'id': 'code.health', 'label': 'Check tool health', 'group': 'Code', 'key': '<Leader>li', 'kind': 'explicit', 'tip': '<Leader>li explains the active language tools.'},
+      \ {'id': 'code.diagnostics', 'label': 'Open diagnostics', 'group': 'Code', 'key': '\\e', 'kind': 'explicit'},
+      \ {'id': 'code.health', 'label': 'Check tool health', 'group': 'Code', 'key': '<Leader>oi', 'kind': 'explicit', 'tip': '<Leader>oi explains the active language tools.'},
       \ {'id': 'code.definition', 'label': 'Go to definition', 'group': 'Code', 'key': 'gd', 'kind': 'explicit'},
       \ {'id': 'code.references', 'label': 'Find references', 'group': 'Code', 'key': 'gr', 'kind': 'explicit'},
-      \ {'id': 'code.implementation', 'label': 'Go to implementation', 'group': 'Code', 'key': '<Leader>. g i', 'kind': 'explicit'},
-      \ {'id': 'code.type_definition', 'label': 'Go to type', 'group': 'Code', 'key': '<Leader>. g t', 'kind': 'explicit'},
+      \ {'id': 'code.implementation', 'label': 'Go to implementation', 'group': 'Code', 'key': ':One goto implementation', 'kind': 'explicit'},
+      \ {'id': 'code.type_definition', 'label': 'Go to type', 'group': 'Code', 'key': ':One goto type_definition', 'kind': 'explicit'},
       \ {'id': 'code.hover', 'label': 'Hover documentation', 'group': 'Code', 'key': 'K', 'kind': 'explicit'},
-      \ {'id': 'code.rename', 'label': 'Rename symbol', 'group': 'Code', 'key': '<Leader>rn', 'kind': 'explicit'},
-      \ {'id': 'code.action', 'label': 'Code action', 'group': 'Code', 'key': '<Leader>ca', 'kind': 'explicit'},
+      \ {'id': 'code.rename', 'label': 'Rename symbol', 'group': 'Code', 'key': '\\n', 'kind': 'explicit'},
+      \ {'id': 'code.action', 'label': 'Code action', 'group': 'Code', 'key': '\\a', 'kind': 'explicit'},
       \ {'id': 'repl.open', 'label': 'Open REPL', 'group': 'Code', 'key': 'F4', 'kind': 'explicit'},
       \ {'id': 'tex.build_once', 'label': 'Save, build and open TeX PDF', 'group': 'Write', 'key': 'F5', 'kind': 'explicit', 'tip': 'In TeX, F5 conflict-checks, saves, then builds once.'},
       \ {'id': 'tex.save', 'label': 'Safely save TeX', 'group': 'Write', 'key': '\\s', 'kind': 'explicit'},
-      \ {'id': 'tex.sync', 'label': 'Check collaborator edits', 'group': 'Write', 'key': '\\or', 'kind': 'explicit'},
-      \ {'id': 'tex.live_build', 'label': 'Toggle TeX live build', 'group': 'Write', 'key': '\\ol', 'kind': 'explicit'},
-      \ {'id': 'tex.compare_disk', 'label': 'Compare TeX with disk', 'group': 'Write', 'key': '\\od', 'kind': 'explicit', 'tip': '<Leader>. shows safe conflict actions for TeX.'},
-      \ {'id': 'tex.status', 'label': 'TeX workflow status', 'group': 'Write', 'key': '\\oi', 'kind': 'explicit'},
+      \ {'id': 'tex.sync', 'label': 'Check collaborator edits', 'group': 'Write', 'key': ':One check', 'kind': 'explicit'},
+      \ {'id': 'tex.live_build', 'label': 'Toggle TeX live build', 'group': 'Write', 'key': ':One live', 'kind': 'explicit'},
+      \ {'id': 'tex.compare_disk', 'label': 'Compare TeX with disk', 'group': 'Write', 'key': '\\d', 'kind': 'explicit', 'tip': 'During a disk conflict, \\ shows only the safe choices.'},
+      \ {'id': 'tex.status', 'label': 'TeX workflow status', 'group': 'Write', 'key': ':One status', 'kind': 'explicit'},
       \ {'id': 'tex.view', 'label': 'View TeX PDF', 'group': 'Write', 'key': '\\v', 'kind': 'explicit'},
       \ {'id': 'tex.outline', 'label': 'Open TeX outline', 'group': 'Write', 'key': '\\t', 'kind': 'explicit'},
       \ {'id': 'tex.errors', 'label': 'Open TeX build problems', 'group': 'Write', 'key': '\\e', 'kind': 'explicit'},
-      \ {'id': 'tex.output', 'label': 'Open TeX compiler output', 'group': 'Write', 'key': '\\oc', 'kind': 'explicit'},
+      \ {'id': 'tex.output', 'label': 'Open TeX compiler output', 'group': 'Write', 'key': ':One log', 'kind': 'explicit'},
       \ {'id': 'tex.word_count', 'label': 'Count TeX words', 'group': 'Write', 'key': '\\w', 'kind': 'explicit'},
-      \ {'id': 'tex.sentence_lines', 'label': 'Normalize TeX sentence lines', 'group': 'Write', 'key': '\\n', 'kind': 'explicit'},
+      \ {'id': 'tex.sentence_lines', 'label': 'Normalize TeX sentence lines', 'group': 'Write', 'key': '\\l', 'kind': 'explicit'},
       \ {'id': 'writing.math', 'label': 'Toggle automatic formulas', 'group': 'Write', 'key': '\\m', 'kind': 'explicit'},
       \ {'id': 'tex.resolve_write', 'label': 'Save reviewed TeX merge', 'group': 'Write', 'key': '\\x', 'kind': 'explicit'},
       \ {'id': 'tex.use_disk', 'label': 'Use TeX disk version', 'group': 'Write', 'key': '\\u', 'kind': 'explicit'},
-      \ {'id': 'tex.help', 'label': 'TeX writing guide', 'group': 'Write', 'key': '\\o?', 'kind': 'explicit'},
-      \ {'id': 'writing.focus', 'label': 'Focus writing mode', 'group': 'Write', 'key': '<Leader>tw', 'kind': 'explicit', 'tip': '<Leader>tw enters a distraction-free writing view.'},
+      \ {'id': 'tex.help', 'label': 'TeX writing guide', 'group': 'Write', 'key': '\\?', 'kind': 'explicit'},
+      \ {'id': 'writing.focus', 'label': 'Focus writing mode', 'group': 'Write', 'key': '\\z', 'kind': 'explicit', 'tip': '\\z enters a distraction-free writing view.'},
       \ {'id': 'writing.cjk', 'label': 'CJK segmentation active', 'group': 'Write', 'key': 'w / iw', 'kind': 'passive'},
       \ {'id': 'ui.relative_number', 'label': 'Relative numbers', 'group': 'Interface', 'key': '<Leader>tr', 'kind': 'explicit'},
       \ {'id': 'ui.indent_guides', 'label': 'Indent guides', 'group': 'Interface', 'key': '<Leader>ti', 'kind': 'explicit'},
@@ -108,7 +108,7 @@ endfunction
 if !exists('g:onesimus_usage_runtime')
   let g:onesimus_usage_runtime = s:NewRuntime()
 elseif !has_key(g:onesimus_usage_runtime, 'last')
-  " In-process migration for :OnesimusReload from the first journal format.
+  " In-process migration for :One reload from the first journal format.
   let g:onesimus_usage_runtime.last = {}
 endif
 let s:runtime = g:onesimus_usage_runtime
@@ -474,11 +474,11 @@ function! OnesimusHomeActions() abort
     call OnesimusOffer('find.grep')
   endif
   return [
-        \ {'line': 'Files', 'cmd': 'OnesimusClap files'},
-        \ {'line': 'Search project', 'cmd': 'OnesimusClap grep'},
-        \ {'line': 'Action guide', 'cmd': 'OnesimusGuide'},
-        \ {'line': 'Tool status', 'cmd': 'OnesimusHealth'},
-        \ {'line': 'Update Onesimus', 'cmd': 'OnesimusUpdate'},
+        \ {'line': 'Files', 'cmd': 'One find files'},
+        \ {'line': 'Search project', 'cmd': 'One find grep'},
+        \ {'line': 'Action guide', 'cmd': 'One'},
+        \ {'line': 'Tool status', 'cmd': 'One health'},
+        \ {'line': 'Update Onesimus', 'cmd': 'One update'},
         \ ]
 endfunction
 
@@ -491,7 +491,7 @@ function! OnesimusHomeFooter() abort
   return [
         \ '',
         \ printf('  7 days  %s  %s', l:summary.sparkline, l:activity),
-        \ '  Guide   pause after \ anywhere · \. for this buffer',
+        \ '  Guide   pause after \ anywhere · \\ for this file',
         \ '  Try     '.s:DiscoveryTip(l:summary),
         \ '  Local only · no filenames, content, or network · \os for usage',
         \ ]
@@ -657,18 +657,7 @@ function! s:StatsDays(value) abort
   return index([7, 30, 90], l:days) >= 0 ? l:days : 30
 endfunction
 
-function! s:CompleteStats(arglead, cmdline, cursorpos) abort
-  return filter(['7', '30', '90'], 'v:val =~# "^".a:arglead')
-endfunction
-
-function! s:ResetStats(bang) abort
-  if a:bang !=# '!'
-    echohl WarningMsg
-    echomsg 'Use :OnesimusStatsReset! to delete local usage journals.'
-    echohl None
-    return
-  endif
-
+function! s:ResetStats() abort
   " Never recursively delete the configurable root.  In particular, a typo
   " such as g:onesimus_usage_state_dir = '~' must not turn a dashboard reset
   " into deletion of unrelated data.  Follow only real YYYY-MM directories
@@ -700,13 +689,22 @@ function! s:DisableStats() abort
   echomsg 'Onesimus local usage journal disabled for this Vim process.'
 endfunction
 
-command! -nargs=? -complete=customlist,<SID>CompleteStats OnesimusStats
-      \ call <SID>OpenStats(<SID>StatsDays(<q-args>))
-command! -nargs=? -complete=customlist,<SID>CompleteStats OnesimusUsage
-      \ call <SID>OpenStats(<SID>StatsDays(<q-args>))
-command! -bang OnesimusStatsReset call <SID>ResetStats('<bang>')
-command! OnesimusStatsPath echomsg <SID>StateRoot()
-command! OnesimusStatsDisable call <SID>DisableStats()
+" :One usage [7|30|90], or reset / path / disable.  Typing `reset` in full is
+" the confirmation; nothing else deletes journals.
+function! s:Usage(...) abort
+  let l:action = get(a:000, 0, '')
+  if l:action ==# 'reset'
+    return s:ResetStats()
+  elseif l:action ==# 'path'
+    echomsg s:StateRoot()
+  elseif l:action ==# 'disable'
+    return s:DisableStats()
+  else
+    return s:OpenStats(s:StatsDays(l:action))
+  endif
+endfunction
+call one#define('usage', '*', function('s:Usage'))
+call one#arguments('usage', ['7', '30', '90', 'disable', 'path', 'reset'])
 
 augroup onesimus_usage
   autocmd!

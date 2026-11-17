@@ -9,4 +9,4 @@ func! s:ToggleBackground()
   endif
 endfunc
 
-command! ToggleBackground call <sid>ToggleBackground()
+call one#define('background', '*', function('s:ToggleBackground'))

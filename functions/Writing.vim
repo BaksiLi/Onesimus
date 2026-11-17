@@ -119,42 +119,6 @@ function! OnesimusWritingToggleSpell() abort
   return 1
 endfunction
 
-function! s:SpellingAction(command) abort
-  if !s:RequireSpelling()
-    return 0
-  endif
-  try
-    setlocal spell
-    execute 'normal! '.a:command
-  catch
-    call OnesimusNotify('SPELLING UNAVAILABLE', [v:exception,
-          \ 'Check :setlocal spelllang? and the installed Vim dictionaries.'], 1)
-    return 0
-  endtry
-  return 1
-endfunction
-
-function! OnesimusWritingNextSpelling() abort
-  return s:SpellingAction(']s')
-endfunction
-
-function! OnesimusWritingSuggest() abort
-  if !s:RequireWritingBuffer()
-    return 0
-  endif
-  let l:word = ''
-  try
-    let l:word = expand('<cword>')
-  catch /E348:/
-  endtry
-  if empty(l:word)
-    call OnesimusNotify('NO WORD SELECTED',
-          \ ['Place the cursor on a word, then choose Spelling → Suggestions.'], 1)
-    return 0
-  endif
-  return s:SpellingAction('z=')
-endfunction
-
 function! OnesimusWritingHelp() abort
   if &l:filetype ==# 'bib'
     call OnesimusPopup('BIBLIOGRAPHY GUIDE', [
@@ -170,13 +134,13 @@ function! OnesimusWritingHelp() abort
         \ '  \\ opens actions for this draft.',
         \ '  F5 previews Markdown/Cogitatum drafts without saving.',
         \ '  TeX F5 saves and builds; PDF positions refer to that build.',
-        \ '  \\v opens browser preview; \\s saves; \\o opens more tools.',
+        \ '  \\v opens browser preview; \\s saves; :One <Tab> lists every action.',
         \ '  Formulas render in place automatically; enter one to edit its source.',
         \ '  \\m switches automatic / raw formulas for this buffer.',
         \ '  Edit raw source here; browser preview has the complete typesetting.',
         \ '  Cogitatum terminal Reading follows saved files only.',
-        \ '  Choose focus mode, word count, or Spelling from the writing menu.',
-        \ '  Focus mode (\tw) changes the view, not the source.',
+        \ '  \\z focus mode · \\w word count · \\p spelling marks.',
+        \ '  Focus mode changes the view, not the source.',
         \ '  Save is explicit. A word count or display toggle never saves.',
         \ '  ↳ marks a screen continuation; it is not a source newline.',
         \ '  Choose source breaks at meaningful sentences/clauses, not a width.',
@@ -188,11 +152,19 @@ function! OnesimusWritingHelp() abort
   return 1
 endfunction
 
-command! OnesimusWritingSave call OnesimusWritingSave()
-command! OnesimusWritingPreview call OnesimusWritingPreview()
-command! OnesimusWritingPreviewStop call OnesimusWritingPreviewStop()
-command! OnesimusWritingCountWords call OnesimusWritingCountWords()
-command! OnesimusWritingToggleSpell call OnesimusWritingToggleSpell()
-command! OnesimusWritingNextSpelling call OnesimusWritingNextSpelling()
-command! OnesimusWritingSuggest call OnesimusWritingSuggest()
-command! OnesimusWritingHelp call OnesimusWritingHelp()
+function! s:Prose() abort
+  return &l:filetype !=# 'bib'
+endfunction
+
+function! s:MathAvailable() abort
+  return exists(':TexInsituToggle') == 2 && s:Prose()
+endfunction
+
+call one#define('save', 'writing', function('OnesimusWritingSave'))
+call one#define('view', ['markdown', 'cogitatum'], function('OnesimusWritingPreview'))
+call one#define('stop', ['tex', 'markdown', 'cogitatum'], function('OnesimusWritingPreviewStop'))
+call one#define('words', 'writing', function('OnesimusWritingCountWords'), function('s:Prose'))
+call one#define('spell', 'writing', function('OnesimusWritingToggleSpell'), function('s:Prose'))
+call one#define('math', 'writing', 'TexInsituToggle', function('s:MathAvailable'))
+call one#define('diff', 'markdown', 'WebPreviewChanges')
+call one#define('help', 'writing', function('OnesimusWritingHelp'))

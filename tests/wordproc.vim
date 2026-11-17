@@ -63,28 +63,10 @@ function! s:RunWritingActionTests() abort
       call assert_equal(l:modified, &l:modified)
       call assert_equal(['Original draft.'], readfile(l:draft),
             \ 'spelling toggles change display only')
-      setlocal spelllang=
-      call assert_false(OnesimusWritingNextSpelling(),
-            \ 'an unconfigured spelling language is an actionable no-op')
-      call assert_false(&l:spell)
       setlocal spell
       call assert_true(OnesimusWritingToggleSpell(),
-            \ 'spelling can always be disabled even without a language')
+            \ 'spelling marks can always be hidden')
       call assert_false(&l:spell)
-      setlocal spelllang=en
-      call setline(1, 'Correct qqqqwordzzzz')
-      call cursor(1, 1)
-      let l:tick = b:changedtick
-      call assert_true(OnesimusWritingNextSpelling())
-      call assert_true(&l:spell)
-      call assert_equal(9, col('.'))
-      call assert_equal(l:tick, b:changedtick,
-            \ 'next spelling word moves the cursor but does not edit')
-      call s:CloseWritingPopups()
-      call feedkeys("\<CR>", 't')
-      call assert_true(OnesimusWritingSuggest())
-      call assert_equal(l:tick, b:changedtick,
-            \ 'cancelling suggestions leaves the source unchanged')
       call setline(1, 'Three simple words.')
     endif
     call assert_true(OnesimusWritingSave())
@@ -151,7 +133,6 @@ function! s:RunWritingActionTests() abort
     call assert_false(OnesimusWritingSave())
     call assert_true(&l:modified)
     call setline(1, '')
-    call assert_false(OnesimusWritingSuggest())
     setlocal buftype=nofile
     call assert_false(OnesimusWritingCountWords())
     call assert_false(OnesimusWritingToggleSpell())
@@ -176,10 +157,10 @@ function! s:RunWordProcTests() abort
   let l:number = &l:number
   let l:textwidth = &l:textwidth
 
-  WPModeToggle
+  One focus
   call assert_false(empty(g:onesimus_wordproc_state))
   call assert_true(OnesimusWritingFocusActive())
-  WPModeToggle
+  One focus
   call assert_equal({}, g:onesimus_wordproc_state)
   call assert_false(OnesimusWritingFocusActive())
   call assert_equal(0, g:gitgutter_enabled,
@@ -190,10 +171,10 @@ function! s:RunWordProcTests() abort
   if PlugInstalled('goyo.vim') && exists(':Goyo')
     silent Goyo
     call assert_true(exists('t:goyo_revert'))
-    WPModeToggle
+    One focus
     call assert_true(exists('t:goyo_revert'),
           \ 'focus mode leaves a pre-existing Goyo session active')
-    WPModeToggle
+    One focus
     call assert_true(exists('t:goyo_revert'),
           \ 'leaving focus mode does not close user-owned Goyo')
     silent! Goyo!
@@ -202,10 +183,10 @@ function! s:RunWordProcTests() abort
   if PlugInstalled('limelight.vim') && exists(':Limelight')
     silent Limelight
     call assert_true(exists('#limelight'))
-    WPModeToggle
+    One focus
     call assert_true(exists('#limelight'),
           \ 'focus mode leaves a pre-existing Limelight session active')
-    WPModeToggle
+    One focus
     call assert_true(exists('#limelight'),
           \ 'leaving focus mode does not close user-owned Limelight')
     silent! Limelight!
@@ -218,13 +199,13 @@ function! s:RunWordProcTests() abort
   setlocal number relativenumber cursorline textwidth=72 nowrap nolinebreak nospell
   let l:tick = b:changedtick
   let v:errmsg = ''
-  WPModeToggle
+  One focus
   call assert_equal(72, &l:textwidth,
         \ 'focus owns display only, never a buffer formatting policy')
   call assert_true(&l:wrap)
   call assert_true(&l:linebreak)
   setlocal spell textwidth=91
-  WPModeToggle
+  One focus
   call assert_equal(91, &l:textwidth,
         \ 'an explicit formatting-policy change during focus survives exit')
   call assert_false(&l:wrap)
@@ -245,7 +226,7 @@ function! s:RunWordProcTests() abort
   let g:plugs['limelight.vim'].dir = '/tmp/onesimus-plugin-not-installed'
   setlocal number nowrap nolinebreak nobreakindent showbreak=OLD
   let l:owner = win_getid()
-  WPModeToggle
+  One focus
   call assert_true(&l:breakindent)
   call assert_equal('↳ ', &l:showbreak)
   vnew
@@ -263,7 +244,7 @@ function! s:RunWordProcTests() abort
   file onesimus-focus-origin
   call setline(1, 'Draft stays unsaved.')
   let l:original = bufnr('')
-  WPModeToggle
+  One focus
   enew
   call assert_false(OnesimusWritingFocusActive())
   setlocal textwidth=97 nowrap
@@ -276,7 +257,7 @@ function! s:RunWordProcTests() abort
   if PlugInstalled('goyo.vim') && exists(':Goyo')
     let l:origin = win_getid()
     setlocal nowrap textwidth=79
-    WPModeToggle
+    One focus
     call assert_true(&l:wrap, 'plugin and native focus use the same soft view')
     call assert_equal(79, &l:textwidth)
     silent Goyo!
@@ -285,7 +266,7 @@ function! s:RunWordProcTests() abort
     call assert_equal(l:origin, win_getid())
     call assert_false(&l:wrap, 'temporary Goyo view did not alter the origin')
     call assert_equal(79, &l:textwidth)
-    WPModeToggle
+    One focus
     tabprevious
     call assert_false(OnesimusWritingFocusActive(),
           \ 'Goyo automatic TabLeave exit also releases focus ownership')

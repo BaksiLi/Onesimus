@@ -77,18 +77,18 @@ function! s:RunUsageTests() abort
   call delete(l:bad_time)
   call delete(l:odd_last)
 
-  OnesimusStats 7
+  One usage 7
   call assert_equal('ONESIMUS / LOCAL USAGE', getline(1))
   call assert_equal('nofile', &l:buftype)
   call assert_match('change window', join(getline(1, '$'), "\n"))
   let l:stats_buffer = bufnr('')
-  OnesimusStats 30
+  One usage 30
   call assert_equal(l:stats_buffer, bufnr(''),
         \ 'opening stats twice reuses the visible dashboard')
   call assert_match('Last 30 days', getline(3))
   close
 
-  OnesimusHome
+  One home
   let l:home = join(getline(1, '$'), "\n")
   call assert_match('Onesimus — Vim, made helpful for human agents', l:home)
   call assert_match('Action guide', l:home)
@@ -104,7 +104,7 @@ function! s:RunUsageTests() abort
   let l:month_dir = g:onesimus_usage_state_dir.'/'.strftime('%Y-%m')
   call mkdir(l:month_dir, 'p')
   call writefile(['keep'], l:month_dir.'/unrelated.json')
-  OnesimusStatsReset!
+  One usage reset
   call assert_true(filereadable(g:onesimus_usage_state_dir.'/KEEP'),
         \ 'reset never recursively deletes the configurable state root')
   call assert_true(filereadable(l:month_dir.'/unrelated.json'),

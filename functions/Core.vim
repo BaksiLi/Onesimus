@@ -113,7 +113,7 @@ function! s:UpdateFailureLines(state) abort
     call extend(l:lines, ['', 'No diagnostic output was produced.'])
   endif
   call extend(l:lines, ['',
-        \ 'Nothing was reloaded. Fix the issue, then run :OnesimusUpdate again.'])
+        \ 'Nothing was reloaded. Fix the issue, then run :One update again.'])
   return l:lines
 endfunction
 
@@ -333,16 +333,17 @@ function! OnesimusConfigureParentheses() abort
   endif
 endfunction
 
-command! OnesimusHome call <SID>OpenHome(1)
-command! OnesimusHelp call <SID>OpenHelp()
-command! OnesimusEditConfig call <SID>EditConfig()
-command! OnesimusUpdate call <SID>Update()
-command! OnesimusReload call OnesimusReloadConfig()
-command! OnesimusToggleRelativeNumber call <SID>ToggleRelativeNumber()
-command! OnesimusTree call <SID>ToggleTree()
-command! OnesimusTags call <SID>BuildTags()
-command! OnesimusIndentToggle call <SID>ToggleIndentGuides()
-command! OnesimusParenthesisToggle call <SID>ToggleParentheses()
+call one#define('home', '*', function('s:OpenHome', [1]))
+call one#define('manual', '*', function('s:OpenHelp'))
+call one#define('help', '*', function('s:OpenHelp'))
+call one#define('config', '*', function('s:EditConfig'))
+call one#define('update', '*', function('s:Update'))
+call one#define('reload', '*', function('OnesimusReloadConfig'))
+call one#define('numbers', '*', function('s:ToggleRelativeNumber'))
+call one#define('tree', '*', function('s:ToggleTree'))
+call one#define('tags', '*', function('s:BuildTags'))
+call one#define('indent', '*', function('s:ToggleIndentGuides'))
+call one#define('parens', '*', function('s:ToggleParentheses'))
 augroup onesimus_native_indent_guides
   autocmd!
   autocmd FileType * call OnesimusConfigureIndentGuides()

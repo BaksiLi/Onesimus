@@ -4,7 +4,7 @@ let s:repo = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
 call assert_equal(s:repo, fnamemodify(resolve($VIMRCDIR), ':p:h'))
 call assert_equal(s:repo.'/init.vim', resolve($MYVIMDOT))
 call assert_equal(1, get(g:, 'onesimus_bootstrap_ready', 0))
-call assert_equal(2, exists(':OnesimusGuide'))
+call assert_equal(2, exists(':One'))
 
 if empty(v:errors)
   qall!

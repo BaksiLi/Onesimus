@@ -2,6 +2,7 @@
 "   vim -Nu tests/compilerun.vim -i NONE -n -es
 
 let s:root = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
+execute 'set runtimepath^='.fnameescape(s:root)
 let s:fixture = tempname().' path with spaces $semi; quote'''
 let s:bin = tempname()
 call mkdir(s:fixture, 'p')
@@ -40,7 +41,7 @@ function! s:Run(filetype, filename, contents) abort
   execute 'edit '.fnameescape(l:path)
   execute 'setlocal filetype='.a:filetype
   let g:compilerun_calls = []
-  silent CompileRun
+  silent call one#run('build')
   call assert_equal(1, len(g:compilerun_calls),
         \ a:filetype.' should dispatch exactly one task')
   return [l:path, get(g:compilerun_calls, 0, {})]
@@ -136,7 +137,7 @@ function! s:TestFailuresDoNotDispatch() abort
   let g:compilerun_calls = []
   let l:message = ''
   redir => l:message
-  CompileRun
+  call one#run('build')
   redir END
   call assert_equal([], g:compilerun_calls)
   call assert_match('save this buffer before running it', l:message)
@@ -147,10 +148,10 @@ function! s:TestFailuresDoNotDispatch() abort
   let g:compilerun_calls = []
   let l:message = ''
   redir => l:message
-  CompileRun
+  call one#run('build')
   redir END
   call assert_equal([], g:compilerun_calls)
-  call assert_match('cannot run filetype text', l:message)
+  call assert_match(':One build is not available', l:message)
 
   let l:source = s:fixture.'/missing compiler.c'
   call writefile(['int main(void) { return 0; }'], l:source)
@@ -160,7 +161,7 @@ function! s:TestFailuresDoNotDispatch() abort
   let g:compilerun_calls = []
   let l:message = ''
   redir => l:message
-  CompileRun
+  call one#run('build')
   redir END
   call assert_equal([], g:compilerun_calls)
   call assert_match('gcc is required', l:message)

@@ -58,4 +58,5 @@ endfunction
 function! s:Snapshot(path) abort
   echomsg 'Plugin snapshot: '.OnesimusPluginSnapshot(a:path)
 endfunction
-command! -nargs=? -complete=file OnesimusPluginSnapshot call <SID>Snapshot(<q-args>)
+call one#define('snapshot', '*', function('s:Snapshot'))
+call one#arguments('snapshot', 'file')

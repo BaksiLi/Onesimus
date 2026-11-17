@@ -283,7 +283,7 @@ function! s:MarkConflict(bufnr) abort
   if l:disk ==# 'missing'
     call OnesimusNotify('SOURCE DELETED OUTSIDE VIM', [
           \ l:name.': the local buffer is preserved and nothing was written.',
-          \ 'Press \. then x to recreate it, or :saveas to keep another path.',
+          \ 'Press \\x to recreate it, or :saveas to keep another path.',
           \ ], 1)
   elseif l:disk =~# '^unreadable:'
     call OnesimusNotify('SOURCE UNREADABLE ON DISK', [
@@ -294,7 +294,7 @@ function! s:MarkConflict(bufnr) abort
     call OnesimusNotify('SOURCE CONFLICT', [
           \ l:name.': the disk file and Vim buffer both changed.',
           \ 'Both versions were kept; nothing was written.',
-          \ 'Press \. then d to compare them.',
+          \ 'Press \\d to compare them.',
           \ ], 1)
   endif
 endfunction
@@ -423,7 +423,7 @@ function! s:InspectBuffer(bufnr, reload_clean) abort
       if l:was_running
         call OnesimusNotify('TEX PROJECT CHANGED', [
               \ 'The previous live/current build was stopped while project state reloaded.',
-              \ 'Press \. then l to restart live build, or F5 to build once.',
+              \ 'Run :One live to restart the live build, or F5 to build once.',
               \ ], 1)
       endif
     endif
@@ -574,17 +574,17 @@ function! OnesimusSafeUpdate(...) abort
     if l:disk ==# 'missing'
       call OnesimusNotify('SOURCE NOT SAVED / BUILD BLOCKED', [
             \ 'The source was deleted outside Vim; this local buffer is preserved.',
-            \ 'Press \. then x to recreate it, or :saveas for another path.',
+            \ 'Press \\x to recreate it, or :saveas for another path.',
             \ ], 1)
     elseif l:disk =~# '^unreadable:'
       call OnesimusNotify('SOURCE NOT SAVED / BUILD BLOCKED', [
             \ 'The disk path exists but cannot be read or snapshotted safely.',
-            \ 'Fix its permissions or mount, then press \. and re-check.',
+            \ 'Fix its permissions or mount, then run :One check.',
             \ ], 1)
     else
       call OnesimusNotify('SOURCE NOT SAVED / BUILD BLOCKED', [
             \ 'The disk file changed after this buffer was read.',
-            \ 'Press \. then d to compare; x saves a reviewed merge.',
+            \ 'Press \\d to compare; \\x saves a reviewed merge.',
             \ ], 1)
     endif
     return 0
@@ -644,7 +644,7 @@ function! OnesimusSafeUpdate(...) abort
       call s:MarkConflict(bufnr('%'))
       call OnesimusNotify('SOURCE CHANGED DURING SAVE — BUILD BLOCKED', [
             \ 'The disk no longer matches the source revision Vim just wrote.',
-            \ 'The local buffer remains preserved; press \. then d to compare.',
+            \ 'The local buffer remains preserved; press \\d to compare.',
             \ ], 1)
       return 0
     endif
@@ -672,7 +672,7 @@ function! OnesimusRefreshVimtexAfterLocalWrite(bufnr) abort
     if l:was_running
       call OnesimusNotify('TEX PROJECT CHANGED', [
             \ 'The previous live/current build stopped while project state reloaded.',
-            \ 'Press \. then l to restart live build, or F5 to build once.',
+            \ 'Run :One live to restart the live build, or F5 to build once.',
             \ ], 1)
     endif
   endif
@@ -764,7 +764,7 @@ function! OnesimusWriteResolved() abort
     call s:MarkConflict(bufnr('%'))
     call OnesimusNotify('REVIEW EXPIRED — SOURCE NOT SAVED', [
           \ empty(l:reviewed)
-          \   ? 'Open \. then d and review the current disk version first.'
+          \   ? 'Press \\d and review the current disk version first.'
           \   : 'The disk changed again after you opened the comparison.',
           \ 'Both versions remain preserved; compare again before writing.',
           \ ], 1)
@@ -864,7 +864,7 @@ function! OnesimusCommitReviewedSource() abort
   if &l:modified || OnesimusDiskChanged()
     call OnesimusNotify('SOURCE NOT SAVED', [
           \ 'The disk diverged during the write; the buffer remains marked local.',
-          \ 'Open \. then d and review the current disk revision again.',
+          \ 'Press \\d and review the current disk revision again.',
           \ ], 1)
     return 0
   endif
@@ -911,7 +911,7 @@ function! OnesimusUseDisk() abort
     call s:MarkConflict(bufnr('%'))
     call OnesimusNotify('DISK CHANGED — LOCAL BUFFER PRESERVED', [
           \ 'The disk revision changed while the confirmation was open.',
-          \ 'Nothing was replaced; press \. then d to inspect it again.',
+          \ 'Nothing was replaced; press \\d to inspect it again.',
           \ ], 1)
     return 0
   endif
@@ -969,7 +969,7 @@ function! OnesimusUseDisk() abort
     if l:was_running
       call OnesimusNotify('TEX PROJECT CHANGED', [
             \ 'The previous live/current build was stopped while project state reloaded.',
-            \ 'Press \. then l to restart live build, or F5 to build once.',
+            \ 'Run :One live to restart the live build, or F5 to build once.',
             \ ], 1)
     endif
   endif
@@ -1078,7 +1078,7 @@ function! OnesimusDiffDisk() abort
   call OnesimusNotify('COMPARE WITH DISK', [
         \ 'Disk copy: left, read-only.  Local buffer: right, editable.',
         \ 'Move to the disk pane and press q to close it.',
-        \ 'After reviewing/merging locally, press \. then x to save it.',
+        \ 'After reviewing/merging locally, press \\x to save it.',
         \ ], 0)
   return l:scratch
 endfunction
@@ -1095,11 +1095,10 @@ function! OnesimusDiffDiskClosed(origin) abort
   endif
 endfunction
 
-command! OnesimusCheckDisk call OnesimusCheckExternalChanges(0)
-command! OnesimusDiffDisk call OnesimusDiffDisk()
-command! OnesimusSafeUpdate call OnesimusSafeUpdate()
-command! OnesimusWriteResolved call OnesimusWriteResolved()
-command! OnesimusUseDisk call OnesimusUseDisk()
+call one#define('check', '*', function('OnesimusCheckExternalChanges', [0]))
+call one#define('compare', '*', function('OnesimusDiffDisk'))
+call one#define('revert', '*', function('OnesimusUseDisk'))
+call one#define('overwrite', '*', function('OnesimusWriteResolved'))
 
 augroup onesimus_external_changes
   autocmd!

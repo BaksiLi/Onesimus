@@ -84,8 +84,7 @@ loader. Use `--root /another/parent` to place the checkout elsewhere, or
 
 ### Updating an existing installation
 
-From Vim, choose `u  Update` on the Home screen, or press `<Leader>`, then
-`o`, then `u`. The equivalent command is `:OnesimusUpdate`. It updates in the
+From Vim, choose `u  Update` on the Home screen, or press `\ou`. The equivalent command is `:One update`. It updates in the
 background and posts a non-blocking restart notice when the on-disk
 configuration and plugins are ready; the running process is never
 half-reloaded.
@@ -121,7 +120,7 @@ plugin directories interactively with `:PlugClean` before approving deletion.
 
 Plugin snapshots live under `$XDG_STATE_HOME/onesimus/plugin-snapshots`
 (default `~/.local/state/onesimus/plugin-snapshots`). They are kept across
-updates. `:OnesimusPluginSnapshot` also saves one explicitly; an optional new
+updates. `:One snapshot` also saves one explicitly; an optional new
 filename selects another destination. To restore installed remote revisions,
 `:source /path/to/snapshot.vim` in Vim with Onesimus loaded. Snapshots record
 actual Git HEADs even when they differ from the lock, and note local checkouts
@@ -154,52 +153,59 @@ fork from Onesimus, then run the same command again; the updater never executes
 an old interactive installer as a handoff target.
 
 ## Keymaps
-The default leader key is `\`.
+Everything Onesimus adds is one command, `:One`, short for Onesimus.
+`:One` alone opens the action guide; `:One {action}` runs an action, and
+`:One <Tab>` lists the actions available in the current buffer.
 
-Press `\` and pause for global tools.
-Press `\\` for the current file's actions; `\.` also opens them directly.
-Neither menu exposes the full internal command surface.
+The leader key is `\`. Two menus cover the guide, and every row in them is
+also a real mapping, so a key you learn from the menu works without it:
 
-### Core Navigation
-- `<leader>ed` - Edit dotfile
-- `<leader>sd` - Reload dotfile
-- `<leader>?` - View help document (`<leader>h` remains an alias)
-- `<leader>.` - Current-buffer action guide
-- `<C-J/K/H/L>` - Navigate between splits
-- `]b/[b` - Next/previous buffer
-- `]c/[c` - Next/previous quickfix item
+- `\` then a pause: global tools. Type the group and the key directly, such as `\ff`.
+- `\\` then a pause: actions for the current file. Type `\\b`, `\\v` and so on directly.
 
-### IDE Features
-- `<leader>ff` - Fuzzy find files (vim-clap)
-- `<leader>fb` - Fuzzy find buffers
-- `<leader>ft` - Fuzzy find tags
-- `[d/]d` or `[a/]a` - Previous/next diagnostic
-- `<leader>ld` - Open diagnostics for the current buffer
-- `<leader>li` - Show concise tool status in a popup
-- `<F2>` - Search symbols/tags in the current buffer
-- `<F3>` - Toggle file tree (NERDTree)
-- `<F4>` - Open REPL
-- `<F5>` - Conflict-check, save, then run/build the current context
-- `<F6>` - Format current file
-- `<leader>oh` - Open Onesimus Home
-- `<leader>os` - Open the local usage dashboard
+Use the shown keys, arrows plus Enter, or taps when the terminal passes mouse
+events through. Left / Backspace returns to the parent menu.
 
-### Editing
-- `lkj` - Alternative to Escape
-- `<leader>tr` - Toggle relative numbering
-- `<leader>tp` - Toggle rainbow parentheses
-- `<leader>ti` - Toggle indent lines
-- `<leader>tw` - Toggle focused writing mode
-- `<leader>tb` - Toggle light/dark background
-- `gd/gr` - Go to definition/find references when an LSP is connected
-- `<leader>. g` - Open the contextual symbol-navigation menu for definition,
-  references, implementation, and type definition
-- `K` - Hover documentation when a language server is connected
-- `gs/gS` - Buffer/workspace symbols
-- `<leader>rn` - Rename symbol (LSP)
-- `<leader>ca` - Code action (LSP)
-- `:ALEInfo` - Open advanced provider diagnostics when the concise status is
-  not enough
+### Current file: `\\`
+
+A letter means the same action in every filetype. A buffer without that action
+hides the row; the letter is never lent to something else.
+
+| Key | Action | Key | Action | Key | Action |
+| --- | --- | --- | --- | --- | --- |
+| `b` | Build & show (F5) | `f` | Format (F6) | `l` | One sentence per line |
+| `v` | Show cursor in preview | `d` | Show changes | `r` | Terminal Reading |
+| `s` | Save safely | `w` | Word count | `c` | Terminal Map |
+| `e` | Problems | `z` | Focus mode | `i` | Preview inquiry fences |
+| `t` | Outline (F2) | `m` | Rendered formulas | `n` | Rename symbol |
+| `?` | Help for this file | `p` | Spelling marks | `a` | Code action |
+
+While the buffer and its file on disk disagree, `\\` shows the conflict
+choices instead: `d` compares them, `u` takes the disk version, and `x` saves
+the reviewed buffer over the disk.
+
+### Global: `\`
+
+| Group | Keys |
+| --- | --- |
+| `f` Find | `ff` files, `fg` Git files, `fb` buffers, `fw` search project, `fh` recent files, `ft` tags, `fm` marks, `fc` command history |
+| `g` Git | `gs` status, `gd` diff, `gb` blame, `gl` log |
+| `t` Toggle | `tr` relative numbers, `ti` indent guides, `tp` parenthesis colours, `tb` light / dark, `td` redraw |
+| `o` Onesimus | `oh` Home, `oi` tool status, `ou` update, `os` usage, `oc` edit config, `or` reload config |
+
+`\?` opens the manual.
+
+### Function keys and Vim keys
+- `<F2>` outline, `<F3>` file tree, `<F4>` REPL, `<F5>` build, `<F6>` format
+- `<C-L>` redraws the screen; `lkj` is an alternative to Escape
+- `<C-J/K/H/L>` move between splits; `]b/[b` buffers; `]c/[c` quickfix items
+- `[d/]d` or `[a/]a` - previous/next diagnostic
+- `gd/gr` go to definition/references and `K` shows hover documentation when a
+  language server is connected; `:One goto implementation` and
+  `:One goto type_definition` reach the rest
+- `gs/gS` - buffer/workspace symbols
+- `]s/[s` and `z=` - Vim's own spelling navigation and suggestions
+- `:ALEInfo` - advanced provider diagnostics when `\oi` is not enough
 
 Haskell is biased toward reading code and validating small changes. With HLS
 installed, ALE supplies diagnostics, completion, hover, navigation, rename,
@@ -208,13 +214,12 @@ project it asks GHC to typecheck the current file without generating code.
 `<F6>` follows a project `fourmolu.yaml`, `.ormolu`, or
 `.stylish-haskell.yaml`; without a declared policy it prefers Ormolu, then
 Fourmolu, then Stylish Haskell. If none is installed, formatting degrades to
-safe whitespace cleanup and `<leader>li` explains what is missing. Onesimus
+safe whitespace cleanup and `\oi` explains what is missing. Onesimus
 never installs or selects a system-wide Haskell toolchain on the user's behalf.
 
 ### TeX workflow
 
-Press `\` for global tools and `\\` for the current file.
-In a TeX buffer:
+The table above applies; in a TeX buffer the actions mean:
 
 | Keys | Action |
 | --- | --- |
@@ -222,20 +227,18 @@ In a TeX buffer:
 | `\\v` | Open/reuse the browser preview; locate the cursor when the build is current |
 | `\\d` | Build a latexdiff revision PDF against the chosen baseline, or HEAD |
 | `\\s` | Save text only |
-| `\\t` | Outline / sections |
 | `\\e` | Compilation errors |
-| `\\n` | Review sentence-based source lines without saving |
-| `\\w` | Manuscript word count |
-| `\\z` | Toggle focus mode |
-| `\\o` | Less frequent tools, build modes, reader URL and project details |
+| `\\l` | Review sentence-based source lines without saving |
+| `\\m` | Show formulas rendered in place |
 
-Use the displayed keys, arrows plus Enter, or taps when the terminal passes mouse events through.
-Left / Backspace returns to the parent menu.
+Less frequent TeX actions are `:One` verbs: `compile` (build without
+opening), `live`, `follow`, `log`, `external`, `session` (reader URL),
+`status` and `check`.
 Progress and results share one notification; previous output stays in `:messages`.
 
 F5 safely saves and builds, then opens the browser preview on every platform.
 A failed build reports errors without opening a reader.
-More tools offers build-only, live builds, the session URL, and an external PDF opener.
+`:One compile`, `:One live`, `:One session` and `:One external` cover build-only, live builds, the reader URL and an external PDF opener.
 Viewing never saves or builds; unsaved edits are absent from that PDF.
 Live builds watch explicit saves and reuse the reader without repeatedly bringing it forward.
 F5 reuses a page that is still checking the session; it opens the existing URL only when no page is present.
@@ -276,7 +279,7 @@ Soft wrapping keeps the `↳` continuation mark and does not insert source newli
 
 #### Browser PDF and mobile terminals
 
-Use `\\d` or `:OnesimusDiff [snapshot|git-ref]` to build a **latexdiff revision PDF**.
+Use `\\d` or `:One diff [snapshot|git-ref]` to build a **latexdiff revision PDF**.
 With no argument it reuses the chosen baseline, reads `<main>.review-base` beside the
 main source, detects `<main>.base.tex`, or compares with `HEAD`. The adjacent conventions
 also prepare Changes during ordinary preview without switching away from Original.
@@ -294,7 +297,7 @@ comments are removed.
 Comparison runs in a private temporary directory using the project's source files and
 TeX engine. It never saves buffers or replaces the manuscript's PDF. Save and build with
 F5 first if the sources are modified or outdated. Once a baseline is chosen, later successful
-F5 builds refresh the comparison in the background. An explicit OnesimusDiff switches to
+F5 builds refresh the comparison in the background. An explicit `:One diff` switches to
 Changes when ready; F5 preserves the version you are reading. Each version retains its own
 page position and zoom. **Download changes PDF** exports the revision for sharing.
 
@@ -309,7 +312,7 @@ Comparison jobs and temporary files end with the Vim-owned reader. There is no s
 browser session or persistent comparison server. The host needs `latexdiff` and `latexmk`.
 
 For **Termius → Zellij → Vim**, use F5 to build and open the browser, or `\\v` to read the existing PDF.
-Vim displays the reader URL; **More tools → Preview session URL** shows it again.
+Vim displays the reader URL; `:One session` shows it again.
 Remote access uses SSH port forwarding or a privately configured relay hostname.
 Set `g:webpreview_host` locally before sourcing Onesimus when a relay is used;
 the default stays on loopback. The relay must route to the displayed loopback port.
@@ -320,7 +323,7 @@ Reopening the same paper reuses it; switching papers replaces it.
 Zellij detach preserves the session; exiting Vim, including a crash, ends the reader.
 Old links expire with their Vim session.
 There is no background daemon or shared session registry.
-`:OnesimusTexBrowserStop` stops it explicitly.
+`:One stop` stops it explicitly.
 The server stays on loopback and exposes the PDF and bundled viewer assets, without serving source files.
 
 The browser uses locally bundled PDF.js and keeps page position and zoom across PDF refreshes and page reloads.
@@ -383,8 +386,8 @@ Each format keeps its own renderer and source-position rules:
 | Cogitatum (`.cog` / `.cog.md`) | Preview the inquiry without saving | The current buffer, with cursor following and return-to-source |
 
 Use `\\v` to open/reuse preview in all three formats; `\\s` saves only the current document.
-`\\o` opens More tools, including formatting, disk comparison, and preview controls.
-`\\m` reads the formula at the cursor in TeX, Markdown, and Cogitatum.
+`\\f` formats, and `:One compare` and `:One stop` handle disk comparison and the preview.
+`\\m` toggles formulas rendered in place in TeX, Markdown, and Cogitatum.
 Previewing Markdown or Cogitatum never saves it.
 Switching buffers keeps its reader available; Vim owns the preview process.
 Markdown's browser URL uses the shared hostname, including over Termius → Zellij.
@@ -392,7 +395,7 @@ Markdown's browser URL uses the shared hostname, including over Termius → Zell
 Cogitatum is optional: declare `vim-cogitatum` in `custom/plugins.vim`
 (see the example there) and build its preview.
 Onesimus enables its ALE server and highlights inquiry fences in Markdown.
-Its document menu adds outline/names, inquiry problems, and **Terminal Reading (saved file)**, with **Terminal Map** under More tools.
+Its file menu adds `\\r` Terminal Reading and `\\c` Terminal Map for the saved file.
 Reading updates on saves; opening it again reuses the same terminal.
 A Markdown buffer containing `cog` fences also offers **Preview inquiry fences**,
 so the whole Markdown document and the inquiry inside it remain distinct reading choices.
@@ -460,7 +463,7 @@ for Markdown, avoid `trim_trailing_whitespace = true` if you use two-space break
 Opening, typing, and focus toggles do not run a formatter; F6 changes the buffer
 for review and does not save it.
 
-`<Leader>tw` / `:WPModeToggle` changes only the view, with or without Goyo and
+`\\z` / `:One focus` changes only the view, with or without Goyo and
 Limelight; it never changes `textwidth`, `formatoptions`, or spelling choices.
 Native focus ends when leaving its buffer/window and restores that view.
 Goyo retains its own tab lifecycle; exiting Goyo also clears Onesimus focus.
@@ -528,7 +531,7 @@ the backend cannot load, Onesimus leaves every motion untouched.
 By default the lazy loader is content-driven in every filetype, so Chinese in
 source comments still gets segmented while an ASCII Markdown file pays no
 jieba startup cost. To restrict automatic activation to Markdown, set this
-before sourcing `init.vim` (the explicit `:OnesimusJiebaEnable` command still
+before sourcing `init.vim` (the explicit `:One jieba enable` command still
 works anywhere):
 
 ```vim
@@ -564,10 +567,10 @@ local: it stores action IDs, eligibility, coarse filetypes, and timestamps.
 It never stores filenames, directories, buffer content, commands, queries, or
 host information, and it has no network code.
 
-- `:OnesimusStats` opens the dashboard
-- `:OnesimusStatsPath` shows the journal directory
-- `:OnesimusStatsReset!` deletes the local journals
-- `:OnesimusStatsDisable` disables recording for the current Vim process
+- `:One usage` (or `\os`) opens the dashboard; `:One usage 7|30|90` picks the window
+- `:One usage path` shows the journal directory
+- `:One usage reset` deletes the local journals
+- `:One usage disable` disables recording for the current Vim process
 
 To disable it permanently, set this before sourcing `init.vim`:
 
@@ -604,6 +607,11 @@ Personal options load earlier from the ignored `custom/settings.vim`:
 cp custom/settings.vim.example custom/settings.vim
 ```
 
+Anything that names your own machines belongs there, never in the tracked
+files: a relay hostname for previews (`g:webpreview_host`), local checkouts,
+credentials. Both `custom/` files stay out of the distribution and out of
+updates.
+
 The default themes are Gruvbox for terminals and Nord for MacVim. Both ship in
 `packages/themes` as plain `:highlight` lists that
 `scripts/build_themes.vim` generates from pinned upstream commits and checks
@@ -630,7 +638,8 @@ CLI and the currently local-only texinsitu checkout.
 
 ```
 .
-├── custom/         - Local plugin declarations and their example
+├── autoload/one.vim - The :One actions, menus and keys
+├── custom/         - Local settings and plugins (ignored) with examples
 ├── config/         - Distribution policies and plugin lock loader
 ├── snippets/       - UltiSnips snippets
 ├── functions/      - Custom functions

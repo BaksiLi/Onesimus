@@ -18,7 +18,7 @@ MYVIMDOT=$runtime_root/init.vim \
   "$vim_bin" \
   --cmd 'let g:onesimus_usage_enabled=0 | let g:startify_disable_at_vimenter=1' \
   -Nu "$repo/init.vim" -i NONE -n -es \
-  -c 'if exists(":OnesimusGuide") != 2 || exists(":CompileRun") != 2 || exists("g:onesimus_path_escape") | cquit | endif' \
+  -c 'if exists(":One") != 2 || exists("g:onesimus_path_escape") | cquit | endif' \
   -c 'qa!'
 
 echo 'PASS: runtime paths treat test_ and glob characters literally'

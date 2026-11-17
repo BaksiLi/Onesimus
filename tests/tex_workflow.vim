@@ -13,6 +13,8 @@ let g:startify_disable_at_vimenter = 1
 let g:onesimus_usage_enabled = 0
 let g:vimtex_enabled = 0
 execute 'source '.fnameescape($MYVIMDOT)
+" After init: a personal custom/settings.vim may name a relay host.
+let g:webpreview_host = '127.0.0.1'
 
 let g:onesimus_tex_compile_once_calls = 0
 let g:onesimus_tex_compile_live_calls = 0
@@ -96,7 +98,7 @@ function! s:TestF5SafeSaveThenBuild() abort
   call setline(1, 'local revision')
   call assert_true(&l:modified)
   let g:onesimus_tex_compile_once_calls = 0
-  silent CompileRun
+  silent One build
   call assert_equal(['local revision'], readfile(l:path))
   call assert_false(&l:modified)
   call assert_equal(1, g:onesimus_tex_compile_once_calls)
@@ -108,12 +110,12 @@ function! s:TestAlternateTeXExtensionKeepsBaseline() abort
   let g:onesimus_tex_compile_once_calls = 0
   let g:onesimus_tex_stop_calls = 0
   call setline(1, 'first local revision')
-  silent CompileRun
+  silent One build
   call assert_equal(['first local revision'], readfile(l:path))
   call assert_false(OnesimusDiskChanged())
 
   call setline(1, 'second local revision')
-  silent CompileRun
+  silent One build
   call assert_equal(['second local revision'], readfile(l:path))
   call assert_false(OnesimusHasExternalConflict())
   call assert_equal(2, g:onesimus_tex_compile_once_calls)
@@ -126,7 +128,7 @@ function! s:TestUnavailableCompilerDoesNotSave() abort
   call setline(1, 'local unsaved revision')
   let b:vimtex.compiler.enabled = v:false
   let g:onesimus_tex_compile_once_calls = 0
-  silent CompileRun
+  silent One build
   call assert_equal(['disk base'], readfile(l:path))
   call assert_equal(['local unsaved revision'], getline(1, '$'))
   call assert_true(&l:modified)
@@ -138,7 +140,7 @@ function! s:TestMissingVimtexDoesNotSave() abort
   call setline(1, 'local unsaved revision')
   delcommand VimtexCompileSS
   let g:onesimus_tex_compile_once_calls = 0
-  silent CompileRun
+  silent One build
   call assert_equal(['disk base'], readfile(l:path))
   call assert_true(&l:modified)
   call assert_equal(0, g:onesimus_tex_compile_once_calls)
@@ -253,9 +255,8 @@ function! s:TestRevisionNeverSavesAnUnsavedDraft() abort
   call assert_true(&modified)
   call assert_equal(l:tick, b:changedtick)
   call assert_equal(['saved source'], readfile(l:path))
-  call assert_equal(2, exists(':OnesimusDiff'))
-  call assert_equal(0, exists(':OnesimusTexDiffBase'), 'the old overlay entry is removed')
-endfunction
+  call assert_true(one#available('diff'))
+  endfunction
 
 function! s:TestSentenceLinesStayUnsavedAndUndoable() abort
   let l:path = s:Open('sentence migration.tex',
@@ -375,7 +376,7 @@ function! s:TestConflictBlocksSaveAndBuild() abort
   call setline(1, 'local revision')
   call writefile(['codex revision'], l:path)
   let g:onesimus_tex_compile_once_calls = 0
-  silent CompileRun
+  silent One build
   call assert_equal(['local revision'], getline(1, '$'))
   call assert_equal(['codex revision'], readfile(l:path))
   call assert_true(&l:modified)
@@ -414,7 +415,7 @@ function! s:TestF5LatePreWriteChangeBlocksSaveAndBuild() abort
           \ .string(l:path).')'
   augroup END
   try
-    silent CompileRun
+    silent One build
   finally
     augroup onesimus_test_f5_late_writer
       autocmd!
@@ -694,7 +695,7 @@ function! s:TestDirtyProjectMemberBlocksWholeBuild() abort
   call setline(1, 'child local')
   execute 'buffer '.l:main_buf
   let g:onesimus_tex_compile_once_calls = 0
-  silent CompileRun
+  silent One build
   call assert_equal(['main disk'], readfile(l:main))
   call assert_equal(['child disk'], readfile(l:child))
   call assert_true(&l:modified)
@@ -713,7 +714,7 @@ function! s:TestBibConflictHasDiscoverableActions() abort
   let l:guide = OnesimusGuide('context')
   let l:text = join(getbufline(winbufnr(l:guide), 1, '$'), "\n")
   call assert_match('BIB.*DISK CONFLICT', l:text)
-  call assert_match('Compare local buffer with disk', l:text)
+  call assert_match('Compare buffer with disk', l:text)
   call assert_match('Save reviewed buffer over disk', l:text)
   call OnesimusGuideFilter(l:guide, "\<Esc>")
 endfunction
@@ -729,8 +730,8 @@ function! s:TestDeletedSourceIsPreserved() abort
 
   let l:guide = OnesimusGuide('context')
   let l:text = join(getbufline(winbufnr(l:guide), 1, '$'), "\n")
-  call assert_match('Recreate deleted source from local buffer', l:text)
-  call assert_notmatch('Compare local buffer with disk', l:text)
+  call assert_match('Recreate deleted file from buffer', l:text)
+  call assert_notmatch('Compare buffer with disk', l:text)
   call OnesimusGuideFilter(l:guide, "\<Esc>")
 
   let b:onesimus_reviewed_disk_fingerprint = 'missing'

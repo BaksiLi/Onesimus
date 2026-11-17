@@ -2,9 +2,10 @@
 let $VIMRCDIR = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
 let g:startify_disable_at_vimenter = 1
 let g:onesimus_usage_enabled = 0
-let g:onesimus_preview_host = 'preview.example'
 let $SSH_CONNECTION = 'writing preview test'
 execute 'source '.fnameescape($VIMRCDIR.'/init.vim')
+" After init: a personal custom/settings.vim may name its own host.
+let g:webpreview_host = 'preview.example'
 let s:root = tempname()
 call mkdir(s:root, 'p')
 let s:opened = []
@@ -47,7 +48,7 @@ function! s:Run() abort
       WebPreviewInquiry
       call assert_true(s:Wait('!empty(cogitatum#preview#Url(bufnr("")))'))
     endif
-    OnesimusWritingPreviewStop
+    One stop
     call assert_equal('', webpreview#markdown#url())
     if exists(':CogPreview') == 2
       call assert_equal('', cogitatum#preview#Url(bufnr('')))
@@ -58,7 +59,7 @@ function! s:Run() abort
       call assert_true(s:Wait('!empty(cogitatum#preview#Url(bufnr("")))'))
       call assert_true(&modified)
       call assert_equal(['- [C] Saved claim.'], readfile(s:root.'/draft.cog.md'))
-      OnesimusWritingPreviewStop
+      One stop
     endif
   catch
     call add(v:errors, v:exception.' at '.v:throwpoint)

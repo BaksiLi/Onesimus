@@ -1,4 +1,4 @@
-# Explicit migration profile for :OnesimusTexSentenceLines.
+# Explicit migration profile for :One sentences.
 #
 # This is deliberately not loaded by F6, BufWrite, or BufRead.  Sentence
 # detection is heuristic, so the command changes only the current buffer and

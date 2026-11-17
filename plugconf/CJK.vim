@@ -148,7 +148,7 @@ function! OnesimusJiebaLoad(...) abort
   endif
   if empty(get(g:, 'onesimus_jieba_error', ''))
     let g:onesimus_jieba_error =
-          \ 'jieba backend unavailable; run :OnesimusJiebaInstall'
+          \ 'jieba backend unavailable; run :One jieba install'
   endif
   call s:StopJiebaWatchers()
   return 0
@@ -227,7 +227,6 @@ function! s:ManualJiebaInstall() abort
     echohl None
   endtry
 endfunction
-command! OnesimusJiebaInstall call <SID>ManualJiebaInstall()
 
 function! s:ManualJiebaEnable() abort
   if !OnesimusJiebaLoad(1)
@@ -237,7 +236,11 @@ function! s:ManualJiebaEnable() abort
     echohl None
   endif
 endfunction
-command! OnesimusJiebaEnable call <SID>ManualJiebaEnable()
+function! s:Jieba(action) abort
+  return a:action ==# 'install' ? s:ManualJiebaInstall() : s:ManualJiebaEnable()
+endfunction
+call one#define('jieba', '*', function('s:Jieba'))
+call one#arguments('jieba', ['enable', 'install'])
 
 augroup onesimus_jieba
   autocmd!

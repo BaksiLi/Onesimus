@@ -71,7 +71,7 @@ endfunction
 
 function! s:CompilerIssue() abort
   if exists(':VimtexCompileSS') != 2
-    return 'VimTeX is unavailable; run :OnesimusUpdate or :PlugInstall vimtex.'
+    return 'VimTeX is unavailable; run :One update or :PlugInstall vimtex.'
   endif
   let l:compiler = s:Compiler()
   if empty(l:compiler)
@@ -238,7 +238,7 @@ function! OnesimusTexSave() abort
         \ ? (s:GetBuildMode() ==# 'live'
         \   ? 'The live build will pick up this explicit save.'
         \   : 'The current one-shot may predate this save; press F5 to replace it.')
-        \ : 'Press F5 to build once, or \. then l for a live build.'
+        \ : 'Press F5 to build once, or :One live for a live build.'
   call OnesimusNotify('SOURCE SAVED', [l:next], 0)
   return 1
 endfunction
@@ -253,17 +253,17 @@ function! OnesimusTexSync() abort
     if getftype(expand('%:p')) ==# ''
       call OnesimusNotify('SOURCE DELETED OUTSIDE VIM', [
             \ 'The local buffer is preserved; nothing was written.',
-            \ 'Press \. then x to recreate it, or :saveas for another path.',
+            \ 'Press \\x to recreate it, or :saveas for another path.',
             \ ], 1)
     elseif !filereadable(expand('%:p'))
       call OnesimusNotify('SOURCE UNREADABLE ON DISK', [
             \ 'The local buffer is preserved; nothing was written.',
-            \ 'Fix the disk path permissions or mount, then press \. and re-check.',
+            \ 'Fix the disk path permissions or mount, then run :One check.',
             \ ], 1)
     else
       call OnesimusNotify('SOURCE CONFLICT', [
             \ 'Local and disk edits are both preserved.',
-            \ 'Press \. then d to compare them; nothing was written.',
+            \ 'Press \\d to compare them; nothing was written.',
             \ ], 1)
     endif
   elseif &l:modified
@@ -312,7 +312,7 @@ function! OnesimusTexBuildOnce(...) abort
       endif
       call OnesimusNotify('LIVE BUILD ACTIVE', [
             \ 'Source safely saved; latexmk is already watching the project.',
-            \ 'The live build will pick it up; press \. then l to stop it.',
+            \ 'The live build will pick it up; press :One live to stop it.',
             \ ], 0)
       return 1
     endif
@@ -338,7 +338,7 @@ function! OnesimusTexBuildOnce(...) abort
   if !OnesimusTexBuildRunning() && index([2, 3], l:start_status) < 0
     call s:SetBuildMode('')
     call OnesimusNotify('SOURCE SAVED; TEX BUILD DID NOT START', [
-          \ 'Open \\o then c for the compiler log.',
+          \ 'Run :One log for the compiler log.',
           \ ], 1)
     return 0
   endif
@@ -392,7 +392,7 @@ function! OnesimusTexToggleLiveBuild() abort
   if !OnesimusTexBuildRunning()
     call s:SetBuildMode('')
     call OnesimusNotify('SOURCE SAVED; LIVE BUILD DID NOT START', [
-          \ 'Open \\o then c for the compiler log.',
+          \ 'Run :One log for the compiler log.',
           \ ], 1)
     return 0
   endif
@@ -412,7 +412,7 @@ function! s:RunVimtex(command, title, action) abort
   endif
   if exists(':'.a:command) != 2
     call OnesimusNotify(a:title,
-          \ ['VimTeX is unavailable; run :OnesimusUpdate or :PlugInstall vimtex.'],
+          \ ['VimTeX is unavailable; run :One update or :PlugInstall vimtex.'],
           \ 1)
     return 0
   endif
@@ -582,7 +582,7 @@ function! OnesimusTexSentenceLines() abort
   if OnesimusHasExternalConflict()
     call OnesimusNotify('SENTENCE FORMAT BLOCKED', [
           \ 'Local and disk edits must be resolved first.',
-          \ 'Press \. then d to compare them; nothing was changed.',
+          \ 'Press \\d to compare them; nothing was changed.',
           \ ], 1)
     return 0
   endif
@@ -610,8 +610,8 @@ function! OnesimusTexSentenceLines() abort
     let l:lines = [s:SentenceFailureLine(get(l:result, 'output', ''))]
     if l:startup
       call add(l:lines, has('macunix')
-            \ ? 'Repair option: `brew install latexindent`, then retry \. n.'
-            \ : 'Install latexindent and its Perl dependencies, then retry \. n.')
+            \ ? 'Repair option: `brew install latexindent`, then retry \\l.'
+            \ : 'Install latexindent and its Perl dependencies, then retry \\l.')
       call add(l:lines,
             \ 'Run `latexindent --version` in the shell to verify the repair.')
     else
@@ -652,7 +652,7 @@ function! OnesimusTexSentenceLines() abort
   call OnesimusNotify('SENTENCE LINES READY — NOT SAVED', [
         \ 'latexindent changed only this Vim buffer.',
         \ 'Review abbreviations, inline math, and the diff; u undoes once.',
-        \ 'Press F5 to save + build, or \\o then d to compare with disk.',
+        \ 'Press F5 to save + build, or :One compare to compare with disk.',
         \ ], 0)
   return 1
 endfunction
@@ -695,7 +695,7 @@ function! s:NextStep() abort
     elseif getftype(expand('%:p')) ==# ''
       return 'Next: \\x recreates the deleted source, or :saveas keeps another path.'
     endif
-    return 'Next: fix the unreadable disk path, then \\r re-checks it.'
+    return 'Next: fix the unreadable disk path, then :One check re-checks it.'
   elseif l:source ==# 'MODIFIED'
     return 'Next: F5 saves + builds + previews, or \\s only saves.'
   elseif OnesimusTexBuildRunning()
@@ -703,7 +703,7 @@ function! s:NextStep() abort
           \ ? 'Next: edit, then \\s; the live build notices that disk write.'
           \ : 'Next: wait for this one-shot, or F5 to replace it with the newest source.'
   endif
-  return 'Next: F5 builds + previews, or \\o then l starts a live build.'
+  return 'Next: F5 builds + previews, or :One live starts a live build.'
 endfunction
 
 function! s:PreviewHelpLines() abort
@@ -711,7 +711,7 @@ function! s:PreviewHelpLines() abort
         \ '  Browser PDF · last successful build · SyncTeX source navigation.',
         \ '  \\v opens/reuses it; current built source also locates the cursor.',
         \ '  Locate in source returns a point; selected text can enter Vim Visual.',
-        \ '  \\d / :OnesimusDiff [file|git-ref] builds a latexdiff revision PDF.',
+        \ '  \\d / :One diff [file|git-ref] builds a latexdiff revision PDF.',
         \ '  Original and Changes both locate passages in the manuscript.',
         \ '  Cmd-F / Ctrl-F searches PDF text; Download saves a separate copy.',
         \ '  Vim owns the session; Zellij detach keeps it, quitting Vim ends it.',
@@ -751,18 +751,18 @@ endfunction
 function! OnesimusTexHelp() abort
   call OnesimusPopup('TEX WRITING & COLLABORATION', [
         \ '  Daily loop',
-        \ '    \        all actions; \\ opens current-file actions',
+        \ '    \        all tools; \\ shows actions for this file',
         \ '    F5       safe-save, build, then preview in the browser',
         \ '    \\v       open/reuse the browser PDF; locate when current',
-        \ '    \\o k     let the browser PDF follow the cursor',
-        \ '    \\s save · \\e errors · \\t outline · \\o more tools',
+        \ '    \\s save · \\e errors · \\t outline · \\d changes',
+        \ '    :One <Tab> lists the rest: follow, live, log, external, session…',
         \ '    Arrows / Enter or tap select; Left / Backspace goes back.',
         \ '',
         \ '  Source layout',
         \ '    Prefer one sentence per physical line plus soft screen wrap.',
         \ '    Use ) / ( or cis for sentences; t. remains line-local.',
         \ '    Do not join on open or hard-wrap/reflow every save.',
-        \ '    \\n runs latexindent sentence lines in the buffer only.',
+        \ '    \\l runs latexindent sentence lines in the buffer only.',
         \ '    It may also adjust indentation; it never saves automatically.',
         \ '    Review the result before saving; one u restores the prior buffer.',
         \ '',
@@ -783,8 +783,7 @@ function! OnesimusTexHelp() abort
         \ '',
         \ '  Collaboration',
         \ '    Clean buffers reload disk edits; dirty conflicts block writes.',
-        \ '    In conflict: compare, then choose disk or save the reviewed buffer.',
-        \ '    If the disk file was deleted, \. x explicitly recreates it.',
+        \ '    In conflict \\d compares, \\u takes disk, \\x saves the buffer.',
         \ '    For isolated work, give the Harness a separate git worktree.',
         \ '',
         \ '  Terminal display',
@@ -843,7 +842,7 @@ function! OnesimusTexLocatePDF() abort
   if !s:CanLocatePDF()
     call OnesimusNotify('BUILD BEFORE LOCATING', [
           \ 'PDF positions refer to the built source. Press F5, then \\v.',
-          \ 'Use :OnesimusTexBrowser to read the previous PDF.',
+          \ 'Use :One session to read the previous PDF.',
           \ ], 1)
     return 0
   endif
@@ -861,7 +860,7 @@ function! OnesimusTexToggleFollow() abort
   call OnesimusNotify(g:onesimus_tex_follow ? 'PDF FOLLOWS CURSOR' : 'PDF FOLLOW OFF',
         \ g:onesimus_tex_follow
         \ ? ['The browser PDF tracks the cursor in saved, built source.',
-        \    'Open the reader with \\v; \\o k turns following off.']
+        \    'Open the reader with \\v; :One follow turns following off.']
         \ : ['\\v still locates the cursor on request.'], 0)
   call s:FollowCursor()
   return g:onesimus_tex_follow
@@ -889,7 +888,7 @@ function! OnesimusDiff(...) abort
   call OnesimusTexRefreshBuildStates()
   if !s:CanLocatePDF()
     call OnesimusNotify('BUILD BEFORE COMPARING', [
-          \ 'Press F5 to build the saved sources, then run :OnesimusDiff again.',
+          \ 'Press F5 to build the saved sources, then run :One diff again.',
           \ 'The comparison never saves your draft.'], 1)
     return 0
   endif
@@ -909,27 +908,37 @@ function! OnesimusDiff(...) abort
         \ 'engine': has_key(l:compiler, 'get_engine') ? l:compiler.get_engine() : '-pdf'}})
 endfunction
 
-command! OnesimusTexStatus call OnesimusTexStatus()
-command! OnesimusTexHelp call OnesimusTexHelp()
-command! OnesimusTexSave call OnesimusTexSave()
-command! OnesimusTexSync call OnesimusTexSync()
-command! OnesimusTexBuild call OnesimusTexBuildOnce()
-command! OnesimusTexPreview call OnesimusTexBuildAndView()
-command! OnesimusTexBrowser call OnesimusTexBrowser(s:PdfFile(), s:MainFile())
-command! OnesimusTexLiveBuild call OnesimusTexToggleLiveBuild()
-command! OnesimusTexView call OnesimusTexView()
-command! OnesimusTexLocatePDF call OnesimusTexLocatePDF()
-command! OnesimusTexFollow call OnesimusTexToggleFollow()
-command! OnesimusTexOpenExternal call OnesimusTexOpenExternal()
-command! OnesimusTexOutline call OnesimusTexOutline()
-command! OnesimusTexErrors call OnesimusTexErrors()
-command! OnesimusTexOutput call OnesimusTexOutput()
-command! OnesimusTexCountWords call OnesimusTexCountWords()
-command! -nargs=? -complete=file OnesimusDiff call OnesimusDiff(<q-args>)
-command! OnesimusTexSentenceLines call OnesimusTexSentenceLines()
-command! OnesimusTexCompareDisk call OnesimusTexCompareDisk()
-command! OnesimusTexWriteResolved call OnesimusTexWriteResolved()
-command! OnesimusTexUseDisk call OnesimusTexUseDisk()
+function! s:ShowSession() abort
+  return OnesimusTexBrowser(s:PdfFile(), s:MainFile())
+endfunction
+
+" TeX implementations of the :One verbs (autoload/one.vim owns the names).
+for [s:verb, s:Run] in [
+      \ ['build', function('OnesimusTexBuildAndView')],
+      \ ['compile', function('OnesimusTexBuildOnce')],
+      \ ['view', function('OnesimusTexLocatePDF')],
+      \ ['save', function('OnesimusTexSave')],
+      \ ['errors', function('OnesimusTexErrors')],
+      \ ['outline', function('OnesimusTexOutline')],
+      \ ['diff', function('OnesimusDiff')],
+      \ ['words', function('OnesimusTexCountWords')],
+      \ ['sentences', function('OnesimusTexSentenceLines')],
+      \ ['help', function('OnesimusTexHelp')],
+      \ ['status', function('OnesimusTexStatus')],
+      \ ['check', function('OnesimusTexSync')],
+      \ ['live', function('OnesimusTexToggleLiveBuild')],
+      \ ['follow', function('OnesimusTexToggleFollow')],
+      \ ['log', function('OnesimusTexOutput')],
+      \ ['external', function('OnesimusTexOpenExternal')],
+      \ ['session', function('s:ShowSession')],
+      \ ['compare', function('OnesimusTexCompareDisk')],
+      \ ['revert', function('OnesimusTexUseDisk')],
+      \ ['overwrite', function('OnesimusTexWriteResolved')],
+      \ ]
+  call one#define(s:verb, 'tex', s:Run)
+endfor
+unlet s:verb s:Run
+call one#arguments('diff', 'file')
 
 augroup onesimus_tex_follow
   autocmd!

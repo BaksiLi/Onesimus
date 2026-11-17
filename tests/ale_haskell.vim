@@ -43,7 +43,7 @@ function! s:OpenProject(name, config, path) abort
 endfunction
 
 function! s:HealthText() abort
-  OnesimusHealth
+  One health
   let l:id = popup_list()[-1]
   let l:text = join(getbufline(winbufnr(l:id), 1, '$'), "\n")
   call popup_close(l:id)

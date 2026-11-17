@@ -101,4 +101,4 @@ function! s:ToggleWordProcessingMode() abort
   endif
 endfunction
 
-command! WPModeToggle call <SID>ToggleWordProcessingMode()
+call one#define('focus', '*', function('s:ToggleWordProcessingMode'))

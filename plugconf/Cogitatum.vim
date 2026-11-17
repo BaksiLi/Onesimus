@@ -3,6 +3,21 @@
 " language server; declare it in custom/plugins.vim (see the example there).
 " Onesimus selects the linter, since ALE runs only explicit linters here.
 " WebPreview.vim configures the preview hostname, opener and text selection.
+" The terminal views and the browser inquiry are :One verbs whenever their
+" plugins are loaded, even when the linter below is missing.
+function! s:HasCommand(name) abort
+  return exists(':'.a:name) == 2
+endfunction
+function! s:CogFences() abort
+  return search('^\s*```\s*cog\>', 'nw') > 0
+endfunction
+call one#define('read', ['cogitatum', 'markdown'], 'CogRead',
+      \ {-> s:HasCommand('CogRead') && (&l:filetype ==# 'cogitatum' || s:CogFences())})
+call one#define('map', ['cogitatum', 'markdown'], 'CogMap',
+      \ {-> s:HasCommand('CogMap') && (&l:filetype ==# 'cogitatum' || s:CogFences())})
+call one#define('inquiry', ['cogitatum', 'markdown'], 'WebPreviewInquiry',
+      \ {-> s:HasCommand('WebPreviewInquiry') && (&l:filetype ==# 'cogitatum' || s:CogFences())})
+
 if empty(globpath(&runtimepath, 'ale_linters/cogitatum/cog.vim'))
   finish
 endif

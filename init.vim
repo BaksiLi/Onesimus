@@ -26,6 +26,12 @@ endif
 if empty($MYVIMDOT)
   let $MYVIMDOT = $VIMRCDIR.'/init.vim'
 endif
+" autoload/ holds code that loads on first use.  The root has no plugin/ or
+" ftplugin/ directory, so joining 'runtimepath' runs nothing at startup;
+" snippets/ is kept from UltiSnips' SnipMate reader in plugconf/UltiSnips.vim.
+if index(split(&runtimepath, ','), $VIMRCDIR) < 0
+  execute 'set runtimepath^='.fnameescape($VIMRCDIR)
+endif
 
 if v:version < 802 || !has('job') || !has('channel') || !has('timers')
       \ || !exists('*sha256')
@@ -79,28 +85,16 @@ endif
 let mapleader = '\'
 let maplocalleader = ','
 
-" One remote preview hostname across document renderers.
-let g:onesimus_preview_host = get(g:, 'onesimus_preview_host',
-      \ get(g:, 'onesimus_tex_browser_host', '127.0.0.1'))
-let g:webpreview_host = get(g:, 'webpreview_host', g:onesimus_preview_host)
-let g:webpreview_browser = get(g:, 'webpreview_browser',
-      \ get(g:, 'onesimus_preview_browser', ''))
+" Previews open through OnesimusOpenBrowser, which tests replace.
 let g:webpreview_browserfunc = 'OnesimusOpenBrowser'
 let g:webpreview_notify = 'OnesimusNotify'
 let g:webpreview_open = extend({'tex': 'OnesimusTexView'}, get(g:, 'webpreview_open', {}))
 let g:webpreview_tex_port = get(g:, 'webpreview_tex_port', get(g:, 'onesimus_tex_browser_port', 0))
 
 " ------ Meta ------
-" Stable Onesimus entrypoints are defined after plugin setup.
-nnoremap <silent> <leader>ed :OnesimusEditConfig<cr>
-nnoremap <silent> <leader>sd :OnesimusReload<cr>
-nnoremap <silent> <leader>h :OnesimusHelp<cr>
-nnoremap <silent> <leader>? :OnesimusHelp<cr>
-nnoremap <silent> <leader>oh :OnesimusHome<cr>
-nnoremap <silent> <leader>os :OnesimusStats<cr>
-nnoremap <silent> <leader>. :call OnesimusGuide('context')<cr>
-nnoremap <silent> <leader> :OnesimusGuide<cr>
-" nnoremap <leader>H :execute ':help ' . expand('<cword>')<cr>
+" One command, :One, carries every Onesimus action (autoload/one.vim); its
+" keys are mapped after the modules have registered their actions.
+command! -nargs=* -complete=customlist,one#complete One call one#run(<q-args>)
 
 " Prefer Unicode, but keep common Traditional/Simplified Chinese and Japanese
 " encodings readable when opening older notes.
@@ -116,12 +110,6 @@ set scrolloff=4
 " ------ Editing ------
 set ruler
 set number        " line numbering
-" key for toggle relative numbering
-nnoremap <silent> <leader>tr :OnesimusToggleRelativeNumber<cr>
-nnoremap <silent> <leader>ti :OnesimusIndentToggle<cr>
-nnoremap <silent> <leader>tp :OnesimusParenthesisToggle<cr>
-nnoremap <silent> <leader>tw :WPModeToggle<cr>
-nnoremap <silent> <leader>tb :ToggleBackground<cr>
 set cursorline
 set hidden        " switch buffers without forcing an intermediate write
 set splitbelow
@@ -209,18 +197,7 @@ nnoremap <C-K> <C-W><C-K>
 nnoremap <C-H> <C-W><C-H>
 " Keep Ctrl-L's familiar redraw meaning for unreliable remote terminals.
 " Moving to the right split remains available as Vim's native Ctrl-W l.
-nnoremap <silent> <C-L> :OnesimusRedraw<CR>
-
-" Stable fuzzy-finder actions.  The wrapper explains how to install vim-clap
-" instead of leaving a raw E492 when plugins have not been bootstrapped yet.
-nnoremap <silent> <leader>ff :OnesimusClap files<cr>
-nnoremap <silent> <leader>fb :OnesimusClap buffers<cr>
-nnoremap <silent> <leader>ft :OnesimusClap tags<cr>
-nnoremap <silent> <leader>fg :OnesimusClap git_files<cr>
-nnoremap <silent> <leader>fw :OnesimusClap grep<cr>
-nnoremap <silent> <leader>fm :OnesimusClap marks<cr>
-nnoremap <silent> <leader>fh :OnesimusClap history<cr>
-nnoremap <silent> <leader>fc :OnesimusClap command_history<cr>
+nnoremap <silent> <C-L> :<C-U>One redraw<CR>
 
 " Keep the old HJKL nudge in Normal mode without stealing arrows from Visual,
 " Select, or Operator-pending mode.  WarningMsg is advisory and does not raise
@@ -450,7 +427,7 @@ endif
 SourceAll $VIMRCDIR.'/plugconf'
 
 " The provider hook also covers an explicit :EditorConfigReload.  Register
-" once across :OnesimusReload; the named function picks up later definitions.
+" once across :One reload; the named function picks up later definitions.
 if exists(':EditorConfigReload') && !get(g:, 'onesimus_prose_editorconfig_hook', 0)
   call editorconfig#AddNewHook(function('OnesimusEnforceProseSoftWrap'))
   let g:onesimus_prose_editorconfig_hook = 1
@@ -500,7 +477,7 @@ function! OnesimusRedraw() abort
   echohl None
   return 1
 endfunction
-command! OnesimusRedraw call OnesimusRedraw()
+call one#define('redraw', '*', function('OnesimusRedraw'))
 if has('gui_running')
   set guioptions-=T
   set guitablabel=%M%t
@@ -546,14 +523,8 @@ endif
 " Load all functions
 SourceAll $VIMRCDIR.'/functions'
 
-" Functional Keys
-nmap <silent> <F2> :OnesimusBufferSymbols<cr>
-nmap <silent> <F3> :OnesimusTree<cr>
-nmap <F4> :OpenREPL<cr>
-nnoremap <silent> <F5> :CompileRun<CR>
-nmap <silent> <F6> :OnesimusFormat<cr>
-
-nnoremap <silent> <leader>et :OnesimusTags<cr>
+" \ (global), \\ (this file) and F2-F6, from the tables in autoload/one.vim.
+call one#map()
 
 " command W w !sudo tee % > /dev/null
 

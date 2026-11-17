@@ -10,5 +10,3 @@ endfunction
 function! OnesimusTexBrowserStop() abort
   return webpreview#tex#stop()
 endfunction
-
-command! OnesimusTexBrowserStop call OnesimusTexBrowserStop()

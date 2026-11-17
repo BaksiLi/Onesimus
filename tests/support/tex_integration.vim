@@ -3,6 +3,8 @@ let s:fixture = resolve($ONESIMUS_TEST_PROJECT)
 let g:vimtex_cache_root = s:fixture.'/cache'
 let g:vimtex_compiler_silent = 1
 let g:vimtex_view_automatic = 0
+" A personal custom/settings.vim may name a relay host.
+let g:webpreview_host = '127.0.0.1'
 let s:opened = []
 function! OnesimusOpenBrowser(url) abort
   call add(s:opened, a:url)

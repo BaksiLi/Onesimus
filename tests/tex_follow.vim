@@ -11,6 +11,8 @@ let g:onesimus_tex_browser_port = 0
 " Serve without opening a browser, as over SSH.
 let $SSH_CONNECTION = 'follow test'
 execute 'source '.fnameescape($MYVIMDOT)
+" After init: a personal custom/settings.vim may name a relay host.
+let g:webpreview_host = '127.0.0.1'
 
 let s:root = tempname()
 call mkdir(s:root, 'p')

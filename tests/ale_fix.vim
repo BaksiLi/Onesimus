@@ -44,7 +44,7 @@ function! s:Start() abort
   setfiletype python
   call assert_equal(['ruff', 'ruff_format', 'remove_trailing_lines',
         \ 'trim_whitespace'], b:ale_fixers)
-  OnesimusHealth
+  One health
   let l:health_popup = popup_list()[-1]
   let l:health = join(getbufline(winbufnr(l:health_popup), 1, '$'), "\n")
   call assert_match('ready\s\+server\s\+pylsp', l:health)

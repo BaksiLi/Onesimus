@@ -34,4 +34,5 @@ function! s:OpenClap(provider) abort
   echohl None
 endfunction
 
-command! -nargs=1 OnesimusClap call <SID>OpenClap(<q-args>)
+call one#define('find', '*', function('s:OpenClap'))
+call one#arguments('find', sort(keys(s:clap_providers)))

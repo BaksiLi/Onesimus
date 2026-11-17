@@ -11,3 +11,7 @@
 
 " Keep TOC updates explicit. Opt in only if save should update generated text.
 " let g:vmt_auto_update_on_save = 1
+
+" Preview URLs name this host instead of 127.0.0.1, for reading from another
+" device through a relay or private network.
+" let g:webpreview_host = 'mac.example'

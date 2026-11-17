@@ -40,4 +40,4 @@ function! s:OpenREPL() abort
   execute 'terminal '.l:program
 endfunction
 
-command! OpenREPL call <SID>OpenREPL()
+call one#define('repl', '*', function('s:OpenREPL'))

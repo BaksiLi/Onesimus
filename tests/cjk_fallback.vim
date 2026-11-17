@@ -3,6 +3,7 @@
 "   vim -Nu tests/cjk_fallback.vim -i NONE -n -es
 
 let $VIMRCDIR = fnamemodify(resolve(expand('<sfile>:p')), ':h:h')
+set runtimepath^=$VIMRCDIR
 
 " Simulate mappings left by an unavailable/broken backend.
 nmap w <Plug>(Jieba_w)
