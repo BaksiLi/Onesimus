@@ -199,6 +199,12 @@ works anywhere):
 let g:onesimus_jieba_filetypes = ['markdown']
 ```
 
+Markdown uses [mdtoc.vim](https://github.com/BaksiLi/mdtoc.vim): place the
+cursor below the document title and run `:MdToc` to insert a table of contents.
+After changing headings, run `:MdTocUpdate`, save, and press `<F5>` to preview.
+Updates are explicit; set `g:vmt_auto_update_on_save = 1` to opt into updates
+on save. `:MdTocRemove` removes the generated table.
+
 ## Local Usage Journal
 
 Onesimus records adoption of its own stable actions so old features can be

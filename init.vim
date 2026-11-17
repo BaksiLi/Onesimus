@@ -281,7 +281,7 @@ Plug 'iamcco/markdown-preview.nvim', {
       \ 'do': ':call mkdp#util#install_sync()',
       \ 'for': 'markdown',
       \ }
-Plug 'BaksiLi/vim-markdown-toc', { 'for': 'markdown' }  " originally 'mzlogin/vim-markdown-toc'
+Plug 'BaksiLi/mdtoc.vim', { 'for': 'markdown' }
 
 " TeX
 " requires latexmk, for example: `sudo tlmgr install latexmk`
