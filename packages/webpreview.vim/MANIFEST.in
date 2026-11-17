@@ -1,0 +1,10 @@
+include CONTRIBUTING.md THIRD_PARTY.md package.json package-lock.json
+graft autoload
+graft bin
+graft doc
+graft plugin
+graft tests
+graft web
+graft .github
+global-exclude __pycache__ *.py[cod] .DS_Store
+exclude doc/tags

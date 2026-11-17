@@ -1,0 +1,135 @@
+*webpreview.txt*  Browser preview for Markdown and LaTeX in Vim
+
+WebPreview.vim                                            *webpreview*
+
+Requires Vim 8.2+ with jobs, channels and timers, plus Python 3.9+.
+Browser libraries ship with the plugin. Node is only a development tool.
+
+COMMANDS                                                 *webpreview-commands*
+
+:WebPreview                                              *:WebPreview*
+    Open or reuse the current document's preview. Markdown includes unsaved
+    edits. TeX opens the compiled PDF through VimTeX's project information,
+    or beside the source. It never saves or builds the manuscript.
+    Cogitatum delegates to :CogPreview when vim-cogitatum is installed.
+
+:WebPreviewInquiry                                       *:WebPreviewInquiry*
+    Open Cogitatum's semantic preview, including inquiry fences in Markdown.
+    Its terminal :CogRead and :CogMap remain independent.
+
+:WebPreviewChanges [source-path|git-ref]                   *:WebPreviewChanges*
+    Compare saved TeX source with a baseline; never save or build the manuscript.
+    An explicit baseline wins; otherwise reuse the session's choice, a
+    source-adjacent paper.review-base, paper.base.tex, or Git HEAD.
+    Normal preview discovers the adjacent conventions without switching views.
+    See doc/changes.md for multi-file snapshots and project discovery.
+
+:WebPreviewStop                                          *:WebPreviewStop*
+    Stop the current document type's preview. Other document types keep theirs.
+
+No mappings are installed. Example: >
+    nnoremap <leader>p <Cmd>WebPreview<CR>
+<
+READING                                                  *webpreview-reading*
+
+Locate in source chooses a point or paragraph. Select browser text to offer
+Select in source. Vim enters Visual only for a unique literal match in the
+located source paragraph. Otherwise it locates a nearby point and explains.
+Jumps unfold the target, preserve dirty buffers, and wait for Normal mode.
+
+Markdown updates from the live buffer. Reading position is preserved; browser
+selection pauses refresh. Relative note links open in Vim and reuse the session.
+Cmd-F / Ctrl-F uses the browser's native Find.
+
+PDF displays the last complete build. Original/Changes retain independent
+reading positions and zoom. Changes are private latexdiff output; removed
+passages locate nearby surviving source when an exact match is unavailable.
+Fit follows viewport width until manual zoom. Cmd-F / Ctrl-F searches the PDF.
+
+Options include cursor following. Ordinary opening does not enable continuous
+scroll synchronization.
+
+SESSIONS                                                 *webpreview-sessions*
+
+The editing Vim owns the reader through a JSON pipe. Zellij/tmux detach keeps it
+alive; Vim exit ends it. Reopening reuses a running reader. Background tabs and
+mobile sleep can delay page-presence reports; presence expires after 90 seconds.
+
+Local sessions open the browser. SSH/Mosh sessions show the URL; use your
+private relay or forward the loopback port. The server binds 127.0.0.1 only,
+allows the configured Host, and scopes routes to an unguessable session token.
+Keep real relay hostnames and URLs outside shared configuration.
+
+OPTIONS                                                  *webpreview-options*
+
+Set these before loading the plugin:
+
+g:webpreview_host                                         *g:webpreview_host*
+    Default: '127.0.0.1'. Hostname used in URLs and accepted for a private relay.
+    It does not change the loopback listener.
+
+g:webpreview_browser                                      *g:webpreview_browser*
+    Default: ''. Use the system browser. On macOS a value is an application
+    name, for example 'Firefox'; elsewhere it is an executable.
+
+g:webpreview_browserfunc                                  *g:webpreview_browserfunc*
+    Optional function name/Funcref: (url) -> success. Receives the reachable URL.
+    Replaces browser launching, including for a custom remote workflow.
+
+g:webpreview_notify                                       *g:webpreview_notify*
+    Optional function name/Funcref: (title, lines, is_error).
+    Default: ordinary Vim messages; diagnostics stay in :messages.
+
+g:webpreview_open                                         *g:webpreview_open*
+    Dictionary of filetype -> function name/Funcref, called without arguments.
+    Hosts can check freshness or supply their own preview policy: >
+        let g:webpreview_open = {'tex': 'MyTeXPreview'}
+<
+g:webpreview_markdown_assets                              *g:webpreview_markdown_assets*
+    Optional local ZIP built with web/build-assets.mjs. Stop and reopen the
+    Markdown session after changing it. See doc/extensions.md.
+
+g:webpreview_command                                     *g:webpreview_command*
+    Optional command argument List for the Markdown reader.
+
+g:webpreview_tex_command                                 *g:webpreview_tex_command*
+    Optional command argument List for the PDF reader.
+    Both commands default to Python running bin/webpreview in this package.
+    Replacements must implement doc/editor-protocol.md.
+
+g:webpreview_tex_port                                    *g:webpreview_tex_port*
+    Default: 0. Choose a free loopback port for the PDF reader.
+
+VIM INTEGRATION                                          *webpreview-integration*
+
+webpreview#open(), webpreview#inquiry(), webpreview#stop()
+    Implement the commands above.
+
+webpreview#show(url)
+    Applies host/browser settings and calls the configured opener.
+
+webpreview#locate(position)
+    Opens a source position {file, line, column}; optional text/end_line requests
+    a literal Visual selection. Call only when the editor can accept a jump.
+    Adapters defer their incoming requests until Normal mode.
+
+webpreview#select(text, line [, end_line])
+    Selects a unique literal match in the located paragraph. Returns success.
+    Preserves source text and opens folds.
+
+webpreview#tex#open(pdf, main [, options])
+    Opens/reuses the PDF reader. options may contain forward (a position event),
+    diff (a comparison event), and reuse (request page-presence-based opening).
+    Existing readers accept show=0 to update without raising the browser.
+    The host retains saving, conflict checks and build policy.
+
+webpreview#tex#follow(pdf, main, position)
+    Follows only a reader already open for this project; never starts one.
+
+webpreview#tex#stop()
+    Stops the PDF reader and its private comparison jobs.
+
+Cogitatum keeps its own transport. Setup supplies preview host, browser and
+selection hooks only where the user has not explicitly configured them.
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

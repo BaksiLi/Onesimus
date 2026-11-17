@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WebPreview</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./pdfjs/web/pdf_viewer.css">
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink: #18242a; --muted: #59666b; --bar: #f1f2ee; --line: #d3d6d0;
+    --control: #fbfcf8; --hover: #e6e8e2; --desk: #c8cbc4;
+    --accent: #18242a; --on-accent: #fbfcf8; --tap: 34px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #efe8d8; --muted: #b3ab9b; --bar: #1b1915; --line: #3a362e;
+      --control: #24211c; --hover: #2f2b24; --desk: #12110e;
+      --accent: #efe8d8; --on-accent: #12110e;
+    }
+  }
+  /* Tablets and phones are first-class readers; keep thumb-sized targets. */
+  @media (pointer: coarse) { :root { --tap: 44px; } }
+  html { font: 14px/1.4 system-ui, sans-serif; color: var(--ink); background: var(--desk); }
+  body { margin: 0; height: 100dvh; display: flex; flex-direction: column; }
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;
+    padding: 6px 10px; background: var(--bar); border-bottom: 1px solid var(--line);
+  }
+  .controls { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .group { display: flex; align-items: center; gap: 2px; }
+  .presence { gap: 0; }
+  /* Keep toolbar styles out of PDF.js's annotation and form layers. */
+  header :is(button, a, input), #change-detail button { font: inherit; color: inherit; }
+  header :is(button, a, summary), #change-detail button {
+    box-sizing: border-box;
+    flex: none; height: var(--tap); padding: 0 10px; display: inline-flex; align-items: center;
+    min-width: var(--tap);
+    border: 1px solid var(--line); border-radius: 6px; background: var(--control);
+    text-decoration: none; cursor: pointer; white-space: nowrap;
+  }
+  header :is(button:hover:not(:disabled), a:hover, summary:hover), #change-detail button:hover { background: var(--hover); }
+  :is(header, #change-detail) :is(button, a, input, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  header button:disabled { color: var(--muted); cursor: default; }
+  .group button { min-width: var(--tap); justify-content: center; padding: 0 8px; }
+  .versions { gap: 0; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--hover); }
+  .versions button { height: calc(var(--tap) - 4px); border-color: transparent; background: transparent; }
+  .versions button[aria-pressed=true] { background: var(--control); border-color: var(--line); }
+  @media (pointer: coarse) { .versions button { height: var(--tap); } }
+  #refresh { min-width: 7em; justify-content: center; }
+  .quiet, #refresh:disabled { border-color: transparent; background: transparent; }
+  .end { margin-left: auto; }
+  #find svg { display: none; width: 18px; height: 18px; }
+  /* Less frequent choices live in a native disclosure beside the toolbar. */
+  #options { position: relative; }
+  #options > summary { list-style: none; min-width: var(--tap); justify-content: center; padding: 0 8px; }
+  #options > summary::-webkit-details-marker { display: none; }
+  #options > div {
+    position: absolute; right: 0; top: calc(100% + 4px); z-index: 10; display: grid; gap: 2px;
+    width: max-content; max-width: calc(100vw - 32px);
+    padding: 4px 8px; background: var(--bar); border: 1px solid var(--line); border-radius: 6px;
+    box-shadow: 0 4px 12px #0003;
+  }
+  #options > div a { justify-content: flex-start; }
+  #options label { padding: 0 4px; }
+  .row-break { display: none; }
+  /* Phones: reading position on one row, the actions that answer it on the next. */
+  @media (max-width: 640px) {
+    header { padding: 4px 8px; }
+    .controls { gap: 4px; }
+    .row-break { display: block; flex-basis: 100%; height: 0; }
+    #refresh { min-width: 0; padding: 0 4px; }
+    #source { padding: 0 8px; }
+    .end { margin-left: auto; }
+    #find { width: var(--tap); justify-content: center; padding: 0; }
+    #find svg { display: block; }
+    #find .label { display: none; }
+  }
+  /* Toolbar display rules must not revive controls that are hidden. */
+  :is(header, #change-detail) [hidden] { display: none !important; }
+  /* Refresh is only a call to action when a newer PDF is waiting. */
+  #refresh[data-action=refresh], #source[aria-pressed=true] {
+    background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+  }
+  #fit[aria-pressed=true] { background: var(--hover); border-color: var(--ink); }
+  header label { display: inline-flex; align-items: center; gap: 6px; height: var(--tap); white-space: nowrap; }
+  header input[type=checkbox] { accent-color: var(--accent); margin: 0; }
+  /* The session is shape as well as colour: a filled dot, or a struck ring. */
+  #session .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid currentColor; color: var(--muted); }
+  #session[data-state=connected] .dot { background: currentColor; color: #357873; }
+  #session[data-state=disconnected] .dot {
+    background: linear-gradient(45deg, transparent 42%, currentColor 42% 58%, transparent 58%);
+  }
+  #page {
+    box-sizing: border-box; width: 3.5em; height: var(--tap); padding: 0 4px; text-align: center;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--control);
+    appearance: textfield; -moz-appearance: textfield;
+  }
+  #page::-webkit-inner-spin-button, #page::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  :is(#count, #matches) { color: var(--muted); white-space: nowrap; }
+  :is(#page, #count, #matches) { font-variant-numeric: tabular-nums; }
+  #status { flex: 1 0 100%; min-width: 0; color: var(--muted); overflow-wrap: anywhere; }
+  #status:empty { display: none; }
+  #find-bar { flex: 1 0 100%; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 4px; }
+  #query {
+    box-sizing: border-box; flex: 1 1 10em; min-width: 6em; max-width: 24em; height: var(--tap); padding: 0 8px;
+    border: 1px solid var(--line); border-radius: 6px; background: var(--control);
+  }
+  main { position: relative; flex: 1; min-height: 0; }
+  #pages { position: absolute; inset: 0; overflow: auto; background: var(--desk); }
+  #pages.locating .page { cursor: crosshair; }
+  .sync-target { position: absolute; width: 16px; height: 16px; border: 3px solid #b4432d; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 5; }
+  /* Following the cursor marks quietly; an explicit locate keeps the bold ring. */
+  .sync-target.is-follow { width: 10px; height: 10px; border-width: 2px; opacity: .7; transition: top .15s, left .15s; }
+  #change-detail {
+    padding: 8px 12px; max-height: 25vh; overflow: auto;
+    background: var(--bar); border-bottom: 1px solid var(--line);
+  }
+  #change-detail pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0; font: inherit; }
+  #change-detail button { float: right; min-width: var(--tap); justify-content: center; }
+  @media (prefers-reduced-motion: reduce) { .sync-target.is-follow { transition: none; } }
+</style>
+<header>
+  <div class="controls" role="group" aria-label="PDF controls">
+    <div class="group presence">
+      <button id="session" class="quiet" data-state="connecting" aria-label="Preview session: connecting" aria-controls="change-detail" aria-expanded="false"><span class="dot" aria-hidden="true"></span></button>
+      <button id="refresh" class="quiet" aria-controls="change-detail" aria-expanded="false" disabled>Loading…</button>
+    </div>
+    <div class="group" role="group" aria-label="Page">
+      <input id="page" type="number" inputmode="numeric" min="1" value="1" aria-label="Page number" aria-describedby="count"> <span id="count"></span>
+    </div>
+    <div class="group" role="group" aria-label="Zoom">
+      <button id="smaller" aria-label="Zoom out">−</button>
+      <button id="fit" aria-label="Fit page width" aria-pressed="true" title="Keep fitting page width as the window changes">Fit</button>
+      <button id="larger" aria-label="Zoom in">+</button>
+    </div>
+    <span class="row-break" aria-hidden="true"></span>
+    <div class="group versions" role="group" aria-label="PDF version">
+      <button id="original" aria-pressed="true">Original</button>
+      <button id="changes" aria-pressed="false" aria-controls="change-detail" aria-expanded="false">Changes</button>
+    </div>
+    <button id="back" hidden title="Return after a citation jump">Back</button>
+    <button id="source" disabled aria-pressed="false">Locate in source</button>
+    <div class="group end">
+    <button id="find" aria-label="Find in PDF" aria-expanded="false" aria-controls="find-bar" title="Find in PDF (⌘F / Ctrl+F)"><span class="label">Find</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg></button>
+    <details id="options">
+      <summary aria-label="More options" title="More options">⋯</summary>
+      <div>
+        <label title="Load each completed build automatically"><input id="auto" type="checkbox" checked>Auto refresh</label>
+        <a id="download" class="quiet" href="./download" download>Download PDF</a>
+        <a id="diff-log" class="quiet" href="./diff-log" target="_blank" hidden>Comparison log</a>
+      </div>
+    </details>
+    </div>
+  </div>
+  <div id="status" role="status" aria-atomic="true"></div>
+  <div id="find-bar" role="search" hidden>
+    <input id="query" type="search" aria-label="Find in PDF" enterkeyhint="search" placeholder="Find in PDF">
+    <div class="group">
+      <button id="previous" aria-label="Previous match" title="Previous match (Shift+Enter)">↑</button>
+      <button id="next" aria-label="Next match" title="Next match (Enter)">↓</button>
+      <button id="find-close" class="quiet" aria-label="Close find" title="Close (Esc)">×</button>
+    </div>
+    <span id="matches" role="status" aria-atomic="true"></span>
+  </div>
+</header>
+<aside id="change-detail" aria-labelledby="change-title" hidden><button id="change-close" class="quiet" aria-label="Close details">×</button><strong id="change-title"></strong><pre id="change-text"></pre></aside>
+<main><div id="pages" tabindex="0" aria-label="PDF document"><div class="pdfViewer"></div></div></main>
+<script type="module" src="./viewer.mjs"></script>
+</html>

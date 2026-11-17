@@ -1,0 +1,4 @@
+# Onesimus default for AutoCorrect; a project's .autocorrectrc replaces it.
+# Code in Markdown fences is source, not copy.
+context:
+  codeblock: 0

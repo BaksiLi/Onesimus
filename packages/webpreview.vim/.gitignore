@@ -1,0 +1,9 @@
+/build/
+/dist/
+/src/*.egg-info/
+/node_modules/
+/.markdown-build/
+__pycache__/
+*.py[cod]
+.DS_Store
+/doc/tags
